@@ -1,12 +1,5 @@
 # Punk Bot
-<p align="center"><a href="https://www.npmjs.com/package/punk-bot"><img src="https://nodei.co/npm/punk-bot.png?downloads=true&downloadRank=true"></a></p>
-<p align="center">
-<a href="https://travis-ci.org/sasjafor/PunkBot"><img src="https://travis-ci.org/sasjafor/PunkBot.svg" alt="Build Status"></a>
-<a href="https://www.npmjs.com/package/punk-bot"><img src="https://img.shields.io/npm/dt/punk-bot.svg" alt="Total Downloads"></a>
-<a href="https://www.npmjs.com/package/punk-bot"><img src="https://img.shields.io/npm/v/punk-bot.svg" alt="Latest Stable Version"></a>
-<a href="https://david-dm.org/sasjafor/PunkBot"><img src="https://david-dm.org/sasjafor/PunkBot/status.svg" alt="Dependencies"></a>
-<a href="https://opensource.org/licenses/gpl-license"><img src="https://img.shields.io/badge/license-GPL-lightgrey.svg" alt="License"></a>
-<a href="https://discord.gg/qPxJfWw"><img src="https://discordapp.com/api/guilds/518113399448666113/embed.png" alt="Discord Server"></a>
-<a href="https://discordapp.com/api/oauth2/authorize?client_id=431490929677959178&permissions=120937536&scope=bot"><img src="https://img.shields.io/badge/discord-bot-blue.svg" alt="Discord Bot"></a>
+[![npm link](https://nodei.co/npm/announcer-bot.png?downloads=true&downloadRank=true)](https://www.npmjs.com/package/announcer-bot)
+[![Build Status](https://travis-ci.org/sasjafor/Announcer-Bot.svg)](https://travis-ci.org/sasjafor/Announcer-Bot) [![Total Downloads](https://img.shields.io/npm/dt/announcer-bot.svg)](https://www.npmjs.com/package/announcer-bot) [![Latest Stable Version](https://img.shields.io/npm/v/announcer-bot.svg)](https://www.npmjs.com/package/owl-bot) [![Dependencies](https://david-dm.org/sasjafor/Announcer-Bot/status.svg)](https://david-dm.org/sasjafor/Announcer-Bot) [![License](https://img.shields.io/badge/license-GPL-lightgrey.svg)](https://opensource.org/licenses/gpl-license) [![Discord Server](https://discordapp.com/api/guilds/518113399448666113/embed.png)](https://discord.gg/qPxJfWw)
 
 A Discord music bot without limits.
