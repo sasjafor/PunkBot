@@ -70,6 +70,7 @@ client.on('message', async message => {
 						conn = null;
 					}
 					playing = false;
+                    message.channel.send(':fast_forward: ***Skipped*** :thumbsup:');
 				}
 				break;
 			default:

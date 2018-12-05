@@ -1,5 +1,5 @@
 {
-  "name": "discord-music-bot",
+  "name": "punk-bot",
   "version": "0.0.1",
   "description": "A discord music bot without limitations.",
   "author": "Sascha Forster <sascha.forster@hotmail.ch>",
@@ -9,7 +9,8 @@
     "discord",
     "bot",
     "music",
-    "streaming"
+    "streaming",
+    "punk"
   ],
   "repository": "github:sasjafor/Announcer-Bot",
   "dependencies": {
