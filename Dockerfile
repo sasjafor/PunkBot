@@ -7,10 +7,7 @@ COPY src/run.sh /usr/src/
 COPY package.json /usr/src/app/
 
 # Setup apt, install non-node dependencies and create /config
-RUN echo "deb http://ftp.debian.org/debian jessie-backports main" >> /etc/apt/sources.list && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends espeak lame vorbis-tools && \
-    mkdir /config
+RUN mkdir /config
 
 # Install node dependencies
 RUN cd /usr/src/app && \
