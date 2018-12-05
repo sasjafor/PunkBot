@@ -1,4 +1,4 @@
-# Announcer Bot
+# Punk Bot
 <p align="center"><a href="https://www.npmjs.com/package/punk-bot"><img src="https://nodei.co/npm/punk-bot.png?downloads=true&downloadRank=true"></a></p>
 <p align="center">
 <a href="https://travis-ci.org/sasjafor/Discord-Music-Bot"><img src="https://travis-ci.org/sasjafor/Discord-Music-Bot.svg" alt="Build Status"></a>
