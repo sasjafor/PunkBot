@@ -8,5 +8,5 @@
 <a href="https://opensource.org/licenses/gpl-license"><img src="https://img.shields.io/badge/license-GPL-lightgrey.svg" alt="License"></a>
 <a href="https://discord.gg/qPxJfWw"><img src="https://discordapp.com/api/guilds/518113399448666113/embed.png" alt="Discord Server"></a>
 <a href="https://discordapp.com/api/oauth2/authorize?client_id=431490929677959178&permissions=120937536&scope=bot"><img src="https://img.shields.io/badge/discord-bot-blue.svg" alt="Discord Bot"></a>
-  
-An ever evolving Discord music bot.
+
+A Discord music bot without limits.
