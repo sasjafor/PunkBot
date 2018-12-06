@@ -7,9 +7,11 @@ const https = require('https');
 const client = new Discord.Client();
 const ytdl = require('youtube-dl');
 const search = require('youtube-search');
+const queue_module = require('./lib/queue.js');
 var conn = null;
-var queue = [];
+var queue = new queue_module.Queue();
 var playing = false;
+var loop = false;
 
 var opts = {
   maxResults: 10,
@@ -38,41 +40,52 @@ client.on('message', async message => {
 		switch (command) {
 			case "p":
 			case "play":
+                var res = null;
                 var url = null;
 				if (content.startsWith("http")) {
 					url = content;
 				} else {
 					var search_string = content;
-                    message.channel.send('<:youtube:519902612976304145> Searching :mag_right: `' + search_string + "`");
+                    message.channel.send('<:youtube:519902612976304145> **Searching** :mag_right: `' + search_string + "`");
                     try {
-                        var res = await search(search_string, opts);
-                        url = res.results[0].link;
+                        var search_res = await search(search_string, opts);
+                        res = search_res.results[0];
+                        url = res.link;
                         console.log(url);
                     } catch (e) {
                         console.error(e);
                         break;
                     }
 				}
-                queue.push(url);
+                queue.enqueue(url);
                 console.log("Added " + url);
                 if (!playing) {
                     startPlayback(message);
-                    message.channel.send('Playing :notes: `' + url + "`");
+                    message.channel.send('**Playing** :notes: `' + res.title + "` - Now!");
                 }
 				break;
 			case "skip":
-				if (playing && queue.length > 0) {
-					play();
-                    message.channel.send(':fast_forward: ***Skipped*** :thumbsup:');
-				} else if (playing && queue.length == 0) {
-					if (conn) {
-						conn.disconnect();
-						conn = null;
-					}
-					playing = false;
+                if (playing) {
+				    if (queue.isEmpty()) {
+                        if (conn) {
+						    conn.disconnect();
+						    conn = null;
+					    }
+					    playing = false;
+				    } else {
+                        play();
+                    }
                     message.channel.send(':fast_forward: ***Skipped*** :thumbsup:');
 				}
 				break;
+            case "loop":
+                loop = !loop;
+                if (loop) {
+                    message.channel.send(':repeat_one: **Enabled!**');
+                } else {
+                    message.channel.send(':repeat_one: **Disabled!**');
+                }
+                break;
 			default:
 				message.reply("This command is invalid! Please use a valid one.");
 		}
@@ -97,7 +110,11 @@ async function startPlayback(message) {
 }
 
 async function play() {
-	url = queue.shift();
+    if (loop) {
+        url = queue.peek();
+    } else {
+        url = queue.dequeue();
+    }
 	console.log("Trying to play: " + url);
 	stream = null;
 	if(url.slice(-4,-3) == '.') {
@@ -109,7 +126,7 @@ async function play() {
 		console.log("Playing: " + url);
 		var dispatcher = conn.play(stream);
 		dispatcher.on('finish', () => {
-			if (queue.length !== 0) {
+			if (!queue.isEmpty()) {
 				play();
 			} else {
 				playing = false;
