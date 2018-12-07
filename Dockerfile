@@ -14,7 +14,7 @@ RUN cd /usr/src/app && \
     npm install --save-prod
 
 # Copy lib folder
-COPY src/lib /usr/src/app/
+COPY src/lib /usr/src/app/lib
 
 # Copy bot script file
 COPY src/bot.js /usr/src/app/
