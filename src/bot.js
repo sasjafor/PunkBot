@@ -1,4 +1,4 @@
-const token = process.env.AUTH_TOKEN;
+const token = process.env.DISCORD_APP_AUTH_TOKEN;
 const youtube_api_key = process.env.YOUTUBE_API_KEY;
 const Discord = require('discord.js');
 const exec = require('child_process').exec;
