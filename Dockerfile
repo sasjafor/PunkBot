@@ -13,6 +13,9 @@ RUN mkdir /config
 RUN cd /usr/src/app && \
     npm install --save-prod
 
+# Copy lib folder
+COPY src/lib /usr/src/app/
+
 # Copy bot script file
 COPY src/bot.js /usr/src/app/
 
