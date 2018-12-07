@@ -1,16 +1,19 @@
 {
   "name": "punk-bot",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A discord music bot without limitations.",
   "author": "Sascha Forster <sascha.forster@hotmail.ch>",
   "main": "src/bot.js",
-  "license": "GPL",
+  "license": "GPL-3.0",
   "keywords": [
     "discord",
     "bot",
     "music",
     "streaming",
     "punk"
+  ],
+  "files": [
+      "lib/*"
   ],
   "repository": "github:sasjafor/Announcer-Bot",
   "dependencies": {
