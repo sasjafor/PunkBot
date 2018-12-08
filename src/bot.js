@@ -43,6 +43,7 @@ client.on('message', async message => {
                 var res = null;
                 var url = null;
 				if (content.startsWith("http")) {
+                    res = content;
 					url = content;
 				} else {
 					var search_string = content;
