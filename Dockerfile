@@ -1,5 +1,13 @@
 FROM node:10
 
+# Generate locale
+#RUN apt-get update && \
+#    apt-get install -y --no-install-recommends locales && \
+#    locale-gen en_GB.UTF8
+
+# Set locale
+ENV LC_ALL C.UTF-8
+
 # Copy run script
 COPY src/run.sh /usr/src/
 
