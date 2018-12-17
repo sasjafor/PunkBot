@@ -1,6 +1,8 @@
 // adapted from https://github.com/MaxGfeller/youtube-search
-var querystring = require('querystring')
-var axios = require('axios')
+const querystring = require('querystring');
+const axios = require('axios');
+const https = require('https');
+const http2 = require('http2');
 
 var allowedProperties = [
     'fields',
@@ -64,7 +66,6 @@ function search(term, opts, cb) {
     Object.keys(opts).map(function(k) {
         if (allowedProperties.indexOf(k) > -1) params[k] = opts[k]
     })
-
     axios.get('https://www.googleapis.com/youtube/v3/search?' + querystring.stringify(params))
         .then(function(response) {
             var result = response.data
@@ -112,6 +113,51 @@ function search(term, opts, cb) {
         .catch(function(err) {
             return cb(err)
         })
+}
+
+async function fast_search(term, key) {
+    return new Promise(function(resolve, reject) {
+        var params = {
+            q: term,
+            key: key,
+            part: 'snippet',
+            type: 'video',
+            maxResults: 1
+        }
+
+        var data = '';
+
+        const clientSession = http2.connect(`https://www.googleapis.com`);
+
+        const req = clientSession.request({
+            ':path': '/youtube/v3/search?' + querystring.stringify(params)
+        });
+
+        req.on('response', () => {
+            req.on('data', (d) => {
+                data += d;
+            });
+            req.on('end', () => {
+                var result = 'https://www.youtube.com/watch?v=' + JSON.parse(data).items[0].id.videoId;
+                clientSession.destroy();
+                resolve(result);
+            });
+        }).on('error', (e) => {
+            reject(e);
+        });
+
+        // https.get('https://www.googleapis.com/youtube/v3/search?' + querystring.stringify(params), (res) => {
+        //     res.on('data', (d) => {
+        //         data += d;
+        //     });
+        //     res.on('end', () => {
+        //         var result = 'https://www.youtube.com/watch?v=' + JSON.parse(data).items[0].id.videoId;
+        //         resolve(result);
+        //     });
+        // }).on('error', (e) => {
+        //     reject(e);
+        // });
+    })
 }
 
 function video_info(id, opts, cb) {
@@ -190,4 +236,5 @@ function video_info(id, opts, cb) {
 }
 
 module.exports.search = search;
+module.exports.fast_search = fast_search;
 module.exports.video_info = video_info;
