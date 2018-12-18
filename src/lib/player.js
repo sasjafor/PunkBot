@@ -22,21 +22,21 @@ function Player(voice_channel_id, controller) {
     this.stream = null;
     this.loop = false;
     this.dispatcher = null;
+    this.playing = false;
+    this.timeout = null;
 
     this.voice_channel_id = voice_channel_id;
     this.conn = null;
 
-    this.playing = false;
-
-    this.earrape = false;
-
-    this.emit = function(...args) {
-        debugv('Emit! with ' + args);
-        this.controller.emit(...args);
-    }
-
     this.controller.on('play', () => {
-        var url = this.now_playing = this.queue.dequeue();
+        clearTimeout(this.timeout);
+        var url = '';
+        if (this.loop) {
+            url = this.now_playing;
+        } else {
+            url = this.now_playing = this.dequeue();
+        }
+
         if (!url) {
             return;
         }
@@ -50,33 +50,40 @@ function Player(voice_channel_id, controller) {
                 this.emit('end');
             });
             this.dispatcher.on('error', error => {
-                console.error(error);
+                debug(error);
             });
         }
-
-        if (this.loop) {
-            this.emit('loop');
-        }
-    });
-
-    this.controller.on('loop', () => {
-        this.stream = this.create_stream(this.now_playing);
-        this.stream.pipe(this.dispatcher);
     });
 
     this.controller.on('end', () => {
-        // if (this.loop && this.dispatcher) {
-        //     this.stream = this.create_stream(this.now_playing);
-        //     this.stream.pipe(this.dispatcher);
-        // }
+        if (this.queue.isEmpty()) {
+            this.playing = false;
+            this.timeout = setTimeout(function(){
+                this.disconnect();
+            }, 120000);
+        } else {
+            this.controller.emit('play');
+        }
     });
+
+    this.play = function(channel) {
+        if (this.playing) {
+            return;
+        }
+        this.playing = true;
+        this.controller.emit('play');
+    }
 
     this.connect = async function(channel) {
         if (channel) {
             try {
                 this.conn = await channel.join()
+                this.conn.on('failed', err => {
+                    debug(err);
+
+                }
             } catch (err) {
-                console.error(err);
+                debug(err);
             }
             debug('Joined Voice Channel');
         }
@@ -84,6 +91,10 @@ function Player(voice_channel_id, controller) {
 
     this.enqueue = function(url) {
         this.queue.enqueue(url);
+    }
+
+    this.dequeue = function() {
+        return this.queue.dequeue();
     }
 
     this.pre_play = function(url) {
@@ -103,30 +114,7 @@ function Player(voice_channel_id, controller) {
         }
     }
 
-    this.play = function(channel) {
-        if (this.playing) {
-            return;
-        }
-        /*if (!this.conn) {
-            await this.connect(channel);
-        }*/
-        this.playing = true;
-        this.controller.emit('play');
 
-        // while (!this.queue.isEmpty()) {
-        //     do {
-        //         try {
-        //             // console.timeEnd("total");
-        //             await this.send_audio();
-        //         } catch (err) {
-        //             console.error(err);
-        //         }
-        //     } while (this.loop);
-        //     this.now_playing = this.queue.dequeue();
-        //     this.curr_stream = this.create_stream(this.now_playing);
-        // }
-        // this.playing = false;
-    }
 
     this.send_audio = function() {
         return new Promise((resolve, reject) => {
@@ -144,7 +132,7 @@ function Player(voice_channel_id, controller) {
                     resolve();
                 });
                 this.dispatcher.on('error', error => {
-                    console.error(error);
+                    debug(error);
                     reject(Error('StreamDispatcher encountered an error'))
                 });
             }

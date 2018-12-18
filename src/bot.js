@@ -82,7 +82,7 @@ client.on('message', async message => {
                     try {
                         url = await fast_search(search_string, youtube_api_key);
                     } catch (err) {
-                        console.error(err);
+                        debug(err);
                         break;
                     }
                 }
@@ -223,7 +223,7 @@ client.on('message', async message => {
 });
 
 client.on('error', error => {
-    console.error(error);
+    debug(error);
 });
 
 client.on('warn', warning => {
