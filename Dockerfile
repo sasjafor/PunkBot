@@ -21,6 +21,9 @@ RUN mkdir /config
 RUN cd /usr/src/app && \
     npm install --save-prod
 
+# Set debug env
+ENV DEBUG basic,verbose
+
 # Copy lib folder
 COPY src/lib /usr/src/app/lib
 

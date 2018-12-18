@@ -110,36 +110,38 @@ client.on('message', async message => {
                 debugv('Added ' + url);
                 await connecting;
                 player.play(message.member.voice.channel);
-                if (url.includes('youtube') || url.includes('youtu.be')) {
-                    let id = null;
-                    if (search_res) {
-                        id = search_res.id;
-                    } else {
-                        let id_regex = /(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-                        id = url.match(id_regex)[1];
-                    }
+                if (playing) {
+                    if (url.includes('youtube') || url.includes('youtu.be')) {
+                        let id = null;
+                        if (search_res) {
+                            id = search_res.id;
+                        } else {
+                            let id_regex = /(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+                            id = url.match(id_regex)[1];
+                        }
 
-                    video_res = await video_info(id, video_opts);
-                    video_res = video_res.results[0];
-                    title = video_res.title
+                        video_res = await video_info(id, video_opts);
+                        video_res = video_res.results[0];
+                        title = video_res.title
 
-                    if (video_res) {
-                        var duration = moment.duration(video_res.duration);
-                        pb.setDuration(duration);
-                        if (playing) {
-                            var pretty_duration = prettifyTime(duration);
-                            var time_until_playing = player.total_queue_time();
-                            var pretty_tut = prettifyTime(time_until_playing);
-                            const embed = new Discord.MessageEmbed()
-                                .setTitle(title)
-                                .setAuthor('Added to queue', message.author.avatarURL(), 'https://github.com/sasjafor/PunkBot')
-                                .setURL('https://youtube.com/watch?v=' + id)
-                                .setThumbnail('https://i.ytimg.com/vi/' + id + '/hqdefault.jpg')
-                                .addField('Channel', video_res.channelTitle)
-                                .addField('Song Duration', pretty_duration)
-                                .addField('Estimated time until playing', pretty_tut)
-                                .addField('Position in queue', player.queue.getLength());
-                            message.channel.send(embed);
+                        if (video_res) {
+                            var duration = moment.duration(video_res.duration);
+                            pb.setDuration(duration);
+                            if (playing) {
+                                var pretty_duration = prettifyTime(duration);
+                                var time_until_playing = player.total_queue_time();
+                                var pretty_tut = prettifyTime(time_until_playing);
+                                const embed = new Discord.MessageEmbed()
+                                    .setTitle(title)
+                                    .setAuthor('Added to queue', message.author.avatarURL(), 'https://github.com/sasjafor/PunkBot')
+                                    .setURL('https://youtube.com/watch?v=' + id)
+                                    .setThumbnail('https://i.ytimg.com/vi/' + id + '/hqdefault.jpg')
+                                    .addField('Channel', video_res.channelTitle)
+                                    .addField('Song Duration', pretty_duration)
+                                    .addField('Estimated time until playing', pretty_tut)
+                                    .addField('Position in queue', player.queue.getLength());
+                                message.channel.send(embed);
+                            }
                         }
                     }
                 } else {
