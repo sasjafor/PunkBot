@@ -138,7 +138,11 @@ async function fast_search(term, key) {
                 data += d;
             });
             req.on('end', () => {
-                var result = 'https://www.youtube.com/watch?v=' + JSON.parse(data).items[0].id.videoId;
+                var response = JSON.parse(data).items[0];
+                var result = {};
+                result.url = 'https://www.youtube.com/watch?v=' + response.id.videoId;
+                result.id = response.id.videoId;
+                result.title = response.snippet.title;
                 clientSession.destroy();
                 resolve(result);
             });

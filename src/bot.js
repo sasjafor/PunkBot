@@ -10,12 +10,16 @@ const {
     Player
 } = require('./lib/player.js');
 const {
+    PlaybackItem
+} = require('./lib/playback_item.js');
+const {
     search,
     fast_search,
     video_info
 } = require('./lib/youtube_api.js');
 
-const voice_only_commands = ['p', 'skip', 'play', 'loop', 'earrape', 'summon', 'join'];
+const voice_only_commands = ['p', 'skip', 'play', 'loop', 'seek', 'summon', 'join', 'disconnect', 'volume'];
+const bot_in_voice_only_commands = ['skip', 'loop', 'clear', 'seek', 'disconnect', 'volume'];
 
 var players = {};
 
@@ -71,67 +75,89 @@ client.on('message', async message => {
         switch (command) {
             case 'p':
             case 'play':
+                if (!message.member.voice.channel.joinable) {
+                    message.channel.send(':no_good: **No permission to connect to** `' + message.member.voice.channel.name + '`');
+                    return;
+                }
+
                 var connecting = player.connect(message.member.voice.channel);
                 var search_res = null;
                 var video_res = null;
-                var url = content;
+                var url = null;
                 var title = content;
                 var search_string = content;
+
                 message.channel.send('<:youtube:519902612976304145> **Searching** :mag_right: `' + search_string + '`');
-                if (!url.startsWith('http')) {
+                if (!content.startsWith('http')) {
                     try {
-                        url = await fast_search(search_string, youtube_api_key);
+                        search_res = await fast_search(search_string, youtube_api_key);
+                        url = search_res.url;
                     } catch (err) {
                         debug(err);
                         break;
                     }
+                } else {
+                    url = content;
                 }
-                player.enqueue(url);
+
+
+                let pb = new PlaybackItem(url);
+                player.enqueue(pb);
                 var playing = player.playing;
                 // if (!playing) {
                 //     player.pre_play(url);
                 // }
                 debugv('Added ' + url);
                 await connecting;
-
                 player.play(message.member.voice.channel);
-                if (playing && (url.includes('youtube') || url.includes('youtu.be'))) {
-                    var id_regex = /(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-                    var id = url.match(id_regex)[1];
+                if (url.includes('youtube') || url.includes('youtu.be')) {
+                    let id = null;
+                    if (search_res) {
+                        id = search_res.id;
+                    } else {
+                        let id_regex = /(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+                        id = url.match(id_regex)[1];
+                    }
+
                     video_res = await video_info(id, video_opts);
                     video_res = video_res.results[0];
                     title = video_res.title
 
                     if (video_res) {
-                        const embed = new Discord.MessageEmbed()
-                            .setTitle(title)
-                            .setAuthor('Added to queue', message.author.avatarURL(), 'https://github.com/sasjafor/PunkBot')
-                            .setURL('https://youtube.com/watch?v=' + id)
-                            .setThumbnail('https://i.ytimg.com/vi/' + id + '/hqdefault.jpg')
-                            .addField('Channel', video_res.channelTitle)
-                            .addField('Song Duration', moment.duration(video_res.duration))
-                            //.addField('Estimated time until playing', '')
-                            .addField('Position in queue', player.queue.getLength());
-                        message.channel.send(embed);
+                        var duration = moment.duration(video_res.duration);
+                        pb.setDuration(duration);
+                        if (playing) {
+                            var pretty_duration = prettifyTime(duration);
+                            var time_until_playing = player.total_queue_time();
+                            var pretty_tut = prettifyTime(time_until_playing);
+                            const embed = new Discord.MessageEmbed()
+                                .setTitle(title)
+                                .setAuthor('Added to queue', message.author.avatarURL(), 'https://github.com/sasjafor/PunkBot')
+                                .setURL('https://youtube.com/watch?v=' + id)
+                                .setThumbnail('https://i.ytimg.com/vi/' + id + '/hqdefault.jpg')
+                                .addField('Channel', video_res.channelTitle)
+                                .addField('Song Duration', pretty_duration)
+                                .addField('Estimated time until playing', pretty_tut)
+                                .addField('Position in queue', player.queue.getLength());
+                            message.channel.send(embed);
+                        }
                     }
                 } else {
+                    title = search_res.title;
                     message.channel.send('**Playing** :notes: `' + title + '` - Now!');
                 }
                 break;
             case 'summon':
             case 'join':
-                player.connect(message.member.voice.channel);
-                message.channel.send(':thumbsup: **Joined** ' + '`' +message.member.voice.channel.name) + '`';
-                break;
-            case 'volume':
-                // TODO: add checking for correct format
-                var value = content;
-                player.setVolume(value);
-                playback_opts.volume = value;
-                message.channel.send(':loud_sound:  **Set to** `' + value + '`');
+                if (!message.member.voice.channel.joinable) {
+                    message.channel.send(':no_good: **No permission to connect to** `' + message.member.voice.channel.name + '`');
+                    return;
+                }
+                await player.connect(message.member.voice.channel);
+                message.channel.send(':thumbsup: **Joined** ' + '`' + message.member.voice.channel.name) + '`';
                 break;
             default:
-                if (!player.conn) {
+                if (!player.conn && bot_in_voice_only_commands.includes(command)) {
                     message.channel.send(':x: **I am not connected to a voice channel**, Use the summon command to get me in one');
                     break;
                 }
@@ -149,7 +175,7 @@ client.on('message', async message => {
                         message.channel.send(':boom: ***Cleared...*** :stop_button:');
                         break;
                     case 'loop':
-                        player.loop();
+                        player.loop = !player.loop;
                         if (player.loop) {
                             message.channel.send(':repeat_one: **Enabled!**');
                         } else {
@@ -160,8 +186,15 @@ client.on('message', async message => {
                         player.disconnect();
                         message.channel.send(':mailbox_with_no_mail: **Successfully disconnected**');
                         break;
+                    case 'volume':
+                        // TODO: add checking for correct format
+                        var value = content;
+                        player.setVolume(value);
+                        message.channel.send(':loud_sound:  **Set to** `' + value + '`');
+                        break;
                     case 'seek':
-                        if ((content.match(/([0-9]+:?[0-9]+:?)?[0-9]+$/)).index != 0) {
+                        let seek_time_regex = /([0-9]+:?[0-9]+:?)?[0-9]+$/;
+                        if (!seek_time_regex.test(content) || (content.match(seek_time_regex)).index != 0) {
                             message.channel.send(':x: **Invalid format**, Example formats:\n\n`0:30` `1:30` `2:15` `5:20`');
                         }
                         debugv((content.match(/([0-9]+:?[0-9]+:?)?[0-9]+$/)));
@@ -169,15 +202,15 @@ client.on('message', async message => {
                         var min_hour_regex = /([0-9]+)(?::)/g
                         var time1 = min_hour_regex.exec(content);
                         var time2 = min_hour_regex.exec(content);
-                        var seconds = content.match(/[0-9]+$/)[0];
+                        var seconds = parseInt(content.match(/[0-9]+$/)[0], 10);
                         var minutes = 0;
                         var hours = 0;
                         if (time1) {
                             if (time2) {
-                                minutes = time2[1];
-                                hours = time1[1];
+                                minutes = parseInt(time2[1], 10);
+                                hours = parseInt(time1[1], 10);
                             } else {
-                                minutes = time1[1];
+                                minutes = parseInt(time1[1], 10);
                             }
                         }
                         debugv(content);
@@ -185,25 +218,23 @@ client.on('message', async message => {
                         debugv(minutes);
                         debugv(hours);
                         var seek_time = 3600 * hours + 60 * minutes + seconds;
+                        let duration = moment.duration(seek_time * 1000);
                         var res_code = player.seek(seek_time);
                         switch (res_code) {
                             case 0:
-                                if (seconds >= 60) {
-                                    var secr = seconds % 60;
-                                    var secm = seconds / 60;
-                                    seconds = seconds - secr;
-                                    minutes = minutes + secm;
-                                }
-                                if (minutes >= 60) {
-                                    var minr = minutes % 60;
-                                    var minm = minutes / 60;
-                                    minutes = minutes - minr;
-                                    hours = hours + minm;
-                                }
-                                var pretty_hours = ((hours / 10 < 1) ? '0' : '') + hours + ':';
-                                var pretty_minutes = ((minutes / 10 < 1) ? '0' : '') + minutes + ':';
-                                var pretty_seconds = ((seconds / 10 < 1) ? '0' : '') + seconds;
-                                var pretty_time = (hours > 0) ? pretty_hours : '' + pretty_minutes + pretty_seconds;
+                                // if (seconds >= 60) {
+                                //     var secr = seconds % 60;
+                                //     var secm = seconds / 60;
+                                //     seconds = seconds - secr;
+                                //     minutes = minutes + secm;
+                                // }
+                                // if (minutes >= 60) {
+                                //     var minr = minutes % 60;
+                                //     var minm = minutes / 60;
+                                //     minutes = minutes - minr;
+                                //     hours = hours + minm;
+                                // }
+                                var pretty_time = prettifyTime(duration);
                                 message.channel.send(':musical_note: **Set position to**' + '`' + pretty_time + '`' + ':fast_forward:');
                                 break;
                             case 1:
@@ -229,3 +260,14 @@ client.on('error', error => {
 client.on('warn', warning => {
     console.warn(warning);
 });
+
+function prettifyTime(duration) {
+    let hours = duration.hours() + duration.days() * 24;
+    let minutes = duration.minutes();
+    let seconds = duration.seconds();
+    var pretty_hours = ((hours / 10 < 1) ? '0' : '') + hours + ':';
+    var pretty_minutes = ((minutes / 10 < 1) ? '0' : '') + minutes + ':';
+    var pretty_seconds = ((seconds / 10 < 1) ? '0' : '') + seconds;
+    var pretty_time = (hours > 0) ? pretty_hours : '' + pretty_minutes + pretty_seconds;
+    return pretty_time;
+}
