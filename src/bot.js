@@ -238,7 +238,7 @@ client.on('message', async message => {
                                 .setURL(np.url)
                                 .setThumbnail(np.thumbnailURL)
                                 .setColor('#0056bf')
-                                .setDescription('`\n' + progress_bar + '`\n\n`' + progress_string + '`\n\n`Requested by:`' + np.requester.username);
+                                .setDescription('\u200B\n`' + progress_bar + '`\n\n`' + progress_string + '`\n\n`Requested by: `' + np.requester.username);
                             message.channel.send(embed);
                         }
                         break;
