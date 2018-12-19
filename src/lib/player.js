@@ -32,7 +32,7 @@ function Player(voice_channel_id, controller) {
     this.controller.on('play', () => {
         clearTimeout(this.timeout);
         var url = '';
-        if (!this.loop) {
+        if (!this.loop || !this.now_playing) {
             this.now_playing = this.dequeue();
         }
         url = this.now_playing.url
@@ -44,7 +44,7 @@ function Player(voice_channel_id, controller) {
 
         if (this.stream && this.conn) {
             debugv('Playing: ' + url);
-            //playback_opts.type = 'webm/opus'; // TODO: need to check if actually webm/opus stream
+            // playback_opts.type = 'webm/opus'; // TODO: need to check if actually webm/opus stream
 
             this.dispatch(playback_opts);
         }
@@ -79,16 +79,21 @@ function Player(voice_channel_id, controller) {
     }
 
     this.dispatch = function(opts) {
+        if (this.dispatcher) {
+            this.dispatcher.destroy();
+        }
+        // debugv(this.stream);
         this.dispatcher = this.conn.play(this.stream, opts);
         this.dispatcher.on('finish', () => {
             if (!this.loop) {
                 this.now_playing = null;
             }
+            debugv('EMITTING END');
             this.controller.emit('end');
         });
         this.dispatcher.on('error', error => {
             debug(error);
-            this.controller.emit('end');
+            // this.controller.emit('end');
         });
     }
 
@@ -121,11 +126,11 @@ function Player(voice_channel_id, controller) {
         if (url.slice(-4, -3) == '.') {
             stream = url;
         } else if (url.startsWith('https://www.youtube.com') || url.startsWith('https://youtu.be')) {
-            let timestamp_regex = /(?:\?t=)([0-9]+)|(?:\&t=)([0-9]+)/;
-            let timestamp = 0
-            if (timestamp_regex.test(url)) {
-                timestamp = parseInt(url.match(timestamp_regex)[1], 10) * 1000;
-            }
+            // let timestamp_regex = /(?:\?t=)([0-9]+)|(?:\&t=)([0-9]+)/;
+            // let timestamp = 0
+            // if (timestamp_regex.test(url)) {
+            //     timestamp = parseInt(url.match(timestamp_regex)[1], 10) * 1000;
+            // }
             // ytdl.getInfo(ytdl.getURLVideoID(url), (err, info) => {
             //     if (err) throw err;
             //     let format = ytdl.chooseFormat(info.formats, { quality: '249,250,251' });
@@ -133,12 +138,12 @@ function Player(voice_channel_id, controller) {
             //     stream = ytdl.downloadFromInfo(info);
             // });
             let opts = {
-                filter: format => {
-                    return format.type === 'audio/webm; codecs="opus"';
-                },
-                begin: timestamp
+                // filter: format => {
+                //     return format.type === 'audio/webm; codecs="opus"';
+                // },
+                // begin: timestamp
             }
-            debugv(opts);
+            // debugv(opts);
             stream = ytdl(url, opts);
         } else {
             stream = ytdl_full(url, ytdl_opts);
@@ -152,16 +157,16 @@ function Player(voice_channel_id, controller) {
 
     this.seek = function(time) {
         if (this.playing) {
-            if (time > this.now_playing.duration.asMilliseconds()) {
+            if (time > this.now_playing.duration.asSeconds()) {
                 return 1;
             }
             debugv('Seek_time=' + time);
-            this.dispatcher.streamOptions.seek = time;
-            // var opts = {};
-            // opts.seek = time;
-            // opts.highWaterMark = 1;
-            // this.stream = this.create_stream(this.now_playing.url);
-            // this.dispatch(opts);
+            // this.dispatcher.streamOptions.seek = time;
+            var opts = {};
+            opts.seek = time;
+            opts.highWaterMark = 1;
+            this.stream = this.create_stream(this.now_playing.url);
+            this.dispatch(opts);
             return 0;
         } else {
             return 2;
@@ -198,6 +203,7 @@ function Player(voice_channel_id, controller) {
             this.playing = false;
             this.dispatcher = null;
             this.now_playing = null;
+            this.stream = null;
         }
     }
 
@@ -209,6 +215,14 @@ function Player(voice_channel_id, controller) {
         }
         duration.add(this.now_playing.duration).subtract(this.dispatcher.streamTime, 'ms');
         return duration;
+    }
+
+    this.getNowPlaying = function() {
+        return this.now_playing;
+    }
+
+    this.getProgress = function() {
+        return moment.duration(this.dispatcher.streamTime)
     }
 }
 

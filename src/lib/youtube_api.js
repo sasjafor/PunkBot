@@ -140,10 +140,14 @@ async function fast_search(term, key) {
             req.on('end', () => {
                 var response = JSON.parse(data).items[0];
                 var result = {};
-                result.url = 'https://www.youtube.com/watch?v=' + response.id.videoId;
-                result.id = response.id.videoId;
-                result.title = response.snippet.title;
-                clientSession.destroy();
+                if (response) {
+                    result.url = 'https://www.youtube.com/watch?v=' + response.id.videoId;
+                    result.id = response.id.videoId;
+                    result.title = response.snippet.title;
+                    clientSession.destroy();
+                } else {
+                    resolve(false);
+                }
                 resolve(result);
             });
         }).on('error', (e) => {
