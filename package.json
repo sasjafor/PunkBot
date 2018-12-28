@@ -22,7 +22,7 @@
   "dependencies": {
     "@discordjs/uws": "^11.149.1",
     "axios": "^0.18.0",
-    "debug": "^4.1.0",
+    "debug": "^4.1.1",
     "discord.js": "github:discordjs/discord.js",
     "erlpack": "github:discordapp/erlpack",
     "ffmpeg-binaries": "^4.0.0",

@@ -23,10 +23,10 @@ const bot_in_voice_only_commands = ['skip', 'loop', 'clear', 'seek', 'disconnect
 
 const strings = {
     need_to_be_in_voice: ':x: **You have to be in a voice channel to use this command.**',
-    no_permission_to_connect: ':no_good: **No permission to connect to**',
+    no_permission_to_connect: ':no_good: **No permission to connect to** ',
     searching_for: '<:youtube:519902612976304145> **Searching** :mag_right:',
     no_matches: ':x: **No matches**',
-    joined: ':thumbsup: **Joined**',
+    joined: ':thumbsup: **Joined** ',
     not_connected: ':x: **I am not connected to a voice channel**, Use the summon command to get me in one',
     skipped: ':fast_forward: ***Skipped*** :thumbsup:',
     nothing_playing: ':x: **Nothing playing in this server**',
@@ -34,8 +34,9 @@ const strings = {
     loop_enabled: ':repeat_one: **Enabled!**',
     loop_disabled: ':repeat_one: **Disabled!**',
     disconnected: ':mailbox_with_no_mail: **Successfully disconnected**',
-    volume_set: ':loud_sound:  **Set to**',
-    invalid_format: ':x: **Invalid format**, Example formats:\n\n`0:30` `1:30` `2:15` `5:20`',
+    volume_set: ':sound:  **Set to** ',
+    invalid_seek_format: ':x: **Invalid format**, Example formats:\n\n`0:30` `1:30` `2:15` `5:20`',
+    invalid_vol_format: ':x: **Invalid format**, Example formats:\n\n\t`1`\t `2`\t `0.5`',
     seek_too_long: ':x: **Time cannot be longer than the song**',
     invalid_command: '**This command is invalid! Please use a valid one.**'
 }
@@ -73,8 +74,11 @@ client.on('message', async message => {
 
     if (message.content[0] == '!') {
         var regex_content = /^![a-zA-Z]* (.*)/;
-        var content = '';
+        var content = null;
         var command = message.content.match(/^!([a-zA-Z]*)/)[1];
+        if (!message.channel.permissionsFor(message.guild.me).has('SEND_MESSAGES')) {
+            return;
+        }
         if (!message.member.voice.channel) {
             if (voice_only_commands.includes(command)) {
                 message.channel.send(strings.need_to_be_in_voice);
@@ -94,6 +98,9 @@ client.on('message', async message => {
         switch (command) {
             case 'p':
             case 'play':
+                if (!content) {
+                    return;
+                }
                 if (!message.member.voice.channel.joinable) {
                     message.channel.send(strings.no_permission_to_connect + '`' + message.member.voice.channel.name + '`');
                     return;
@@ -153,6 +160,8 @@ client.on('message', async message => {
                     if (video_res) {
                         var duration = moment.duration(video_res.duration);
                         let thumbnailURL = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
+                        title = video_res.title;
+                        pb.setTitle(title);
                         pb.setDuration(duration);
                         pb.setThumbnailURL(thumbnailURL);
                         if (playing) {
@@ -220,7 +229,11 @@ client.on('message', async message => {
                         break;
                     case 'vol':
                     case 'volume':
-                        // TODO: add checking for correct format
+                        let vol_regex = /(0\.)?[0-9]+/;
+                        if (!vol_regex.test(content)) {
+                            message.channel.send(strings.invalid_vol_format);
+                            break;
+                        }
                         var value = content;
                         player.setVolume(value);
                         message.channel.send(strings.volume_set + '`' + value + '`');
@@ -245,10 +258,9 @@ client.on('message', async message => {
                     case 'seek':
                         let seek_time_regex = /([0-9]+:?[0-9]+:?)?[0-9]+$/;
                         if (!seek_time_regex.test(content) || (content.match(seek_time_regex)).index != 0) {
-                            message.channel.send(strings.invalid_format);
+                            message.channel.send(strings.invalid_seek_format);
+                            break;
                         }
-                        // debugv((content.match(/([0-9]+:?[0-9]+:?)?[0-9]+$/)));
-                        // debugv((content.match(/([0-9]+:?[0-9]+:?)?[0-9]+$/)).index == 0);
                         var min_hour_regex = /([0-9]+)(?::)/g
                         var time1 = min_hour_regex.exec(content);
                         var time2 = min_hour_regex.exec(content);
@@ -263,27 +275,11 @@ client.on('message', async message => {
                                 minutes = parseInt(time1[1], 10);
                             }
                         }
-                        // debugv(content);
-                        // debugv(seconds);
-                        // debugv(minutes);
-                        // debugv(hours);
                         var seek_time = 3600 * hours + 60 * minutes + seconds;
                         let duration = moment.duration(seek_time * 1000);
                         var res_code = player.seek(seek_time);
                         switch (res_code) {
                             case 0:
-                                // if (seconds >= 60) {
-                                //     var secr = seconds % 60;
-                                //     var secm = seconds / 60;
-                                //     seconds = seconds - secr;
-                                //     minutes = minutes + secm;
-                                // }
-                                // if (minutes >= 60) {
-                                //     var minr = minutes % 60;
-                                //     var minm = minutes / 60;
-                                //     minutes = minutes - minr;
-                                //     hours = hours + minm;
-                                // }
                                 var pretty_time = prettifyTime(duration);
                                 message.channel.send(':musical_note: **Set position to**' + '`' + pretty_time + '`' + ':fast_forward:');
                                 break;

@@ -51,6 +51,7 @@ function Player(voice_channel_id, controller) {
     });
 
     this.controller.on('end', () => {
+        this.dispatcher = null;
         if (!this.queue.isEmpty() || (this.loop && this.now_playing)) {
             this.controller.emit('play');
         } else {
@@ -80,7 +81,9 @@ function Player(voice_channel_id, controller) {
 
     this.dispatch = function(opts) {
         if (this.dispatcher) {
+            this.dispatcher.removeAllListeners();
             this.dispatcher.destroy();
+            this.dispatcher = null;
         }
         // debugv(this.stream);
         this.dispatcher = this.conn.play(this.stream, opts);
@@ -88,7 +91,6 @@ function Player(voice_channel_id, controller) {
             if (!this.loop) {
                 this.now_playing = null;
             }
-            debugv('EMITTING END');
             this.controller.emit('end');
         });
         this.dispatcher.on('error', error => {

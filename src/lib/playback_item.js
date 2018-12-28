@@ -6,6 +6,10 @@ function PlaybackItem(url, requester, title, thumbnailURL, duration) {
     this.title = title;
     this.thumbnailURL = thumbnailURL;
 
+    this.setTitle = function(title) {
+        this.title = title;
+    }
+
     this.setDuration = function(duration) {
         this.duration = duration;
     }
