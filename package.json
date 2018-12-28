@@ -1,6 +1,6 @@
 {
   "name": "punk-bot",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A discord music bot without limitations.",
   "author": "Sascha Forster <sascha.forster@hotmail.ch>",
   "main": "src/bot.js",
@@ -16,6 +16,9 @@
     "lib/*"
   ],
   "repository": "github:sasjafor/Announcer-Bot",
+  "bin": {
+    "run-punk-bot": "./cli.sh"
+  },
   "dependencies": {
     "@discordjs/uws": "^11.149.1",
     "axios": "^0.18.0",
