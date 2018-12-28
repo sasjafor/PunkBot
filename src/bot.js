@@ -24,7 +24,7 @@ const bot_in_voice_only_commands = ['skip', 'loop', 'clear', 'seek', 'disconnect
 const strings = {
     need_to_be_in_voice: ':x: **You have to be in a voice channel to use this command.**',
     no_permission_to_connect: ':no_good: **No permission to connect to** ',
-    searching_for: '<:youtube:519902612976304145> **Searching** :mag_right:',
+    searching_for: '<:youtube:519902612976304145> **Searching** :mag_right: ',
     no_matches: ':x: **No matches**',
     joined: ':thumbsup: **Joined** ',
     not_connected: ':x: **I am not connected to a voice channel**, Use the summon command to get me in one',
@@ -136,9 +136,6 @@ client.on('message', async message => {
                 let pb = new PlaybackItem(url, message.author, title);
                 player.enqueue(pb);
                 var playing = player.playing;
-                // if (!playing) {
-                //     player.pre_play(url);
-                // }
                 debugv('Added ' + url);
                 await connecting;
                 player.play(message.member.voice.channel);
@@ -155,7 +152,6 @@ client.on('message', async message => {
 
                     video_res = await video_info(id, video_opts);
                     video_res = video_res.results[0];
-                    // title = video_res.title
 
                     if (video_res) {
                         var duration = moment.duration(video_res.duration);

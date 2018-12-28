@@ -7,7 +7,6 @@ const EventEmitter = require('events');
 const {
     Queue
 } = require('./queue.js');
-// const {Controller} = require('./controller.js');
 
 
 var ytdl_opts = [];
@@ -25,7 +24,6 @@ function Player(voice_channel_id, controller) {
     this.dispatcher = null;
     this.playing = false;
     this.timeout = null;
-
     this.voice_channel_id = voice_channel_id;
     this.conn = null;
 
@@ -85,7 +83,6 @@ function Player(voice_channel_id, controller) {
             this.dispatcher.destroy();
             this.dispatcher = null;
         }
-        // debugv(this.stream);
         this.dispatcher = this.conn.play(this.stream, opts);
         this.dispatcher.on('finish', () => {
             if (!this.loop) {
@@ -95,14 +92,8 @@ function Player(voice_channel_id, controller) {
         });
         this.dispatcher.on('error', error => {
             debug(error);
-            // this.controller.emit('end');
+            this.controller.emit('end');
         });
-    }
-
-    this.pre_play = function(url) {
-        // TODO: still necessary?
-        this.now_playing = url;
-        this.curr_stream = this.create_stream(url);
     }
 
     this.setVolume = function(value) {
@@ -147,8 +138,17 @@ function Player(voice_channel_id, controller) {
             }
             // debugv(opts);
             stream = ytdl(url, opts);
+            let context = this;
+            stream.on('error', err => {
+                debug(err);
+                return context.create_stream(url);
+            });
         } else {
             stream = ytdl_full(url, ytdl_opts);
+            stream.on('error', err => {
+                debug(err);
+                return context.create_stream(url);
+            });
         }
         return stream;
     }
@@ -177,22 +177,23 @@ function Player(voice_channel_id, controller) {
 
     this.connect = async function(channel) {
         if (channel) {
-            try {
-                this.conn = await channel.join();
-                var context = this;
-                this.conn.on('failed', err => {
-                    debug(err);
-                    context.connect();
-                });
-                this.conn.on('disconnect', () => {
-                    if (context.playing) {
-                        context.connect();
-                        context.controller.emit('end');
-                    }
-                });
-            } catch (err) {
+            this.conn = await channel.join();
+            var context = this;
+            this.conn.on('failed', err => {
                 debug(err);
-            }
+                context.connect();
+            });
+            this.conn.on('disconnect', () => {
+                if (context.playing) {
+                    context.connect();
+                }
+            });
+            this.conn.on('error', err => {
+                debug(err);
+                if (context.playing) {
+                    context.connect();
+                }
+            });
             debug('Joined Voice Channel');
         }
     }
