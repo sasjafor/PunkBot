@@ -252,7 +252,7 @@ client.on('message', async message => {
                         }
                         break;
                     case 'seek':
-                        let seek_time_regex = /([0-9]+:?[0-9]+:?)?[0-9]+$/;
+                        let seek_time_regex = /(([0-9]+:)?([0-9]+:)?)?[0-9]+$/;
                         if (!seek_time_regex.test(content) || (content.match(seek_time_regex)).index != 0) {
                             message.channel.send(strings.invalid_seek_format);
                             break;
