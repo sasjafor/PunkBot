@@ -32,7 +32,7 @@
     "query-string": "^6.2.0",
     "sodium": "^3.0.1",
     "youtube-dl": "^1.12.2",
-    "ytdl-core": "^0.28.3",
+    "ytdl-core": "^0.29.1",
     "zlib-sync": "^0.1.4"
   }
 }
