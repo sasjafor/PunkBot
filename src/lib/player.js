@@ -12,7 +12,7 @@ const {
 var ytdl_opts = [];
 
 var playback_opts = {
-    highWaterMark: 1
+    highWaterMark: 1<<26
 };
 
 function Player(voice_channel_id, controller) {
@@ -164,9 +164,9 @@ function Player(voice_channel_id, controller) {
             }
             debugv('Seek_time=' + time);
             // this.dispatcher.streamOptions.seek = time;
-            var opts = {};
+            var opts = {...playback_opts};
             opts.seek = time;
-            opts.highWaterMark = 1;
+            //opts.highWaterMark = 1;
             this.stream = this.create_stream(this.now_playing.url);
             this.dispatch(opts);
             return 0;
