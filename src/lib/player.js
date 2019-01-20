@@ -106,7 +106,7 @@ function Player(voice_channel_id, controller) {
             if (this.loop) {
                 this.now_playing = this.queue.dequeue();
             }
-            this.dispatcher.end();
+            this.dispatcher.destroy();
             return true;
         } else {
             return false;
