@@ -171,6 +171,14 @@ function Player(voice_channel_id, controller) {
         this.queue = new Queue();
     }
 
+    this.remove = function(num) {
+        if (num > 0 && num <= this.queue.getLength()) {
+            return this.queue.remove(num - 1)[0];
+        } else {
+            return false;
+        }
+    }
+
     this.seek = function(time) {
         if (this.playing) {
             if (time > this.now_playing.duration.asSeconds()) {
@@ -183,7 +191,6 @@ function Player(voice_channel_id, controller) {
             };
             opts.seek = time;
             this.last_seek_time = time*1000;
-            //opts.highWaterMark = 1;
             this.stream = this.create_stream(this.now_playing.url);
             this.dispatch(opts);
             return 0;

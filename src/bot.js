@@ -38,7 +38,9 @@ const strings = {
     invalid_seek_format: ':x: **Invalid format**, Example formats:\n\n`0:30` `1:30` `2:15` `5:20`',
     invalid_vol_format: ':x: **Invalid format**, Example formats:\n\n\t`1`\t `2`\t `0.5`',
     seek_too_long: ':x: **Time cannot be longer than the song**',
-    invalid_command: '**This command is invalid! Please use a valid one.**'
+    invalid_command: '**This command is invalid! Please use a valid one.**',
+    removed: ':white_check_mark: **Removed** ',
+    out_of_range: ':x: **Out of range**'
 }
 
 var players = {};
@@ -99,6 +101,10 @@ client.on('message', async message => {
             case 'p':
             case 'play':
                 if (!content) {
+                    let embed = new Discord.MessageEmbed()
+                        .setDescription(':x: **Missing args**\n\n!play [Link or query]')
+                        .setColor('#ff0000');
+                    message.channel.send(embed)
                     return;
                 }
                 if (!message.member.voice.channel.joinable) {
@@ -210,6 +216,22 @@ client.on('message', async message => {
                     case 'clear':
                         player.clear();
                         message.channel.send(strings.cleared);
+                        break;
+                    case 'remove':
+                        let num = parseInt(content);
+                        if (num !== 0 && !num) {
+                            let embed = new Discord.MessageEmbed()
+                                .setDescription(':x: **Invalid format**\n\n!remove [Entry]')
+                                .setColor('#ff0000');
+                            message.channel.send(embed);
+                            break;
+                        }
+                        let remove_res = player.remove(num);
+                        if (remove_res) {
+                            message.channel.send(strings.removed + '`' + remove_res.title + '`');
+                        } else {
+                            message.channel.send(strings.out_of_range);
+                        }
                         break;
                     case 'loop':
                         player.loop = !player.loop;
