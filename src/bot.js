@@ -234,6 +234,10 @@ client.on('message', async message => {
                         player.setVolume(value);
                         message.channel.send(strings.volume_set + '`' + value + '`');
                         break;
+                    case 'dbg':
+                    case 'debug':
+                        debugv(player.stream);
+                        break;
                     case 'np':
                     case 'now_playing':
                         let np = player.getNowPlaying();
@@ -249,6 +253,8 @@ client.on('message', async message => {
                                 .setColor('#0056bf')
                                 .setDescription('\u200B\n`' + progress_bar + '`\n\n`' + progress_string + '`\n\n`Requested by:` ' + np.requester.username);
                             message.channel.send(embed);
+                        } else {
+                            message.channel.send(strings.nothing_playing);
                         }
                         break;
                     case 'seek':
