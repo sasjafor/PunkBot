@@ -34,5 +34,8 @@
     "youtube-dl": "^1.12.2",
     "ytdl-core": "^0.29.1",
     "zlib-sync": "^0.1.4"
+  },
+  "devDependencies": {
+    "eslint": "^5.12.1"
   }
 }
