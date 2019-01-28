@@ -15,7 +15,7 @@ var playback_opts = {
     highWaterMark: 1
 };
 
-function Player(controller) {
+function Player() {
     this.controller = new EventEmitter();
     this.queue = new Queue();
     this.now_playing = null;
@@ -33,7 +33,7 @@ function Player(controller) {
         if (!this.loop || !this.now_playing) {
             this.now_playing = this.dequeue();
         }
-        url = this.now_playing.url
+        url = this.now_playing.url;
 
         if (!url) {
             return;
@@ -67,15 +67,15 @@ function Player(controller) {
         }
         this.playing = true;
         this.controller.emit('play');
-    }
+    };
 
     this.enqueue = function(url) {
         this.queue.enqueue(url);
-    }
+    };
 
     this.dequeue = function() {
         return this.queue.dequeue();
-    }
+    };
 
     this.dispatch = function(opts) {
         if (this.dispatcher) {
@@ -94,14 +94,14 @@ function Player(controller) {
             debug(error);
             this.controller.emit('end');
         });
-    }
+    };
 
     this.setVolume = function(value) {
         playback_opts.volume = value;
         if (this.dispatcher) {
             this.dispatcher.setVolume(value);
         }
-    }
+    };
 
     this.skip = function() {
         if (this.playing) {
@@ -116,7 +116,7 @@ function Player(controller) {
         } else {
             return false;
         }
-    }
+    };
 
     this.create_stream = function(url) {
         var stream = null;
@@ -142,7 +142,7 @@ function Player(controller) {
                 // begin: timestamp
                 highWaterMark: 1<<26,
                 debug: true
-            }
+            };
             // debugv(opts);
             stream = ytdl(url, opts);
             stream.on('error', err => {
@@ -151,7 +151,6 @@ function Player(controller) {
             });
         } else {
             stream = ytdl_full(url, ytdl_opts);
-            let context = this;
             stream.on('error', err => {
                 debug(err);
             });
@@ -159,15 +158,15 @@ function Player(controller) {
         if (stream === url || stream.readable) {
             return stream;
         } else {
-            debugv('403 ERROR!!')
+            debugv('403 ERROR!!');
             setTimeout(function() {}, 1000);
             return this.create_stream(url);
         }
-    }
+    };
 
     this.clear = function() {
         this.queue = new Queue();
-    }
+    };
 
     this.remove = function(num) {
         if (num > 0 && num <= this.queue.getLength()) {
@@ -175,7 +174,7 @@ function Player(controller) {
         } else {
             return false;
         }
-    }
+    };
 
     this.seek = function(time) {
         if (this.playing) {
@@ -195,7 +194,7 @@ function Player(controller) {
         } else {
             return 2;
         }
-    }
+    };
 
     this.connect = async function(channel) {
         if (channel) {
@@ -218,7 +217,7 @@ function Player(controller) {
             });
             debug('Joined Voice Channel');
         }
-    }
+    };
 
     this.disconnect = function() {
         if (this.conn) {
@@ -231,7 +230,7 @@ function Player(controller) {
             this.stream = null;
             this.last_seek_time = 0;
         }
-    }
+    };
 
     this.current_playback_progress = function() {
         if (this.dispatcher) {
@@ -239,7 +238,7 @@ function Player(controller) {
         } else {
             return false;
         }
-    }
+    };
 
     this.total_queue_time = function() {
         let duration = moment.duration(0);
@@ -251,11 +250,11 @@ function Player(controller) {
             duration.add(this.now_playing.duration).subtract(this.current_playback_progress(), 'ms');
         }
         return duration;
-    }
+    };
 
     this.getNowPlaying = function() {
         return this.now_playing;
-    }
+    };
 
     this.getProgress = function() {
         if (this.dispatcher) {
@@ -263,7 +262,7 @@ function Player(controller) {
         } else {
             return false;
         }
-    }
+    };
 }
 
 module.exports.Player = Player;

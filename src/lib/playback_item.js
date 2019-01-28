@@ -8,19 +8,19 @@ function PlaybackItem(url, requester, title, thumbnailURL, duration, channelTitl
 
     this.setTitle = function(title) {
         this.title = title;
-    }
+    };
 
     this.setDuration = function(duration) {
         this.duration = duration;
-    }
+    };
 
     this.setThumbnailURL = function(thumbnailURL) {
         this.thumbnailURL = thumbnailURL;
-    }
+    };
 
     this.setChannelTitle = function(title) {
-        this.channelTitle = channelTitle;
-    }
+        this.channelTitle = title;
+    };
 }
 
 module.exports.PlaybackItem = PlaybackItem;

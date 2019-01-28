@@ -25,12 +25,12 @@ function Queue() {
     // Returns the length of the queue.
     this.getLength = function() {
         return (this.queue.length - offset);
-    }
+    };
 
     // Returns true if the queue is empty, and false otherwise.
     this.isEmpty = function() {
         return (this.queue.length == 0);
-    }
+    };
 
     /* Enqueues the specified item. The parameter is:
      *
@@ -38,7 +38,7 @@ function Queue() {
      */
     this.enqueue = function(item) {
         this.queue.push(item);
-    }
+    };
 
     /* Dequeues an item and returns it. If the queue is empty, the value
      * 'undefined' is returned.
@@ -59,14 +59,14 @@ function Queue() {
 
         // return the dequeued item
         return item;
-    }
+    };
 
     /* Returns the item at the front of the queue (without dequeuing it). If the
      * queue is empty then undefined is returned.
      */
     this.peek = function() {
         return (this.queue.length > 0 ? this.queue[offset] : undefined);
-    }
+    };
 
     /* Removes the item location at index from the queue.
      * Not part of original code
@@ -75,7 +75,7 @@ function Queue() {
      */
     this.remove = function(index) {
         return this.queue.splice(index + offset, 1);
-    }
+    };
 }
 
 module.exports.Queue = Queue;
