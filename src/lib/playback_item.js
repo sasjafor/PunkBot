@@ -1,10 +1,10 @@
-
-function PlaybackItem(url, requester, title, thumbnailURL, duration) {
+function PlaybackItem(url, requester, title, thumbnailURL, duration, channelTitle) {
     this.url = url;
     this.duration = duration;
     this.requester = requester;
     this.title = title;
     this.thumbnailURL = thumbnailURL;
+    this.channelTitle = channelTitle;
 
     this.setTitle = function(title) {
         this.title = title;
@@ -16,6 +16,10 @@ function PlaybackItem(url, requester, title, thumbnailURL, duration) {
 
     this.setThumbnailURL = function(thumbnailURL) {
         this.thumbnailURL = thumbnailURL;
+    }
+
+    this.setChannelTitle = function(title) {
+        this.channelTitle = channelTitle;
     }
 }
 

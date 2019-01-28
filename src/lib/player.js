@@ -15,7 +15,7 @@ var playback_opts = {
     highWaterMark: 1
 };
 
-function Player(voice_channel_id, controller) {
+function Player(controller) {
     this.controller = new EventEmitter();
     this.queue = new Queue();
     this.now_playing = null;
@@ -24,7 +24,6 @@ function Player(voice_channel_id, controller) {
     this.dispatcher = null;
     this.playing = false;
     this.timeout = null;
-    this.voice_channel_id = voice_channel_id;
     this.conn = null;
     this.last_seek_time = 0;
 
@@ -43,7 +42,6 @@ function Player(voice_channel_id, controller) {
 
         if (this.stream && this.conn) {
             debugv('Playing: ' + url);
-            // playback_opts.type = 'webm/opus'; // TODO: need to check if actually webm/opus stream
 
             this.dispatch(playback_opts);
         }
@@ -63,7 +61,7 @@ function Player(voice_channel_id, controller) {
         }
     });
 
-    this.play = function(channel) {
+    this.play = function() {
         if (this.playing) {
             return;
         }
@@ -161,9 +159,9 @@ function Player(voice_channel_id, controller) {
         if (stream === url || stream.readable) {
             return stream;
         } else {
-            setTimeout(function() {
-                return this.create_stream(url);
-            }, 1000);
+            debugv('403 ERROR!!')
+            setTimeout(function() {}, 1000);
+            return this.create_stream(url);
         }
     }
 

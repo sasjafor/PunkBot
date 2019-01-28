@@ -15,11 +15,12 @@ const {
 const {
     search,
     fast_search,
-    video_info
+    video_info,
+    playlist_info
 } = require('./lib/youtube_api.js');
 
-const voice_only_commands = ['p', 'skip', 'play', 'loop', 'seek', 'summon', 'join', 'disconnect', 'volume', 'vol', 'np', 'now_playing'];
-const bot_in_voice_only_commands = ['skip', 'loop', 'clear', 'seek', 'disconnect', 'volume', 'vol', 'np', 'now_playing'];
+const bot_in_voice_only_commands = ['skip', 'loop', 'clear', 'remove', 'seek', 'disconnect', 'volume', 'vol', 'np', 'now_playing'];
+const voice_only_commands = ['p', 'play', 'seek', 'summon', 'join', ...bot_in_voice_only_commands];
 
 const strings = {
     need_to_be_in_voice: ':x: **You have to be in a voice channel to use this command.**',
@@ -54,6 +55,12 @@ var search_opts = {
 var video_opts = {
     key: youtube_api_key,
     part: 'contentDetails,snippet'
+}
+
+var playlist_opts = {
+    key: youtube_api_key,
+    part: 'contentDetails',
+    maxResults: 50
 }
 
 function login() {
@@ -112,10 +119,16 @@ client.on('message', async message => {
                     return;
                 }
 
-                var connecting = player.connect(message.member.voice.channel);
+                let playing = player.playing;
+                let connecting = null;
+                if (!playing) {
+                    connecting = player.connect(message.member.voice.channel);
+                }
+
                 var search_res = null;
                 var video_res = null;
                 var url = null;
+                let id = null;
                 var title = content;
                 var search_string = content;
 
@@ -125,6 +138,7 @@ client.on('message', async message => {
                         search_res = await fast_search(search_string, youtube_api_key);
                         if (search_res) {
                             url = search_res.url;
+                            id = search_res.id;
                             title = search_res.title;
                         } else {
                             message.channel.send(strings.no_matches);
@@ -132,62 +146,77 @@ client.on('message', async message => {
                         }
                     } catch (err) {
                         debug(err);
-                        break;
+                        return;
                     }
                 } else {
                     url = content;
                 }
 
-
-                let pb = new PlaybackItem(url, message.author, title);
-                player.enqueue(pb);
-                var playing = player.playing;
-                debugv('Added ' + url);
-                await connecting;
-                player.play(message.member.voice.channel);
-
-                let embed = null;
-                if (url.includes('youtube') || url.includes('youtu.be')) {
-                    let id = null;
-                    if (search_res) {
-                        id = search_res.id;
+                let playlist_id_regex = /(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:playlist|e(?:mbed)?\/videoseries)\/|\S*?\?list=)|youtu\.be\/)([a-zA-Z0-9_-]{34})/;
+                if (playlist_id_regex.test(url)) {
+                    let playlist_id = url.match(playlist_id_regex)[1];
+                    if (!playing) {
+                        let custom_opts = {
+                            ...playlist_opts
+                        };
+                        custom_opts.maxResults = 1;
+                        custom_opts.part = 'snippet,contentDetails';
+                        let playlist_res = await playlist_info(playlist_id, custom_opts);
+                        if (playlist_res) {
+                            id = playlist_res.results[0].videoId;
+                            url = 'https://www.youtube.com/watch?v=' + id;
+                            title = playlist_res.results[0].title;
+                        }
+                        handle_playlist(player, playlist_id, message.author, true);
                     } else {
-                        let id_regex = /(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-                        id = url.match(id_regex)[1];
+                        handle_playlist(player, playlist_id, message.author, false);
+                        return;
                     }
+                }
 
-                    video_res = await video_info(id, video_opts);
-                    video_res = video_res.results[0];
+                if (!id) {
+                    let id_regex = /(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+                    id = url.match(id_regex)[1];
+                }
+                let pb = handle_video(id, message.author);
+                if (!playing) {
+                    let pb_short = new PlaybackItem(url, message.author, title);
+                    player.enqueue(pb_short);
 
-                    if (video_res) {
-                        var duration = moment.duration(video_res.duration);
-                        let thumbnailURL = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
-                        title = video_res.title;
-                        pb.setTitle(title);
-                        pb.setDuration(duration);
-                        pb.setThumbnailURL(thumbnailURL);
-                        if (playing) {
-                            var pretty_duration = prettifyTime(duration);
+                    debugv('Added ' + url);
+                    await connecting;
+                    player.play();
+                    message.channel.send('**Playing** :notes: `' + title + '` - Now!');
+                    pb = await pb;
+                    pb_short.setTitle(pb.title);
+                    pb_short.setDuration(pb.duration);
+                    pb_short.setThumbnailURL(pb.thumbnailURL);
+                    pb_short.setChannelTitle(pb.channelTitle);
+                } else {
+                    let embed = null;
+                    pb = await pb;
+                    if (url.includes('youtube') || url.includes('youtu.be')) {
+                        if (pb) {
+                            player.enqueue(pb);
+                            var pretty_duration = prettifyTime(pb.duration);
                             var time_until_playing = player.total_queue_time();
                             var pretty_tut = prettifyTime(time_until_playing);
                             embed = new Discord.MessageEmbed()
                                 .setTitle(title)
                                 .setAuthor('Added to queue', message.author.avatarURL(), 'https://github.com/sasjafor/PunkBot')
                                 .setURL(url)
-                                .setThumbnail(thumbnailURL)
-                                .addField('Channel', video_res.channelTitle)
+                                .setThumbnail(pb.thumbnailURL)
+                                .addField('Channel', pb.channelTitle)
                                 .addField('Song Duration', pretty_duration)
                                 .addField('Estimated time until playing', pretty_tut)
                                 .addField('Position in queue', player.queue.getLength());
                         }
+                    } else {
+                        //TODO: embed for non youtube links
                     }
-                }
-                if (playing) {
                     if (embed) {
                         message.channel.send(embed);
                     }
-                } else {
-                    message.channel.send('**Playing** :notes: `' + title + '` - Now!');
                 }
                 break;
             case 'summon':
@@ -202,7 +231,7 @@ client.on('message', async message => {
             default:
                 if (!player.conn && bot_in_voice_only_commands.includes(command)) {
                     message.channel.send(strings.not_connected);
-                    break;
+                    return;
                 }
                 switch (command) {
                     case 'skip':
@@ -224,7 +253,7 @@ client.on('message', async message => {
                                 .setDescription(':x: **Invalid format**\n\n!remove [Entry]')
                                 .setColor('#ff0000');
                             message.channel.send(embed);
-                            break;
+                            return;
                         }
                         let remove_res = player.remove(num);
                         if (remove_res) {
@@ -250,7 +279,7 @@ client.on('message', async message => {
                         let vol_regex = /(0\.)?[0-9]+/;
                         if (!vol_regex.test(content)) {
                             message.channel.send(strings.invalid_vol_format);
-                            break;
+                            return;
                         }
                         var value = content;
                         player.setVolume(value);
@@ -283,7 +312,7 @@ client.on('message', async message => {
                         let seek_time_regex = /(([0-9]+:)?([0-9]+:)?)?[0-9]+$/;
                         if (!seek_time_regex.test(content) || (content.match(seek_time_regex)).index != 0) {
                             message.channel.send(strings.invalid_seek_format);
-                            break;
+                            return;
                         }
                         var min_hour_regex = /([0-9]+)(?::)/g
                         var time1 = min_hour_regex.exec(content);
@@ -313,7 +342,6 @@ client.on('message', async message => {
                             case 2:
                                 message.channel.send(strings.nothing_playing);
                                 break;
-                            default:
                         }
                         break;
                     default:
@@ -332,14 +360,18 @@ client.on('warn', warning => {
 });
 
 function prettifyTime(duration) {
-    let hours = duration.hours() + duration.days() * 24;
-    let minutes = duration.minutes();
-    let seconds = duration.seconds();
-    var pretty_hours = ((hours / 10 < 1) ? '0' : '') + hours + ':';
-    var pretty_minutes = ((minutes / 10 < 1) ? '0' : '') + minutes + ':';
-    var pretty_seconds = ((seconds / 10 < 1) ? '0' : '') + seconds;
-    var pretty_time = ((hours > 0) ? pretty_hours : '') + pretty_minutes + pretty_seconds;
-    return pretty_time;
+    if (duration) {
+        let hours = duration.hours() + duration.days() * 24;
+        let minutes = duration.minutes();
+        let seconds = duration.seconds();
+        var pretty_hours = ((hours / 10 < 1) ? '0' : '') + hours + ':';
+        var pretty_minutes = ((minutes / 10 < 1) ? '0' : '') + minutes + ':';
+        var pretty_seconds = ((seconds / 10 < 1) ? '0' : '') + seconds;
+        var pretty_time = ((hours > 0) ? pretty_hours : '') + pretty_minutes + pretty_seconds;
+        return pretty_time;
+    } else {
+        throw new Error('Invalid duration provided');
+    }
 }
 
 function buildProgressBar(progress, total_time) {
@@ -361,4 +393,42 @@ function buildProgressBar(progress, total_time) {
         res += '▬'
     }
     return res;
+}
+
+async function handle_video(id, requester) {
+    let res = await video_info(id, video_opts);
+    res = res.results[0];
+
+    if (res) {
+        let url = 'https://www.youtube.com/watch?v=' + id;
+        let title = res.title;
+        let thumbnailURL = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
+        let duration = moment.duration(res.duration);
+        let channelTitle = res.channelTitle;
+        return new PlaybackItem(url, requester, title, thumbnailURL, duration, channelTitle);
+    } else {
+        throw new Error('Failed to get video info');
+    }
+}
+
+async function handle_playlist(player, id, requester, skip_first) {
+    let skipped = false;
+    let page_info = null;
+    let page_token = null;
+    do {
+        let res = await playlist_info(id, playlist_opts, page_token);
+        page_info = res.pageInfo;
+        page_token = (page_info) ? page_info.nextPageToken : null;
+        let items = res.results;
+
+        for (let i of items) {
+            if (skipped || !skip_first) {
+                let video = await handle_video(i.videoId, requester);
+                player.enqueue(video);
+                debugv('Enqueued: ' + video.url);
+            }
+            skipped = true;
+        }
+    } while (page_info.nextPageToken);
+    debugv('DONE processing playlist!');
 }

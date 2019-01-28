@@ -153,18 +153,6 @@ async function fast_search(term, key) {
         }).on('error', (e) => {
             reject(e);
         });
-
-        // https.get('https://www.googleapis.com/youtube/v3/search?' + querystring.stringify(params), (res) => {
-        //     res.on('data', (d) => {
-        //         data += d;
-        //     });
-        //     res.on('end', () => {
-        //         var result = 'https://www.youtube.com/watch?v=' + JSON.parse(data).items[0].id.videoId;
-        //         resolve(result);
-        //     });
-        // }).on('error', (e) => {
-        //     reject(e);
-        // });
     })
 }
 
@@ -207,23 +195,6 @@ function video_info(id, opts, cb) {
             }
 
             var findings = result.items.map(function(item) {
-                var link = ''
-                var id = ''
-                switch (item.id.kind) {
-                    case 'youtube#channel':
-                        link = 'https://www.youtube.com/channel/' + item.id.channelId
-                        id = item.id.channelId
-                        break
-                    case 'youtube#playlist':
-                        link = 'https://www.youtube.com/playlist?list=' + item.id.playlistId
-                        id = item.id.playlistId
-                        break
-                    default:
-                        link = 'https://www.youtube.com/watch?v=' + item.id.videoId
-                        id = item.id.videoId
-                        break
-                }
-
                 return {
                     kind: item.id.kind,
                     publishedAt: item.snippet.publishedAt,
@@ -243,6 +214,60 @@ function video_info(id, opts, cb) {
         })
 }
 
+function playlist_info(id, opts, page_token, cb) {
+    if (!opts) opts = {}
+
+    if (!cb) {
+        return new Promise(function(resolve, reject) {
+            playlist_info(id, opts, page_token, function(err, results, pageInfo) {
+                if (err) return reject(err)
+                resolve({
+                    results: results,
+                    pageInfo: pageInfo
+                })
+            })
+        })
+    }
+
+    var params = {
+        playlistId: id,
+        part: opts.part || 'snippet'
+    }
+
+    if (page_token) {
+        params.pageToken = page_token;
+    }
+
+    Object.keys(opts).map(function(k) {
+        if (allowedProperties.indexOf(k) > -1) params[k] = opts[k]
+    })
+
+    axios.get('https://www.googleapis.com/youtube/v3/playlistItems?' + querystring.stringify(params))
+        .then(function(response) {
+            var result = response.data
+
+            var pageInfo = {
+                totalResults: result.pageInfo.totalResults,
+                resultsPerPage: result.pageInfo.resultsPerPage,
+                nextPageToken: result.nextPageToken
+            }
+
+            var findings = result.items.map(function(item) {
+                return {
+                    kind: item.kind,
+                    videoId: item.contentDetails.videoId,
+                    title: (params.part == 'snippet,contentDetails') ? item.snippet.title : null
+                }
+            })
+
+            return cb(null, findings, pageInfo)
+        })
+        .catch(function(err) {
+            return cb(err)
+        })
+}
+
 module.exports.search = search;
 module.exports.fast_search = fast_search;
 module.exports.video_info = video_info;
+module.exports.playlist_info = playlist_info;
