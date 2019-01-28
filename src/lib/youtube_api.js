@@ -42,12 +42,16 @@ function search(term, opts, cb) {
         opts = {};
     }
 
-    if (!opts) opts = {};
+    if (!opts) {
+        opts = {};
+    }
 
     if (!cb) {
         return new Promise(function(resolve, reject) {
             search(term, opts, function(err, results, pageInfo) {
-                if (err) return reject(err);
+                if (err) {
+                    return reject(err);
+                }
                 resolve({
                     results: results,
                     pageInfo: pageInfo
@@ -62,9 +66,12 @@ function search(term, opts, cb) {
         maxResults: opts.maxResults || 30
     };
 
-    Object.keys(opts).map(function(k) {
-        if (allowedProperties.indexOf(k) > -1) params[k] = opts[k];
-    });
+    Object.keys(opts)
+        .map(function(k) {
+            if (allowedProperties.indexOf(k) > -1) {
+                params[k] = opts[k];
+            }
+        });
     axios.get('https://www.googleapis.com/youtube/v3/search?' + querystring.stringify(params))
         .then(function(response) {
             var result = response.data;
@@ -133,25 +140,27 @@ async function fast_search(term, key) {
         });
 
         req.on('response', () => {
-            req.on('data', (d) => {
-                data += d;
+                req.on('data', (d) => {
+                    data += d;
+                });
+                req.on('end', () => {
+                    var response = JSON.parse(data)
+                        .items[0];
+                    var result = {};
+                    if (response) {
+                        result.url = 'https://www.youtube.com/watch?v=' + response.id.videoId;
+                        result.id = response.id.videoId;
+                        result.title = response.snippet.title;
+                        clientSession.destroy();
+                    } else {
+                        resolve(false);
+                    }
+                    resolve(result);
+                });
+            })
+            .on('error', (e) => {
+                reject(e);
             });
-            req.on('end', () => {
-                var response = JSON.parse(data).items[0];
-                var result = {};
-                if (response) {
-                    result.url = 'https://www.youtube.com/watch?v=' + response.id.videoId;
-                    result.id = response.id.videoId;
-                    result.title = response.snippet.title;
-                    clientSession.destroy();
-                } else {
-                    resolve(false);
-                }
-                resolve(result);
-            });
-        }).on('error', (e) => {
-            reject(e);
-        });
     });
 }
 
@@ -161,12 +170,16 @@ function video_info(id, opts, cb) {
         opts = {};
     }
 
-    if (!opts) opts = {};
+    if (!opts) {
+        opts = {};
+    }
 
     if (!cb) {
         return new Promise(function(resolve, reject) {
             video_info(id, opts, function(err, results, pageInfo) {
-                if (err) return reject(err);
+                if (err) {
+                    return reject(err);
+                }
                 resolve({
                     results: results,
                     pageInfo: pageInfo
@@ -180,9 +193,12 @@ function video_info(id, opts, cb) {
         part: opts.part || 'snippet'
     };
 
-    Object.keys(opts).map(function(k) {
-        if (allowedProperties.indexOf(k) > -1) params[k] = opts[k];
-    });
+    Object.keys(opts)
+        .map(function(k) {
+            if (allowedProperties.indexOf(k) > -1) {
+                params[k] = opts[k];
+            }
+        });
 
     axios.get('https://www.googleapis.com/youtube/v3/videos?' + querystring.stringify(params))
         .then(function(response) {
@@ -214,12 +230,16 @@ function video_info(id, opts, cb) {
 }
 
 function playlist_info(id, opts, page_token, cb) {
-    if (!opts) opts = {};
+    if (!opts) {
+        opts = {};
+    }
 
     if (!cb) {
         return new Promise(function(resolve, reject) {
             playlist_info(id, opts, page_token, function(err, results, pageInfo) {
-                if (err) return reject(err);
+                if (err) {
+                    return reject(err);
+                }
                 resolve({
                     results: results,
                     pageInfo: pageInfo
@@ -237,9 +257,12 @@ function playlist_info(id, opts, page_token, cb) {
         params.pageToken = page_token;
     }
 
-    Object.keys(opts).map(function(k) {
-        if (allowedProperties.indexOf(k) > -1) params[k] = opts[k];
-    });
+    Object.keys(opts)
+        .map(function(k) {
+            if (allowedProperties.indexOf(k) > -1) {
+                params[k] = opts[k];
+            }
+        });
 
     axios.get('https://www.googleapis.com/youtube/v3/playlistItems?' + querystring.stringify(params))
         .then(function(response) {

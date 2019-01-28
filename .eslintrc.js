@@ -10,9 +10,9 @@ module.exports = {
     },
     "rules": {
         "indent": [
-            "error",
+            "off",
             4,
-            {"SwitchCase": 1}
+            { "SwitchCase": 1 }
         ],
         "linebreak-style": [
             "error",
@@ -25,6 +25,12 @@ module.exports = {
         "semi": [
             "error",
             "always"
-        ]
+        ],
+        "brace-style": [
+            "error",
+            "1tbs",
+            { "allowSingleLine": true }
+        ],
+        "curly" : "error"
     }
 };

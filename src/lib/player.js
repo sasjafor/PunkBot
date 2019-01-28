@@ -36,11 +36,15 @@ function Player() {
         this.now_playing = await this.now_playing;
         url = this.now_playing.url;
 
-
         if (!url) {
             return;
         }
         this.stream = this.create_stream(url);
+        if (!this.stream) {
+            setTimeout(function() {
+                this.stream = this.create_stream(url);
+            }, 1000);
+        }
 
         if (this.stream && this.conn) {
             debugv('Playing: ' + url);
@@ -59,7 +63,7 @@ function Player() {
             var context = this;
             this.timeout = setTimeout(function() {
                 context.disconnect();
-            }, 120000);
+            }, 300000);
         }
     });
 
@@ -142,8 +146,7 @@ function Player() {
                 //     return format.type === 'audio/webm; codecs="opus"';
                 // },
                 // begin: timestamp
-                highWaterMark: 1<<26,
-                debug: true
+                highWaterMark: 1 << 26
             };
             // debugv(opts);
             stream = ytdl(url, opts);
@@ -160,7 +163,7 @@ function Player() {
         if (stream === url || stream.readable) {
             return stream;
         } else {
-            debugv('403 ERROR!!');
+            debugv('Encountered error with stream');
             setTimeout(function() {}, 1000);
             return this.create_stream(url);
         }
@@ -189,7 +192,7 @@ function Player() {
                 ...playback_opts
             };
             opts.seek = time;
-            this.last_seek_time = time*1000;
+            this.last_seek_time = time * 1000;
             this.stream = this.create_stream(this.now_playing.url);
             this.dispatch(opts);
             return 0;
@@ -246,14 +249,24 @@ function Player() {
         }
     };
 
-    this.total_queue_time = function() {
+    this.getTotalRemainingPlaybackTime = async function() {
         let duration = moment.duration(0);
-        let len = this.queue.getLength();
-        for (let i = 0; i < len - 1; i++) {
-            duration.add(this.queue.queue[i].duration);
+        for (let i of this.queue.queue) {
+            i = await i;
+            duration.add(i.duration);
         }
         if (this.now_playing && this.dispatcher) {
-            duration.add(this.now_playing.duration).subtract(this.current_playback_progress(), 'ms');
+            duration.add(this.now_playing.duration)
+                .subtract(this.current_playback_progress(), 'ms');
+        }
+        return duration;
+    };
+
+    this.getTotalQueueTime = async function() {
+        let duration = moment.duration(0);
+        for (let i of this.queue.queue) {
+            i = await i;
+            duration.add(i.duration);
         }
         return duration;
     };
@@ -268,6 +281,17 @@ function Player() {
         } else {
             return false;
         }
+    };
+
+    this.getQueueLength = function() {
+        return this.queue.getLength();
+    };
+
+    /* Returns the queue array, this is meant for read-only purposes and thus
+     * avoids creating an unnecessary copy of the entire array
+     */
+    this.getQueue = function() {
+        return this.queue.queue;
     };
 }
 
