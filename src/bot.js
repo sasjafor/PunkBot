@@ -39,7 +39,8 @@ const strings = {
     seek_too_long: ':x: **Time cannot be longer than the song**',
     invalid_command: '**This command is invalid! Please use a valid one.**',
     removed: ':white_check_mark: **Removed** ',
-    out_of_range: ':x: **Out of range**'
+    out_of_range: ':x: **Out of range**',
+    shuffled: '**Shuffled queue** :ok_hand:'
 };
 
 var players = {};
@@ -146,6 +147,7 @@ client.on('message', async message => {
                 let playlist_id_regex = /(?:youtube(?:-nocookie)?\.com\/(?:[^/\n\s]+\/\S+\/|(?:playlist|e(?:mbed)?\/videoseries)\/|\S*?\?list=)|youtu\.be\/)([a-zA-Z0-9_-]{34})/;
                 if (playlist_id_regex.test(url)) {
                     let playlist_id = url.match(playlist_id_regex)[1];
+                    let playlist_callback = function(num) {message.channel.send(':white_check_mark: **Enqueued** `' + num + '` songs');};
                     if (!playing) {
                         let custom_opts = {
                             ...playlist_opts
@@ -158,9 +160,9 @@ client.on('message', async message => {
                             url = 'https://www.youtube.com/watch?v=' + id;
                             title = playlist_res.results[0].title;
                         }
-                        handle_playlist(player, playlist_id, message.author, true);
+                        handle_playlist(player, playlist_id, message.author, true, playlist_callback);
                     } else {
-                        handle_playlist(player, playlist_id, message.author, false);
+                        handle_playlist(player, playlist_id, message.author, false, playlist_callback);
                         return;
                     }
                 }
@@ -309,6 +311,12 @@ client.on('message', async message => {
                         }
                         break;
                     }
+                    case 'shuffle': {
+                        player.shuffle();
+                        message.channel.send(strings.shuffled);
+                        debug('Shuffled queue');
+                        break;
+                    }
                     case 'seek': {
                         let seek_time_regex = /(([0-9]+:)?([0-9]+:)?)?[0-9]+$/;
                         if (!seek_time_regex.test(content) || (content.match(seek_time_regex)).index != 0) {
@@ -413,10 +421,11 @@ async function handle_video(id, requester) {
     }
 }
 
-async function handle_playlist(player, id, requester, skip_first) {
+async function handle_playlist(player, id, requester, skip_first, callback) {
     let skipped = false;
     let page_info = null;
     let page_token = null;
+    let k = 0;
     do {
         let res = await playlist_info(id, playlist_opts, page_token);
         page_info = res.pageInfo;
@@ -425,12 +434,14 @@ async function handle_playlist(player, id, requester, skip_first) {
 
         for (let i of items) {
             if (skipped || !skip_first) {
-                let video = await handle_video(i.videoId, requester);
+                let video = handle_video(i.videoId, requester);
                 player.enqueue(video);
-                debugv('Enqueued: ' + video.url);
+                //debugv('Enqueued: ' + video.url);
             }
             skipped = true;
+            k++;
         }
     } while (page_info.nextPageToken);
     debugv('DONE processing playlist!');
+    if (callback) {callback(k);}
 }

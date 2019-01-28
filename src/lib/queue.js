@@ -76,6 +76,20 @@ function Queue() {
     this.remove = function(index) {
         return this.queue.splice(index + offset, 1);
     };
+
+    /* Shuffles the queue
+     */
+    this.shuffle = function() {
+        var queue = this.queue;
+        var l = queue.length + 1;
+        while (l-- > offset) {
+            var r = ~~(Math.random() * (l - offset)) + offset,
+                o = queue[r];
+
+            queue[r] = queue[offset];
+            queue[offset] = o;
+        }
+    };
 }
 
 module.exports.Queue = Queue;

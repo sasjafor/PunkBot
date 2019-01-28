@@ -27,13 +27,15 @@ function Player() {
     this.conn = null;
     this.last_seek_time = 0;
 
-    this.controller.on('play', () => {
+    this.controller.on('play', async () => {
         clearTimeout(this.timeout);
         var url = '';
         if (!this.loop || !this.now_playing) {
             this.now_playing = this.dequeue();
         }
+        this.now_playing = await this.now_playing;
         url = this.now_playing.url;
+
 
         if (!url) {
             return;
@@ -230,6 +232,10 @@ function Player() {
             this.stream = null;
             this.last_seek_time = 0;
         }
+    };
+
+    this.shuffle = function() {
+        this.queue.shuffle();
     };
 
     this.current_playback_progress = function() {
