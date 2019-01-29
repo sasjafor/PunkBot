@@ -3,8 +3,8 @@ const youtube_api_key = process.env.YOUTUBE_API_KEY;
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const moment = require('moment');
-const debug = require('debug')('basic');
-const debugv = require('debug')('verbose');
+const debug = require('debug')('punk_bot');
+const debugv = require('debug')('punk_bot:verbose');
 const {
     Player
 } = require('./lib/player.js');

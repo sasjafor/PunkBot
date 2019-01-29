@@ -1,5 +1,5 @@
-const debug = require('debug')('basic');
-const debugv = require('debug')('verbose');
+const debug = require('debug')('punk_bot');
+const debugv = require('debug')('punk_bot:verbose');
 const ytdl = require('ytdl-core');
 const ytdl_full = require('youtube-dl');
 const moment = require('moment');
@@ -150,9 +150,13 @@ function Player() {
             };
             // debugv(opts);
             stream = ytdl(url, opts);
+            let context = this;
             stream.on('error', err => {
                 debug(url);
                 debug(err);
+                if (err.message.includes('This video is not available.')) {
+                    context.skip();
+                }
             });
         } else {
             stream = ytdl_full(url, ytdl_opts);

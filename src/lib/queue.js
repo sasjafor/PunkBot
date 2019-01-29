@@ -46,7 +46,9 @@ function Queue() {
     this.dequeue = function() {
 
         // if the queue is empty, return immediately
-        if (this.queue.length == 0) return undefined;
+        if (this.queue.length == 0) {
+            return undefined;
+        }
 
         // store the item at the front of the queue
         var item = this.queue[offset];
