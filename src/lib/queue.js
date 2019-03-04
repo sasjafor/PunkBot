@@ -79,6 +79,10 @@ function Queue() {
         return this.queue.splice(index + offset, 1);
     };
 
+    this.get = function(index) {
+        return this.queue[index + offset];
+    };
+
     /* Shuffles the queue
      */
     this.shuffle = function() {

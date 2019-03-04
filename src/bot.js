@@ -5,6 +5,7 @@ const client = new Discord.Client();
 const moment = require('moment');
 const debug = require('debug')('punk_bot');
 const debugv = require('debug')('punk_bot:verbose');
+const debugd = require('debug')('punk_bot:debug');
 const {
     Player
 } = require('./lib/player.js');
@@ -69,7 +70,6 @@ login();
 
 client.on('ready', () => {
     debug('I am ready!');
-
 });
 
 client.on('message', async message => {
@@ -303,7 +303,8 @@ client.on('message', async message => {
                     case 'dbg':
                     case 'debug':
                         {
-                            debugv(player.stream);
+                            debugd(player.conn);
+                            debugd(player.stream);
                             break;
                         }
                     case 'np':
@@ -358,9 +359,9 @@ client.on('message', async message => {
                             let num_tabs = Math.ceil(queue_length / 10);
                             if (queue_length > 0) {
                                 let queue = player.getQueue();
-                                let k = 1;
+                                let k = 0;
                                 if (num > 1) {
-                                    if (num <= 0 || num > num_tabs) {
+                                    if (num > num_tabs) {
                                         message.channel.send(strings.invalid_queue_tab + '**1-' + num_tabs + '**');
                                         return;
                                     } else {
@@ -371,9 +372,9 @@ client.on('message', async message => {
                                     desc += '\n\n\n:arrow_down:__Up Next:__:arrow_down:\n\n';
                                 }
                                 let stop = Math.min(k + 10, queue_length);
-                                for (let i = queue[k]; k < stop; k++, i = queue[k]) {
+                                for (let i = queue.get(k); k < stop; k++, i = queue.get(k)) {
                                     i = await i;
-                                    desc += '`' + k + '.` [' + i.title + '](' + i.url + ') | `' + prettifyTime(i.duration) + ' Requested by: ' + i.requester.username + '`\n\n';
+                                    desc += '`' + (k+1) + '.` [' + i.title + '](' + i.url + ') | `' + prettifyTime(i.duration) + ' Requested by: ' + i.requester.username + '`\n\n';
                                 }
                                 desc += '\n**' + queue_length + ' songs in queue | ' + prettifyTime(await player.getTotalQueueTime()) + ' total length**';
                                 if (num_tabs > 1) {
@@ -466,10 +467,6 @@ function buildProgressBar(progress, total_time) {
     let tt = total_time.asSeconds();
     let mul = 30 / tt;
     let pos = Math.round(pr * mul);
-    debugv('pr: ' + pr);
-    debugv('tt: ' + tt);
-    debugv('mul: ' + mul);
-    debugv('pos: ' + pos);
     let res = '';
     for (let i = 0; i < pos; i++) {
         res += '▬';
@@ -513,13 +510,12 @@ async function handle_playlist(player, id, requester, skip_first, callback) {
             if (skipped || !skip_first) {
                 let video = handle_video(i.videoId, requester);
                 player.enqueue(video);
-                //debugv('Enqueued: ' + video.url);
             }
             skipped = true;
             k++;
         }
     } while (page_info.nextPageToken);
-    debugv('DONE processing playlist!');
+    debugd('DONE processing playlist!');
     if (callback) {
         callback(k);
     }

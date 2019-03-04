@@ -1,5 +1,6 @@
 const debug = require('debug')('punk_bot');
-const debugv = require('debug')('punk_bot:verbose');
+//const debugv = require('debug')('punk_bot:verbose');
+const debugd = require('debug')('punk_bot:debug');
 const ytdl = require('ytdl-core');
 const ytdl_full = require('youtube-dl');
 const moment = require('moment');
@@ -12,7 +13,10 @@ const {
 var ytdl_opts = [];
 
 var playback_opts = {
-    highWaterMark: 1
+    highWaterMark: 12,
+    passes: 4,
+    bitrate: 128,
+    fec: true,
 };
 
 function Player() {
@@ -47,7 +51,7 @@ function Player() {
         }
 
         if (this.stream && this.conn) {
-            debugv('Playing: ' + url);
+            debugd('Playing: ' + url);
 
             this.dispatch(playback_opts);
         }
@@ -130,25 +134,11 @@ function Player() {
         if (url.slice(-4, -3) == '.') {
             stream = url;
         } else if (url.startsWith('https://www.youtube.com') || url.startsWith('https://youtu.be')) {
-            // let timestamp_regex = /(?:\?t=)([0-9]+)|(?:\&t=)([0-9]+)/;
-            // let timestamp = 0
-            // if (timestamp_regex.test(url)) {
-            //     timestamp = parseInt(url.match(timestamp_regex)[1], 10) * 1000;
-            // }
-            // ytdl.getInfo(ytdl.getURLVideoID(url), (err, info) => {
-            //     if (err) throw err;
-            //     let format = ytdl.chooseFormat(info.formats, { quality: '249,250,251' });
-            //     info.formats = format;
-            //     stream = ytdl.downloadFromInfo(info);
-            // });
             let opts = {
-                // filter: format => {
-                //     return format.type === 'audio/webm; codecs="opus"';
-                // },
-                // begin: timestamp
-                highWaterMark: 1 << 26
+                // highWaterMark: 1 << 26
+                quality: 'highestaudio',
+                filter: 'audioonly',
             };
-            // debugv(opts);
             stream = ytdl(url, opts);
             let context = this;
             stream.on('error', err => {
@@ -156,6 +146,8 @@ function Player() {
                 debug(err);
                 if (err.message.includes('This video is not available.')) {
                     context.skip();
+                } else {
+                    // context.retry_on_403(url);
                 }
             });
         } else {
@@ -167,11 +159,15 @@ function Player() {
         if (stream === url || stream.readable) {
             return stream;
         } else {
-            debugv('Encountered error with stream');
+            debug('Encountered error with stream');
             setTimeout(function() {}, 1000);
             return this.create_stream(url);
         }
     };
+
+    // this.retry_on_403 = function(url) {
+    //
+    // };
 
     this.clear = function() {
         this.queue = new Queue();
@@ -190,7 +186,7 @@ function Player() {
             if (time > this.now_playing.duration.asSeconds()) {
                 return 1;
             }
-            debugv('Seek_time=' + time);
+            debugd('Seek_time=' + time);
             // this.dispatcher.streamOptions.seek = time;
             var opts = {
                 ...playback_opts
@@ -223,6 +219,9 @@ function Player() {
                 if (context.playing) {
                     context.connect();
                 }
+            });
+            this.conn.on('warning', err => {
+                debug(err);
             });
             debug('Joined Voice Channel');
         }
@@ -295,7 +294,7 @@ function Player() {
      * avoids creating an unnecessary copy of the entire array
      */
     this.getQueue = function() {
-        return this.queue.queue;
+        return this.queue;
     };
 }
 
