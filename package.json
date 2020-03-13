@@ -20,22 +20,19 @@
     "run-punk-bot": "./cli.sh"
   },
   "dependencies": {
-    "@discordjs/uws": "^11.149.1",
-    "axios": "^0.18.0",
-    "debug": "^4.1.1",
-    "discord.js": "github:sasjafor/discord.js",
+    "@discordjs/opus": "^0.1.0",
+    "axios": "^0.19.2",
+    "bufferutil": "^4.0.1",
+    "discord.js": "^12.0.2",
     "erlpack": "github:discordapp/erlpack",
-    "ffmpeg-static": "^2.4.0",
-    "libsodium": "^0.7.4",
     "moment": "^2.24.0",
-    "node-opus": "^0.3.1",
-    "query-string": "^6.2.0",
-    "sodium": "^3.0.1",
-    "youtube-dl": "^1.12.2",
-    "ytdl-core": "^0.29.1",
-    "zlib-sync": "^0.1.4"
+    "sodium": "^3.0.2",
+    "utf-8-validate": "^5.0.2",
+    "youtube-dl": "^3.0.2",
+    "ytdl-core": "^2.0.0",
+    "zlib-sync": "^0.1.6"
   },
   "devDependencies": {
-    "eslint": "^5.14.1"
+    "eslint": "^6.8.0"
   }
 }

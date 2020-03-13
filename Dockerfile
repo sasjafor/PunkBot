@@ -1,4 +1,4 @@
-FROM node:10
+FROM node:13
 
 # Generate locale
 #RUN apt-get update && \
