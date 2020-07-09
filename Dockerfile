@@ -30,6 +30,10 @@ COPY src/lib /usr/src/app/lib
 # Copy bot script file
 COPY src/bot.js /usr/src/app/
 
+# Install youtube-dl
+ADD https://yt-dl.org/downloads/latest/youtube-dl /usr/local/bin/
+RUN chmod a+rx /usr/local/bin/youtube-dl
+
 EXPOSE 8080
 VOLUME /config
 CMD ["/usr/src/run.sh"]
