@@ -6,6 +6,8 @@ const moment = require('moment');
 const debug = require('debug')('punk_bot');
 const debugv = require('debug')('punk_bot:verbose');
 const debugd = require('debug')('punk_bot:debug');
+const path = require('path');
+const youtubedl = require('youtube-dl');
 const {
     Player
 } = require('./lib/player.js');
@@ -59,6 +61,8 @@ var playlist_opts = {
 };
 
 function login() {
+    const customytdlBinaryPath = path.resolve('/usr/local/bin/youtube-dl')
+    youtubedl.setYtdlBinary(customytdlBinaryPath)
     try {
         client.login(token);
     } catch (err) {
