@@ -25,13 +25,14 @@
     "bufferutil": "^4.0.1",
     "discord.js": "^12.2.0",
     "erlpack": "github:discordapp/erlpack",
-    "ffmpeg-static": "^4.2.2",
-    "moment": "^2.26.0",
+    "ffmpeg-static": "^4.2.5",
+    "moment": "^2.27.0",
+    "path": "^0.12.7",
     "sodium": "^3.0.2",
     "utf-8-validate": "^5.0.2",
     "youtube-dl": "^3.0.2",
-    "ytdl-core": "^2.1.4",
-    "zlib-sync": "^0.1.6"
+    "ytdl-core": "^3.1.2",
+    "zlib-sync": "^0.1.7"
   },
   "devDependencies": {
     "eslint": "^7.1.0"
