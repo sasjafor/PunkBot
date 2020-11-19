@@ -1,4 +1,4 @@
-FROM node:14
+FROM node:15
 
 # Generate locale
 #RUN apt-get update && \
@@ -17,9 +17,9 @@ COPY package.json /usr/src/app/
 # Setup apt, install non-node dependencies and create /config
 RUN mkdir /config
 
-# Install node dependencies
+# Install node dependencies  # --legacy-peer-deps is a temp fix
 RUN cd /usr/src/app && \
-    npm install --save-prod
+    npm install --save-prod --legacy-peer-deps 
 
 # Set debug env
 ENV DEBUG basic,verbose
