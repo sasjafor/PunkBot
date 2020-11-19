@@ -8,6 +8,7 @@ const debugv = require('debug')('punk_bot:verbose');
 const debugd = require('debug')('punk_bot:debug');
 const path = require('path');
 const youtubedl = require('youtube-dl');
+const decode = require('unescape');
 const {
     Player
 } = require('./lib/player.js');
@@ -190,7 +191,7 @@ client.on('message', async message => {
                         debugv('Added ' + url);
                         await connecting;
                         player.play();
-                        message.channel.send('**Playing** :notes: `' + title + '` - Now!');
+                        message.channel.send('**Playing** :notes: `' + decode(title) + '` - Now!');
                         pb = await pb;
                         pb_short.setTitle(pb.title);
                         pb_short.setDuration(pb.duration);
