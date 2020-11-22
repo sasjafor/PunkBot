@@ -25,6 +25,7 @@
     "bufferutil": "^4.0.2",
     "discord.js": "^12.4.1",
     "erlpack": "github:discord/erlpack",
+    "ffmpeg-static": "^4.2.7",
     "moment": "^2.29.1",
     "sodium": "^3.0.2",
     "unescape": "^1.0.1",
