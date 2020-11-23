@@ -155,6 +155,10 @@ function Player() {
             stream.on('error', err => {
                 debug(err);
             });
+            stream.on('info', info => {
+                this.now_playing.title = info._filename;
+                this.now_playing.duration = moment.duration(info._duration_hms);
+            })
         }
         if (stream === url || stream.readable) {
             return stream;

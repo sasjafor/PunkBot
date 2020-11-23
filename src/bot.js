@@ -180,10 +180,12 @@ client.on('message', async message => {
                     }
 
                     if (!id) {
-                        let id_regex = /(?:youtube(?:-nocookie)?\.com\/(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-                        id = url.match(id_regex)[1];
+                        id = getYTid(url);
                     }
-                    let pb = handle_video(id, message.author);
+
+                    let isYT = id != null;
+
+                    let pb = handle_video(id, message.author, url);
                     if (!playing) {
                         let pb_short = new PlaybackItem(url, message.author, title);
                         player.enqueue(pb_short);
@@ -200,7 +202,7 @@ client.on('message', async message => {
                     } else {
                         let embed = null;
                         pb = await pb;
-                        if (url.includes('youtube') || url.includes('youtu.be')) {
+                        if (isYT) {
                             if (pb) {
                                 player.enqueue(pb);
                                 var pretty_duration = prettifyTime(pb.duration);
@@ -470,6 +472,11 @@ function prettifyTime(duration) {
 function buildProgressBar(progress, total_time) {
     let pr = progress.asSeconds();
     let tt = total_time.asSeconds();
+
+    if (pr > tt) {
+        tt = pr;
+    }
+
     let mul = 30 / tt;
     let pos = Math.round(pr * mul);
     let res = '';
@@ -484,19 +491,23 @@ function buildProgressBar(progress, total_time) {
     return res;
 }
 
-async function handle_video(id, requester) {
-    let res = await video_info(id, video_opts);
-    res = res.results[0];
+async function handle_video(id, requester, url) {
+    if (id) {
+        let res = await video_info(id, video_opts);
+        res = res.results[0];
 
-    if (res) {
-        let url = 'https://www.youtube.com/watch?v=' + id;
-        let title = res.title;
-        let thumbnailURL = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
-        let duration = moment.duration(res.duration);
-        let channelTitle = res.channelTitle;
-        return new PlaybackItem(url, requester, title, thumbnailURL, duration, channelTitle);
+        if (res) {
+            let YTurl = 'https://www.youtube.com/watch?v=' + id;
+            let title = res.title;
+            let thumbnailURL = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
+            let duration = moment.duration(res.duration);
+            let channelTitle = res.channelTitle;
+            return new PlaybackItem(YTurl, requester, title, thumbnailURL, duration, channelTitle);
+        } else {
+            throw new Error('Failed to get video info');
+        }
     } else {
-        throw new Error('Failed to get video info');
+        return new PlaybackItem(url, requester, url, null, null, null);
     }
 }
 
@@ -524,4 +535,17 @@ async function handle_playlist(player, id, requester, skip_first, callback) {
     if (callback) {
         callback(k);
     }
+}
+
+function getYTid(url) {
+    let id_regex = /(?:youtube(?:-nocookie)?\.com\/(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    let match = url.match(id_regex);
+
+    if (match && match.length > 1) {
+        return match[1];
+    } else {
+        return null;
+    }
+
+    // return url.includes('youtube') || url.includes('youtu.be');
 }
