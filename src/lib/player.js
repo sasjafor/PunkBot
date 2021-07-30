@@ -2,7 +2,7 @@ const debug = require('debug')('punk_bot');
 //const debugv = require('debug')('punk_bot:verbose');
 const debugd = require('debug')('punk_bot:debug');
 const ytdl = require('ytdl-core');
-const ytdl_full = require('youtube-dl');
+const ytdl_full = require('youtube-dl-exec');
 const moment = require('moment');
 const EventEmitter = require('events');
 const {

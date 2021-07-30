@@ -7,7 +7,7 @@ const debug = require('debug')('punk_bot');
 const debugv = require('debug')('punk_bot:verbose');
 const debugd = require('debug')('punk_bot:debug');
 const path = require('path');
-const youtubedl = require('youtube-dl');
+const youtubedl = require('youtube-dl-exec');
 const decode = require('unescape');
 const {
     Player
@@ -62,8 +62,8 @@ var playlist_opts = {
 };
 
 function login() {
-    const customytdlBinaryPath = path.resolve('/usr/local/bin/youtube-dl')
-    youtubedl.setYtdlBinary(customytdlBinaryPath)
+    // const customytdlBinaryPath = path.resolve('/usr/local/bin/youtube-dl')
+    // youtubedl.setYtdlBinary(customytdlBinaryPath)
     try {
         client.login(token);
     } catch (err) {
@@ -507,7 +507,7 @@ async function handle_video(id, requester, url) {
             throw new Error('Failed to get video info');
         }
     } else {
-        return new PlaybackItem(url, requester, url, null, null, null);
+        return new PlaybackItem(url, requester, url, null, moment.duration("0"), null);
     }
 }
 

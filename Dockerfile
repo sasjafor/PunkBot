@@ -17,9 +17,9 @@ COPY package.json /usr/src/app/
 # Setup apt, install non-node dependencies and create /config
 RUN mkdir /config
 
-# Install node dependencies  # --legacy-peer-deps is a temp fix
+# Install node dependencies
 RUN cd /usr/src/app && \
-    npm install --save-prod --legacy-peer-deps 
+    npm install --save-prod
 
 # Set debug env
 ENV DEBUG basic,verbose
