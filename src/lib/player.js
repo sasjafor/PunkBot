@@ -1,14 +1,12 @@
-const debug = require('debug')('punk_bot');
-//const debugv = require('debug')('punk_bot:verbose');
-const debugd = require('debug')('punk_bot:debug');
-const ytdl = require('ytdl-core');
-const ytdl_full = require('youtube-dl-exec');
-const moment = require('moment');
-const EventEmitter = require('events');
-const {
-    Queue
-} = require('./queue.js');
-
+import ytdl from 'ytdl-core';
+import ytdl_full from 'youtube-dl-exec';
+import moment from 'moment';
+import EventEmitter from 'events';
+import {Queue} from './queue.js';
+import Debug from 'debug';
+const debug = Debug('punk_bot');
+const debugv = Debug('punk_bot:verbose');
+const debugd = Debug('punk_bot:debug');
 
 var ytdl_opts = [];
 
@@ -19,7 +17,7 @@ var playback_opts = {
     fec: true,
 };
 
-function Player() {
+export function Player() {
     this.controller = new EventEmitter();
     this.queue = new Queue();
     this.now_playing = null;
@@ -301,5 +299,3 @@ function Player() {
         return this.queue;
     };
 }
-
-module.exports.Player = Player;

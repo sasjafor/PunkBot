@@ -1,25 +1,23 @@
-const token = process.env.DISCORD_APP_AUTH_TOKEN;
-const youtube_api_key = process.env.YOUTUBE_API_KEY;
-const Discord = require('discord.js');
-const client = new Discord.Client();
-const moment = require('moment');
-const debug = require('debug')('punk_bot');
-const debugv = require('debug')('punk_bot:verbose');
-const debugd = require('debug')('punk_bot:debug');
-const path = require('path');
-const youtubedl = require('youtube-dl-exec');
-const decode = require('unescape');
-const {
-    Player
-} = require('./lib/player.js');
-const {
-    PlaybackItem
-} = require('./lib/playback_item.js');
-const {
+import Discord from 'discord.js';
+import moment from 'moment';
+import path from 'path';
+import youtubedl from 'youtube-dl-exec';
+import decode from 'unescape';
+import {Player} from './lib/player.js';
+import {PlaybackItem} from './lib/playback_item.js';
+import {
     fast_search,
     video_info,
     playlist_info
-} = require('./lib/youtube_api.js');
+} from './lib/youtube_api.js';
+import Debug from 'debug';
+const debug = Debug('punk_bot');
+const debugv = Debug('punk_bot:verbose');
+const debugd = Debug('punk_bot:debug');
+
+const token = process.env.DISCORD_APP_AUTH_TOKEN;
+const youtube_api_key = process.env.YOUTUBE_API_KEY;
+const client = new Discord.Client({ intents: ['GUILD_VOICE_STATES', 'GUILD_MESSAGES', 'GUILDS'] });
 
 const bot_in_voice_only_commands = ['skip', 'loop', 'clear', 'remove', 'seek', 'disconnect', 'volume', 'vol', 'np', 'now_playing', 'shuffle', 'queue'];
 const voice_only_commands = ['p', 'play', 'seek', 'summon', 'join', ...bot_in_voice_only_commands];

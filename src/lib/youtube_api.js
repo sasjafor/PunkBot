@@ -1,7 +1,7 @@
 // adapted from https://github.com/MaxGfeller/youtube-search
-const querystring = require('querystring');
-const axios = require('axios');
-const http2 = require('http2');
+import querystring from 'querystring';
+import axios from 'axios';
+import http2 from 'http2';
 
 var allowedProperties = [
     'fields',
@@ -36,7 +36,7 @@ var allowedProperties = [
     'key'
 ];
 
-function search(term, opts, cb) {
+export function search(term, opts, cb) {
     if (typeof opts === 'function') {
         cb = opts;
         opts = {};
@@ -121,7 +121,7 @@ function search(term, opts, cb) {
         });
 }
 
-async function fast_search(term, key) {
+export async function fast_search(term, key) {
     return new Promise(function(resolve, reject) {
         var params = {
             q: term,
@@ -164,7 +164,7 @@ async function fast_search(term, key) {
     });
 }
 
-function video_info(id, opts, cb) {
+export function video_info(id, opts, cb) {
     if (typeof opts === 'function') {
         cb = opts;
         opts = {};
@@ -229,7 +229,7 @@ function video_info(id, opts, cb) {
         });
 }
 
-function playlist_info(id, opts, page_token, cb) {
+export function playlist_info(id, opts, page_token, cb) {
     if (!opts) {
         opts = {};
     }
@@ -288,8 +288,3 @@ function playlist_info(id, opts, page_token, cb) {
             return cb(err);
         });
 }
-
-module.exports.search = search;
-module.exports.fast_search = fast_search;
-module.exports.video_info = video_info;
-module.exports.playlist_info = playlist_info;
