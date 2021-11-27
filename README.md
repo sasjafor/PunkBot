@@ -11,4 +11,4 @@ To use the bot you need to provide an authorisation token for a Discord applicat
 ## Commands
 * !p or !play [search string | url] - To search and play a youtube video or play any media that are supported by youtube-dl
 * !loop - Enable loop
-* !skip - Skip what is currently playing
+* !skip - Skip what is currently playing 
