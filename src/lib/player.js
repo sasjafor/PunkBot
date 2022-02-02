@@ -62,7 +62,7 @@ function Player(channelId) {
     });
 
     this.controller.on('end', () => {
-        this.dispatcher = null;
+        // this.dispatcher = null;
         this.last_seek_time = 0;
         if (!this.queue.isEmpty() || (this.loop && this.now_playing)) {
             this.controller.emit('play');
@@ -92,14 +92,12 @@ function Player(channelId) {
     };
 
     this.dispatch = function() {
-        if (this.dispatcher) {
-            this.dispatcher.removeAllListeners();
-            this.dispatcher.stop();
-            this.dispatcher = null;
-        }
+        // if (this.dispatcher) {
+        //     this.dispatcher.removeAllListeners();
+        //     this.dispatcher.stop();
+        //     this.dispatcher = null;
+        // }
         // this.dispatcher = this.conn.play(this.stream, opts);
-        this.dispatcher = createAudioPlayer();
-        this.subscription = this.conn.subscribe(this.dispatcher);
         this.dispatcher.play(this.stream);
 
         this.dispatcher.on('finish', () => {
@@ -127,9 +125,9 @@ function Player(channelId) {
             if (this.loop) {
                 this.now_playing = this.queue.dequeue();
             }
-            this.dispatcher.removeAllListeners();
-            this.dispatcher.stop();
-            this.dispatcher = null;
+            // this.dispatcher.removeAllListeners();
+            // this.dispatcher.stop();
+            // this.dispatcher = null;
             this.controller.emit('end');
             return true;
         } else {
@@ -223,7 +221,7 @@ function Player(channelId) {
                 channelId: channel.id,
                 guildId: channel.guild.id,
                 adapterCreator: channel.guild.voiceAdapterCreator,
-            })
+            });
             var context = this;
             this.conn.on('failed', err => {
                 debug(err);
@@ -244,11 +242,19 @@ function Player(channelId) {
                 debug(err);
             });
             debug('Joined Voice Channel');
+
+            this.dispatcher = createAudioPlayer();
+            this.subscription = this.conn.subscribe(this.dispatcher);
         }
     };
 
     this.disconnect = function() {
         if (this.conn) {
+            if (this.dispatcher) {
+                // this.dispatcher.removeAllListeners();
+                this.dispatcher.stop();
+                // this.dispatcher = null;
+            }
             this.conn.destroy();
             this.conn = null;
             this.queue = new Queue();
