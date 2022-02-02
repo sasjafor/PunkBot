@@ -1,4 +1,4 @@
-export class PlaybackItem {
+class PlaybackItem {
     constructor(url, requester, title, thumbnailURL, duration, channelTitle) {
         this.url = url;
         this.duration = duration;
@@ -23,4 +23,8 @@ export class PlaybackItem {
             this.channelTitle = title;
         };
     }
+}
+
+module.exports = {
+    PlaybackItem,
 }

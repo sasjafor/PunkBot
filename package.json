@@ -3,7 +3,7 @@
   "version": "0.2.2",
   "description": "A discord music bot without limitations.",
   "author": "Sascha Forster <sascha.forster@hotmail.ch>",
-  "type": "module",
+  "type": "commonjs",
   "main": "src/bot.js",
   "license": "GPL-3.0",
   "keywords": [
@@ -21,21 +21,22 @@
     "run-punk-bot": "cli.sh"
   },
   "dependencies": {
-    "@discordjs/opus": "^0.5.3",
-    "axios": "^0.21.4",
-    "bufferutil": "^4.0.4",
-    "discord.js": "^12.5.3",
-    "erlpack": "^0.1.3",
-    "ffmpeg-static": "^4.4.0",
+    "@discordjs/opus": "^0.7.0",
+    "@discordjs/voice": "^0.8.0",
+    "axios": "^0.25.0",
+    "bufferutil": "^4.0.6",
+    "discord.js": "^13.6.0",
+    "erlpack": "^0.1.4",
+    "ffmpeg-static": "^4.4.1",
     "moment": "^2.29.1",
     "sodium": "^3.0.2",
     "unescape": "^1.0.1",
-    "utf-8-validate": "^5.0.6",
-    "youtube-dl-exec": "^1.2.13",
-    "ytdl-core": "^4.9.1",
+    "utf-8-validate": "^5.0.8",
+    "youtube-dl-exec": "^2.0.2",
+    "ytdl-core": "^4.10.0",
     "zlib-sync": "^0.1.7"
   },
   "devDependencies": {
-    "eslint": "^7.32.0"
+    "eslint": "^8.8.0"
   }
 }

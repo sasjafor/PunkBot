@@ -1,23 +1,27 @@
-import ytdl from 'ytdl-core';
-import ytdl_full from 'youtube-dl-exec';
-import moment from 'moment';
-import EventEmitter from 'events';
-import {Queue} from './queue.js';
-import Debug from 'debug';
+const ytdl = require('ytdl-core');
+const ytdl_full = require('youtube-dl-exec');
+const moment = require('moment');
+const EventEmitter = require('events');
+const {Queue} = require('./queue.js');
+const Debug = require('debug');
+const { joinVoiceChannel, 
+        createAudioPlayer,
+        createAudioResource,
+} = require('@discordjs/voice');
 const debug = Debug('punk_bot');
 const debugv = Debug('punk_bot:verbose');
 const debugd = Debug('punk_bot:debug');
 
 var ytdl_opts = [];
 
-var playback_opts = {
-    highWaterMark: 12,
-    passes: 4,
-    bitrate: 128,
-    fec: true,
-};
+// var playback_opts = {
+//     highWaterMark: 12,
+//     passes: 4,
+//     bitrate: 128,
+//     fec: true,
+// };
 
-export function Player() {
+function Player(channelId) {
     this.controller = new EventEmitter();
     this.queue = new Queue();
     this.now_playing = null;
@@ -28,6 +32,8 @@ export function Player() {
     this.timeout = null;
     this.conn = null;
     this.last_seek_time = 0;
+    this.subscription = null;
+    this.volume = 1;
 
     this.controller.on('play', async () => {
         clearTimeout(this.timeout);
@@ -51,7 +57,7 @@ export function Player() {
         if (this.stream && this.conn) {
             debugd('Playing: ' + url);
 
-            this.dispatch(playback_opts);
+            this.dispatch();
         }
     });
 
@@ -85,13 +91,17 @@ export function Player() {
         return this.queue.dequeue();
     };
 
-    this.dispatch = function(opts) {
+    this.dispatch = function() {
         if (this.dispatcher) {
             this.dispatcher.removeAllListeners();
-            this.dispatcher.destroy();
+            this.dispatcher.stop();
             this.dispatcher = null;
         }
-        this.dispatcher = this.conn.play(this.stream, opts);
+        // this.dispatcher = this.conn.play(this.stream, opts);
+        this.dispatcher = createAudioPlayer();
+        this.subscription = this.conn.subscribe(this.dispatcher);
+        this.dispatcher.play(this.stream);
+
         this.dispatcher.on('finish', () => {
             if (!this.loop) {
                 this.now_playing = null;
@@ -105,9 +115,10 @@ export function Player() {
     };
 
     this.setVolume = function(value) {
-        playback_opts.volume = value;
-        if (this.dispatcher) {
-            this.dispatcher.setVolume(value);
+        this.volume = value;
+        if (this.stream) {
+            this.stream.volume.setVolume(value);
+            debugv("Set volume to " + value);
         }
     };
 
@@ -117,7 +128,7 @@ export function Player() {
                 this.now_playing = this.queue.dequeue();
             }
             this.dispatcher.removeAllListeners();
-            this.dispatcher.destroy();
+            this.dispatcher.stop();
             this.dispatcher = null;
             this.controller.emit('end');
             return true;
@@ -159,7 +170,9 @@ export function Player() {
             })
         }
         if (stream === url || stream.readable) {
-            return stream;
+            resource = createAudioResource(stream, { inlineVolume: true });
+            resource.volume.setVolume(this.volume);
+            return resource;
         } else {
             debug('Encountered error with stream');
             setTimeout(function() {}, 1000);
@@ -205,7 +218,12 @@ export function Player() {
 
     this.connect = async function(channel) {
         if (channel) {
-            this.conn = await channel.join();
+            // this.conn = await channel.join();
+            this.conn = joinVoiceChannel({
+                channelId: channel.id,
+                guildId: channel.guild.id,
+                adapterCreator: channel.guild.voiceAdapterCreator,
+            })
             var context = this;
             this.conn.on('failed', err => {
                 debug(err);
@@ -231,7 +249,7 @@ export function Player() {
 
     this.disconnect = function() {
         if (this.conn) {
-            this.conn.disconnect();
+            this.conn.destroy();
             this.conn = null;
             this.queue = new Queue();
             this.playing = false;
@@ -298,4 +316,8 @@ export function Player() {
     this.getQueue = function() {
         return this.queue;
     };
+}
+
+module.exports = {
+    Player,
 }

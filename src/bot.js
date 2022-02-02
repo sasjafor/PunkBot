@@ -1,16 +1,15 @@
-import Discord from 'discord.js';
-import moment from 'moment';
-import path from 'path';
-import youtubedl from 'youtube-dl-exec';
-import decode from 'unescape';
-import {Player} from './lib/player.js';
-import {PlaybackItem} from './lib/playback_item.js';
-import {
-    fast_search,
-    video_info,
-    playlist_info
-} from './lib/youtube_api.js';
-import Debug from 'debug';
+const Discord = require('discord.js');
+const moment = require('moment');
+const path = require('path');
+const youtubedl = require('youtube-dl-exec');
+const decode = require('unescape');
+const {Player} = require('./lib/player.js');
+const {PlaybackItem} = require('./lib/playback_item.js');
+const { fast_search,
+        video_info,
+        playlist_info,
+} = require('./lib/youtube_api.js');
+const Debug = require('debug');
 const debug = Debug('punk_bot');
 const debugv = Debug('punk_bot:verbose');
 const debugd = Debug('punk_bot:debug');
@@ -73,6 +72,7 @@ login();
 
 client.on('ready', () => {
     debug('I am ready!');
+    console.log("Connected as " + client.user.username);
 });
 
 client.on('message', async message => {
@@ -112,7 +112,7 @@ client.on('message', async message => {
                         let embed = new Discord.MessageEmbed()
                             .setDescription(':x: **Missing args**\n\n!play [Link or query]')
                             .setColor('#ff0000');
-                        message.channel.send(embed);
+                        message.channel.send({embeds: [embed]});
                         return;
                     }
                     if (!message.member.voice.channel.joinable) {
@@ -120,9 +120,8 @@ client.on('message', async message => {
 
                     }
 
-                    let playing = player.playing;
                     let connecting = null;
-                    if (!playing) {
+                    if (!player.playing) {
                         connecting = player.connect(message.member.voice.channel);
                     }
 
@@ -184,7 +183,7 @@ client.on('message', async message => {
                     let isYT = id != null;
 
                     let pb = handle_video(id, message.author, url);
-                    if (!playing) {
+                    if (!player.playing) {
                         let pb_short = new PlaybackItem(url, message.author, title);
                         player.enqueue(pb_short);
 
@@ -208,19 +207,19 @@ client.on('message', async message => {
                                 var pretty_tut = prettifyTime(time_until_playing);
                                 embed = new Discord.MessageEmbed()
                                     .setTitle(title)
-                                    .setAuthor('Added to queue', message.author.avatarURL(), 'https://github.com/sasjafor/PunkBot')
+                                    .setAuthor({ name: 'Added to queue', iconURL: message.author.avatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
                                     .setURL(url)
                                     .setThumbnail(pb.thumbnailURL)
                                     .addField('Channel', pb.channelTitle)
                                     .addField('Song Duration', pretty_duration)
                                     .addField('Estimated time until playing', pretty_tut)
-                                    .addField('Position in queue', player.queue.getLength());
+                                    .addField('Position in queue', String(player.queue.getLength()));
                             }
                         } else {
                             //TODO: embed for non youtube links
                         }
                         if (embed) {
-                            message.channel.send(embed);
+                            message.channel.send({embeds: [embed]});
                         }
                     }
                     break;
@@ -265,7 +264,7 @@ client.on('message', async message => {
                                 let embed = new Discord.MessageEmbed()
                                     .setDescription(':x: **Invalid format**\n\n!remove [Entry]')
                                     .setColor('#ff0000');
-                                message.channel.send(embed);
+                                message.channel.send({embeds: [embed]});
                                 return;
                             }
                             let remove_res = player.remove(num);
@@ -327,7 +326,7 @@ client.on('message', async message => {
                                     .setThumbnail(np.thumbnailURL)
                                     .setColor('#0056bf')
                                     .setDescription('\u200B\n`' + progress_bar + '`\n\n`' + progress_string + '`\n\n`Requested by:` ' + np.requester.username);
-                                message.channel.send(embed);
+                                message.channel.send({embeds: [embed]});
                             } else {
                                 message.channel.send(strings.nothing_playing);
                             }
@@ -348,7 +347,7 @@ client.on('message', async message => {
                                 let embed = new Discord.MessageEmbed()
                                     .setDescription(':x: **Invalid format**\n\n!queue [Tab number]')
                                     .setColor('#ff0000');
-                                message.channel.send(embed);
+                                message.channel.send({embeds: [embed]});
                                 return;
                             }
 
@@ -388,7 +387,7 @@ client.on('message', async message => {
                             }
 
                             embed.setDescription(desc);
-                            message.channel.send(embed);
+                            message.channel.send({embeds: [embed]});
                             break;
                         }
                     case 'shuffle':

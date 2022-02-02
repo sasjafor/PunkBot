@@ -1,7 +1,7 @@
 // adapted from https://github.com/MaxGfeller/youtube-search
-import querystring from 'querystring';
-import axios from 'axios';
-import http2 from 'http2';
+const querystring = require('querystring');
+const axios = require('axios');
+const http2 = require('http2');
 
 var allowedProperties = [
     'fields',
@@ -36,7 +36,7 @@ var allowedProperties = [
     'key'
 ];
 
-export function search(term, opts, cb) {
+function search(term, opts, cb) {
     if (typeof opts === 'function') {
         cb = opts;
         opts = {};
@@ -121,7 +121,7 @@ export function search(term, opts, cb) {
         });
 }
 
-export async function fast_search(term, key) {
+async function fast_search(term, key) {
     return new Promise(function(resolve, reject) {
         var params = {
             q: term,
@@ -164,7 +164,7 @@ export async function fast_search(term, key) {
     });
 }
 
-export function video_info(id, opts, cb) {
+function video_info(id, opts, cb) {
     if (typeof opts === 'function') {
         cb = opts;
         opts = {};
@@ -229,7 +229,7 @@ export function video_info(id, opts, cb) {
         });
 }
 
-export function playlist_info(id, opts, page_token, cb) {
+function playlist_info(id, opts, page_token, cb) {
     if (!opts) {
         opts = {};
     }
@@ -287,4 +287,11 @@ export function playlist_info(id, opts, page_token, cb) {
         .catch(function(err) {
             return cb(err);
         });
+}
+
+module.exports = {
+    search,
+    fast_search,
+    video_info,
+    playlist_info,
 }
