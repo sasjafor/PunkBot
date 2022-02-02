@@ -3,4 +3,5 @@ package-lock.json
 test_run.sh
 test_run_debug.sh
 test_run_container.sh
+debug_test_run.sh
 client_secret.json
