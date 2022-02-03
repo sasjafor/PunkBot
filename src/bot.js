@@ -201,10 +201,10 @@ client.on('message', async message => {
                         pb = await pb;
                         if (isYT) {
                             if (pb) {
-                                player.enqueue(pb);
                                 var pretty_duration = prettifyTime(pb.duration);
                                 var time_until_playing = await player.getTotalRemainingPlaybackTime();
                                 var pretty_tut = prettifyTime(time_until_playing);
+                                player.enqueue(pb);
                                 embed = new Discord.MessageEmbed()
                                     .setTitle(title)
                                     .setAuthor({ name: 'Added to queue', iconURL: message.author.avatarURL(), url: 'https://github.com/sasjafor/PunkBot'})

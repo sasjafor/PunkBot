@@ -1,12 +1,15 @@
 const ytdl = require('ytdl-core');
 const ytdl_full = require('youtube-dl-exec');
+const playdl = require('play-dl');
+const prism = require('prism-media');
 const moment = require('moment');
-const EventEmitter = require('events');
+// const EventEmitter = require('events');
 const {Queue} = require('./queue.js');
 const Debug = require('debug');
 const { joinVoiceChannel, 
         createAudioPlayer,
         createAudioResource,
+        AudioPlayerStatus,
 } = require('@discordjs/voice');
 const debug = Debug('punk_bot');
 const debugv = Debug('punk_bot:verbose');
@@ -22,7 +25,6 @@ var ytdl_opts = [];
 // };
 
 function Player(channelId) {
-    this.controller = new EventEmitter();
     this.queue = new Queue();
     this.now_playing = null;
     this.stream = null;
@@ -35,23 +37,29 @@ function Player(channelId) {
     this.subscription = null;
     this.volume = 1;
 
-    this.controller.on('play', async () => {
+    this.play = function() {
+        // if (this.playing) {
+        //     return;
+        // }
+        this.playing = true;
+        
         clearTimeout(this.timeout);
         var url = '';
         if (!this.loop || !this.now_playing) {
             this.now_playing = this.dequeue();
         }
-        this.now_playing = await this.now_playing;
-        url = this.now_playing.url;
 
-        if (!url) {
-            return;
+        if (this.now_playing.stream) {
+            debugv("Using already prepared stream");
+
+            this.stream = this.now_playing.stream;
+        } else {
+            this.stream = this.prepare_stream(this.now_playing);
         }
-        this.stream = this.create_stream(url);
-        if (!this.stream) {
-            setTimeout(function() {
-                this.stream = this.create_stream(url);
-            }, 1000);
+
+        let next = this.peek();
+        if (next) {
+            next.stream = this.prepare_stream(next);
         }
 
         if (this.stream && this.conn) {
@@ -59,57 +67,53 @@ function Player(channelId) {
 
             this.dispatch();
         }
-    });
-
-    this.controller.on('end', () => {
-        // this.dispatcher = null;
-        this.last_seek_time = 0;
-        if (!this.queue.isEmpty() || (this.loop && this.now_playing)) {
-            this.controller.emit('play');
-        } else {
-            this.playing = false;
-            var context = this;
-            this.timeout = setTimeout(function() {
-                context.disconnect();
-            }, 300000);
-        }
-    });
-
-    this.play = function() {
-        if (this.playing) {
-            return;
-        }
-        this.playing = true;
-        this.controller.emit('play');
     };
 
-    this.enqueue = function(url) {
-        this.queue.enqueue(url);
+    this.next = function() {
+        if (!this.queue.isEmpty() || (this.loop && this.now_playing)) {
+            this.play();
+        } else {
+            this.stop();
+        }
+    };
+
+    this.stop = function() {
+        this.dispatcher.stop();
+        this.playing = false;
+        var context = this;
+        this.timeout = setTimeout(function() {
+            context.disconnect();
+        }, 300000);
+
+        return;
+    };
+
+    this.enqueue = function(item) {
+        if (this.queue.isEmpty()) {
+            item.stream = this.prepare_stream(item);
+        }
+        this.queue.enqueue(item);
     };
 
     this.dequeue = function() {
         return this.queue.dequeue();
     };
 
-    this.dispatch = function() {
-        // if (this.dispatcher) {
-        //     this.dispatcher.removeAllListeners();
-        //     this.dispatcher.stop();
-        //     this.dispatcher = null;
-        // }
-        // this.dispatcher = this.conn.play(this.stream, opts);
-        this.dispatcher.play(this.stream);
+    this.peek = function() {
+        return this.queue.peek();
+    }
 
-        this.dispatcher.on('finish', () => {
-            if (!this.loop) {
-                this.now_playing = null;
-            }
-            this.controller.emit('end');
-        });
-        this.dispatcher.on('error', error => {
-            debug(error);
-            this.controller.emit('end');
-        });
+    this.dispatch = async function() {
+        // set volume before playing
+        this.stream = await this.stream;
+
+        if (this.stream.started) {
+            this.stream = this.prepare_stream(this.now_playing);
+            this.stream = await this.stream;
+        }
+
+        this.stream.volume.setVolume(this.volume);
+        this.dispatcher.play(this.stream);
     };
 
     this.setVolume = function(value) {
@@ -125,56 +129,97 @@ function Player(channelId) {
             if (this.loop) {
                 this.now_playing = this.queue.dequeue();
             }
-            // this.dispatcher.removeAllListeners();
-            // this.dispatcher.stop();
-            // this.dispatcher = null;
-            this.controller.emit('end');
+            this.next();
             return true;
         } else {
             return false;
         }
     };
 
-    this.create_stream = function(url) {
+    this.prepare_stream = async function(next) {
+        url = next.url;
+
+        if (!url) {
+            return;
+        }
+        let stream = await this.create_stream(url);
+        if (!stream) {
+            setTimeout(async function() {
+                stream = await this.create_stream(url);
+            }, 1000);
+        }
+
+        return stream;
+    }
+
+    this.create_stream = async function(url, seektime=null) {
         var stream = null;
         // this is most likely unsafe, but it works for now
         if (url.slice(-4, -3) == '.') {
             stream = url;
-        } else if (url.startsWith('https://www.youtube.com') || url.startsWith('https://youtu.be')) {
-            let opts = {
-                // highWaterMark: 1 << 26
-                quality: 'highestaudio',
-                filter: 'audioonly',
-            };
-            stream = ytdl(url, opts);
-            let context = this;
-            stream.on('error', err => {
-                debug(url);
-                debug(err);
-                if (err.message.includes('This video is not available.')) {
-                    context.skip();
-                } else {
-                    // context.retry_on_403(url);
-                }
-            });
         } else {
-            stream = ytdl_full(url, ytdl_opts);
-            stream.on('error', err => {
-                debug(err);
-            });
-            stream.on('info', info => {
-                this.now_playing.title = info._filename;
-                this.now_playing.duration = moment.duration(info._duration_hms);
-            })
+            stream = await playdl.stream(url, { discordPlayerCompatibility : true });
+            stream = stream.stream;
+
+            if (seektime == null) {
+                seektime = '0';
+            }
+            stream = stream.pipe(new prism.FFmpeg({
+                args: [
+                    '-ss', String(seektime),
+                    '-i', '-',
+                    '-loglevel', '0', 
+                    '-acodec', 'libopus', 
+                    '-f', 'opus', 
+                    '-ar', '48000', 
+                    '-ac', '2',
+                ]
+            }));
+            // console.log(stream);
+            // stream.on('error', err => {
+            //     debug(url);
+            //     debug(err);
+            //     if (err.message.includes('This video is not available.')) {
+            //         context.skip();
+            //     } else {
+            //         // context.retry_on_403(url);
+            //     }
+            // });
         }
+        // } else if (url.startsWith('https://www.youtube.com') || url.startsWith('https://youtu.be')) {
+        //     let opts = {
+        //         // highWaterMark: 1 << 26
+        //         quality: 'highestaudio',
+        //         filter: 'audioonly',
+        //     };
+        //     stream = ytdl(url, opts);
+        //     let context = this;
+        //     stream.on('error', err => {
+        //         debug(url);
+        //         debug(err);
+        //         if (err.message.includes('This video is not available.')) {
+        //             context.skip();
+        //         } else {
+        //             // context.retry_on_403(url);
+        //         }
+        //     });
+        // } else {
+        //     stream = ytdl_full(url, ytdl_opts);
+        //     stream.on('error', err => {
+        //         debug(err);
+        //     });
+        //     stream.on('info', info => {
+        //         this.now_playing.title = info._filename;
+        //         this.now_playing.duration = moment.duration(info._duration_hms);
+        //     })
+        // }
         if (stream === url || stream.readable) {
             resource = createAudioResource(stream, { inlineVolume: true });
-            resource.volume.setVolume(this.volume);
             return resource;
         } else {
             debug('Encountered error with stream');
             setTimeout(function() {}, 1000);
-            return this.create_stream(url);
+            return await this.create_stream(url);
         }
     };
 
@@ -194,20 +239,20 @@ function Player(channelId) {
         }
     };
 
-    this.seek = function(time) {
+    this.seek = async function(time) {
         if (this.playing) {
             if (time > this.now_playing.duration.asSeconds()) {
                 return 1;
             }
             debugd('Seek_time=' + time);
             // this.dispatcher.streamOptions.seek = time;
-            var opts = {
-                ...playback_opts
-            };
-            opts.seek = time;
+            // var opts = {
+            //     ...playback_opts
+            // };
+            // opts.seek = time;
             this.last_seek_time = time * 1000;
-            this.stream = this.create_stream(this.now_playing.url);
-            this.dispatch(opts);
+            this.stream = await this.create_stream(this.now_playing.url, time);
+            this.dispatch();
             return 0;
         } else {
             return 2;
@@ -244,6 +289,19 @@ function Player(channelId) {
             debug('Joined Voice Channel');
 
             this.dispatcher = createAudioPlayer();
+
+            this.dispatcher.on(AudioPlayerStatus.Idle, () => {
+                debugv("Finished playing");
+                if (!this.loop) {
+                    this.now_playing = null;
+                }
+                this.next();
+            });
+            this.dispatcher.on('error', error => {
+                debug(error);
+                this.stop();
+            });
+
             this.subscription = this.conn.subscribe(this.dispatcher);
         }
     };
@@ -272,7 +330,7 @@ function Player(channelId) {
 
     this.current_playback_progress = function() {
         if (this.dispatcher) {
-            return this.dispatcher.streamTime + this.last_seek_time;
+            return this.stream.playbackDuration + this.last_seek_time;
         } else {
             return false;
         }

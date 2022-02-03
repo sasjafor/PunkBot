@@ -6,6 +6,7 @@ class PlaybackItem {
         this.title = title;
         this.thumbnailURL = thumbnailURL;
         this.channelTitle = channelTitle;
+        this.stream = null;
 
         this.setTitle = function (title) {
             this.title = title;
