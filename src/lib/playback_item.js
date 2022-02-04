@@ -1,8 +1,8 @@
 class PlaybackItem {
-    constructor(url, requester, title, thumbnailURL, duration, channelTitle) {
+    constructor(url, requesterName, title, thumbnailURL, duration, channelTitle) {
         this.url = url;
         this.duration = duration;
-        this.requester = requester;
+        this.requesterName = requesterName;
         this.title = title;
         this.thumbnailURL = thumbnailURL;
         this.channelTitle = channelTitle;

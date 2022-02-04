@@ -27,6 +27,9 @@ ENV DEBUG basic,verbose
 # Copy lib folder
 COPY src/lib /usr/src/app/lib
 
+# Copy commands folder
+COPY src/commands /usr/src/app/commands
+
 # Copy bot script file
 COPY src/bot.js /usr/src/app/
 

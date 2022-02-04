@@ -106,6 +106,9 @@ function Player(channelId) {
     this.dispatch = async function() {
         // set volume before playing
         this.stream = await this.stream;
+        if (!this.stream) {
+            return;
+        }
 
         if (this.stream.started) {
             this.stream = this.prepare_stream(this.now_playing);
@@ -143,11 +146,11 @@ function Player(channelId) {
             return;
         }
         let stream = await this.create_stream(url);
-        if (!stream) {
-            setTimeout(async function() {
-                stream = await this.create_stream(url);
-            }, 1000);
-        }
+        // if (!stream) {
+        //     setTimeout(async function() {
+        //         stream = await this.create_stream(url);
+        //     }, 1000);
+        // }
 
         return stream;
     }
@@ -158,8 +161,24 @@ function Player(channelId) {
         if (url.slice(-4, -3) == '.') {
             stream = url;
         } else {
-            stream = await playdl.stream(url, { discordPlayerCompatibility : true });
+            try {
+                stream = await playdl.stream(url, { discordPlayerCompatibility : true });
+            } catch(err) {
+                debug(err);
+                this.skip();
+                return false;
+            }
             stream = stream.stream;
+
+            stream.on('error', err => {
+                debug(url);
+                debug(err);
+                if (err.message.includes('This video is not available.')) {
+                    this.skip();
+                } else {
+                    // context.retry_on_403(url);
+                }
+            });
 
             if (seektime == null) {
                 seektime = '0';
@@ -176,15 +195,6 @@ function Player(channelId) {
                 ]
             }));
             // console.log(stream);
-            // stream.on('error', err => {
-            //     debug(url);
-            //     debug(err);
-            //     if (err.message.includes('This video is not available.')) {
-            //         context.skip();
-            //     } else {
-            //         // context.retry_on_403(url);
-            //     }
-            // });
         }
         // } else if (url.startsWith('https://www.youtube.com') || url.startsWith('https://youtu.be')) {
         //     let opts = {

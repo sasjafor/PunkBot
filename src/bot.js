@@ -1,62 +1,44 @@
-const Discord = require('discord.js');
-const moment = require('moment');
+const fs = require('fs');
 const path = require('path');
+const { Client, Collection, Intents, MessageEmbed } = require('discord.js');
+const { REST } = require('@discordjs/rest');
+const { Routes } = require('discord-api-types/v9');
+const moment = require('moment');
 const youtubedl = require('youtube-dl-exec');
-const decode = require('unescape');
-const {Player} = require('./lib/player.js');
-const {PlaybackItem} = require('./lib/playback_item.js');
-const { fast_search,
-        video_info,
-        playlist_info,
-} = require('./lib/youtube_api.js');
+const { Player } = require('./lib/player.js');
+const { prettifyTime } = require('./lib/util.js');
+const { strings } = require('./lib/strings.js');
 const Debug = require('debug');
 const debug = Debug('punk_bot');
 const debugv = Debug('punk_bot:verbose');
 const debugd = Debug('punk_bot:debug');
 
 const token = process.env.DISCORD_APP_AUTH_TOKEN;
-const youtube_api_key = process.env.YOUTUBE_API_KEY;
-const client = new Discord.Client({ intents: ['GUILD_VOICE_STATES', 'GUILD_MESSAGES', 'GUILDS'] });
+const youtubeAPIKey = process.env.YOUTUBE_API_KEY;
+const client = new Client({ intents: [Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS] });
 
 const bot_in_voice_only_commands = ['skip', 'loop', 'clear', 'remove', 'seek', 'disconnect', 'volume', 'vol', 'np', 'now_playing', 'shuffle', 'queue'];
 const voice_only_commands = ['p', 'play', 'seek', 'summon', 'join', ...bot_in_voice_only_commands];
 
-const strings = {
-    need_to_be_in_voice: ':x: **You have to be in a voice channel to use this command.**',
-    no_permission_to_connect: ':no_good: **No permission to connect to** ',
-    searching_for: '<:youtube:519902612976304145> **Searching** :mag_right: ',
-    no_matches: ':x: **No matches**',
-    joined: ':thumbsup: **Joined** ',
-    not_connected: ':x: **I am not connected to a voice channel**, Use the summon command to get me in one',
-    skipped: ':fast_forward: ***Skipped*** :thumbsup:',
-    nothing_playing: ':x: **Nothing playing in this server**',
-    cleared: ':boom: ***Cleared...*** :stop_button:',
-    loop_enabled: ':repeat_one: **Enabled!**',
-    loop_disabled: ':repeat_one: **Disabled!**',
-    disconnected: ':mailbox_with_no_mail: **Successfully disconnected**',
-    volume_set: ':sound:  **Set to** ',
-    invalid_seek_format: ':x: **Invalid format**, Example formats:\n\n`0:30` `1:30` `2:15` `5:20`',
-    invalid_vol_format: ':x: **Invalid format**, Example formats:\n\n\t`1`\t `2`\t `0.5`',
-    seek_too_long: ':x: **Time cannot be longer than the song**',
-    invalid_command: '**This command is invalid! Please use a valid one.**',
-    removed: ':white_check_mark: **Removed** ',
-    out_of_range: ':x: **Out of range**',
-    shuffled: '**Shuffled queue** :ok_hand:',
-    invalid_queue_tab: ':x: **Invalid queue tab, must be a number between** '
-};
+const players = {};
+const commands = new Collection();
+const commandFiles = fs.readdirSync(path.resolve(__dirname, './commands')).filter(file => file.endsWith('.js'));
 
-var players = {};
+const commandJSONs = [];
 
-var video_opts = {
-    key: youtube_api_key,
-    part: 'contentDetails,snippet'
-};
+module.exports = {
+    players,
+    youtubeAPIKey,
+}
 
-var playlist_opts = {
-    key: youtube_api_key,
-    part: 'contentDetails',
-    maxResults: 50
-};
+for (const file of commandFiles) {
+	const command = require(`./commands/${file}`);
+	// Set a new item in the Collection
+	// With the key as the command name and the value as the exported module
+	commands.set(command.data.name, command);
+    // Add command JSON to list
+    commandJSONs.push(command.data.toJSON());
+}
 
 function login() {
     // const customytdlBinaryPath = path.resolve('/usr/local/bin/youtube-dl')
@@ -70,12 +52,40 @@ function login() {
 }
 login();
 
-client.on('ready', () => {
+client.on('ready', async () => {
     debug('I am ready!');
     console.log("Connected as " + client.user.username);
+
+    // Push command to Discord application
+    const rest = new REST({ version: '9' }).setToken(token);
+
+    await rest.put(Routes.applicationGuildCommands(client.user.id, '374283832901500928'), { body: commandJSONs })
+        .then(() => console.log('Successfully registered application commands.'))
+        .catch(console.error);
 });
 
-client.on('message', async message => {
+client.on('interactionCreate', async interaction => {
+    if (!interaction.isCommand()) return;
+
+	const command = commands.get(interaction.commandName);
+
+	if (!command) return;
+
+    let guildId = interaction.guildId;
+    let player = players[guildId];
+    if (!player) {
+        player = players[guildId] = new Player(interaction.member.voice.channel.id);
+    }
+
+	try {
+		await command.execute(interaction);
+	} catch (error) {
+		console.error(error);
+		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+	}
+});
+
+client.on('messageCreate', async message => {
     if (!message.guild || message.author.bot) {
         return;
     }
@@ -97,133 +107,12 @@ client.on('message', async message => {
         if (regex_content.test(message.content)) {
             content = message.content.match(regex_content)[1];
         }
-        var guild_id = message.guild.id;
-        var player = players[guild_id];
-        if (!player) {
-            player = players[guild_id] = new Player(message.member.voice.channel.id);
-        }
 
         debugv('Command: ' + message.content);
         switch (command) {
-            case 'p':
-            case 'play':
-                {
-                    if (!content) {
-                        let embed = new Discord.MessageEmbed()
-                            .setDescription(':x: **Missing args**\n\n!play [Link or query]')
-                            .setColor('#ff0000');
-                        message.channel.send({embeds: [embed]});
-                        return;
-                    }
-                    if (!message.member.voice.channel.joinable) {
-                        message.channel.send(strings.no_permission_to_connect + '`' + message.member.voice.channel.name + '`');
-
-                    }
-
-                    let connecting = null;
-                    if (!player.playing) {
-                        connecting = player.connect(message.member.voice.channel);
-                    }
-
-                    let search_res = null;
-                    let url = null;
-                    let id = null;
-                    let title = content;
-                    let search_string = content;
-
-                    message.channel.send(strings.searching_for + '`' + search_string + '`');
-                    if (!content.startsWith('http')) {
-                        try {
-                            search_res = await fast_search(search_string, youtube_api_key);
-                            if (search_res) {
-                                url = search_res.url;
-                                id = search_res.id;
-                                title = search_res.title;
-                            } else {
-                                message.channel.send(strings.no_matches);
-                                return;
-                            }
-                        } catch (err) {
-                            debug(err);
-                            return;
-                        }
-                    } else {
-                        url = content;
-                    }
-
-                    let playlist_id_regex = /(?:youtube(?:-nocookie)?\.com\/(?:[^/\n\s]+\/\S+\/|(?:playlist|e(?:mbed)?\/videoseries)\/|\S*?\?list=)|youtu\.be\/)([a-zA-Z0-9_-]{34})/;
-                    if (playlist_id_regex.test(url)) {
-                        let playlist_id = url.match(playlist_id_regex)[1];
-                        let playlist_callback = function(num) {
-                            message.channel.send(':white_check_mark: **Enqueued** `' + num + '` songs');
-                        };
-                        if (!playing) {
-                            let custom_opts = {
-                                ...playlist_opts
-                            };
-                            custom_opts.maxResults = 1;
-                            custom_opts.part = 'snippet,contentDetails';
-                            let playlist_res = await playlist_info(playlist_id, custom_opts);
-                            if (playlist_res) {
-                                id = playlist_res.results[0].videoId;
-                                url = 'https://www.youtube.com/watch?v=' + id;
-                                title = playlist_res.results[0].title;
-                            }
-                            handle_playlist(player, playlist_id, message.author, true, playlist_callback);
-                        } else {
-                            handle_playlist(player, playlist_id, message.author, false, playlist_callback);
-                            return;
-                        }
-                    }
-
-                    if (!id) {
-                        id = getYTid(url);
-                    }
-
-                    let isYT = id != null;
-
-                    let pb = handle_video(id, message.author, url);
-                    if (!player.playing) {
-                        let pb_short = new PlaybackItem(url, message.author, title);
-                        player.enqueue(pb_short);
-
-                        debugv('Added ' + url);
-                        await connecting;
-                        player.play();
-                        message.channel.send('**Playing** :notes: `' + decode(title) + '` - Now!');
-                        pb = await pb;
-                        pb_short.setTitle(pb.title);
-                        pb_short.setDuration(pb.duration);
-                        pb_short.setThumbnailURL(pb.thumbnailURL);
-                        pb_short.setChannelTitle(pb.channelTitle);
-                    } else {
-                        let embed = null;
-                        pb = await pb;
-                        if (isYT) {
-                            if (pb) {
-                                var pretty_duration = prettifyTime(pb.duration);
-                                var time_until_playing = await player.getTotalRemainingPlaybackTime();
-                                var pretty_tut = prettifyTime(time_until_playing);
-                                player.enqueue(pb);
-                                embed = new Discord.MessageEmbed()
-                                    .setTitle(title)
-                                    .setAuthor({ name: 'Added to queue', iconURL: message.author.avatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
-                                    .setURL(url)
-                                    .setThumbnail(pb.thumbnailURL)
-                                    .addField('Channel', pb.channelTitle)
-                                    .addField('Song Duration', pretty_duration)
-                                    .addField('Estimated time until playing', pretty_tut)
-                                    .addField('Position in queue', String(player.queue.getLength()));
-                            }
-                        } else {
-                            //TODO: embed for non youtube links
-                        }
-                        if (embed) {
-                            message.channel.send({embeds: [embed]});
-                        }
-                    }
-                    break;
-                }
+            // case 'p':
+            // case 'play':
+                
             case 'summon':
             case 'join':
                 {
@@ -261,7 +150,7 @@ client.on('message', async message => {
                         {
                             let num = parseInt(content);
                             if (num !== 0 && !num) {
-                                let embed = new Discord.MessageEmbed()
+                                let embed = new MessageEmbed()
                                     .setDescription(':x: **Invalid format**\n\n!remove [Entry]')
                                     .setColor('#ff0000');
                                 message.channel.send({embeds: [embed]});
@@ -319,13 +208,13 @@ client.on('message', async message => {
                             if (np && progress) {
                                 let progress_bar = buildProgressBar(progress, np.duration);
                                 let progress_string = prettifyTime(progress) + ' / ' + prettifyTime(np.duration);
-                                let embed = new Discord.MessageEmbed()
+                                let embed = new MessageEmbed()
                                     .setTitle(np.title)
                                     .setAuthor('Now Playing ♪', client.user.avatarURL(), 'https://github.com/sasjafor/PunkBot')
                                     .setURL(np.url)
                                     .setThumbnail(np.thumbnailURL)
                                     .setColor('#0056bf')
-                                    .setDescription('\u200B\n`' + progress_bar + '`\n\n`' + progress_string + '`\n\n`Requested by:` ' + np.requester.username);
+                                    .setDescription('\u200B\n`' + progress_bar + '`\n\n`' + progress_string + '`\n\n`Requested by:` ' + np.requesterName);
                                 message.channel.send({embeds: [embed]});
                             } else {
                                 message.channel.send(strings.nothing_playing);
@@ -344,7 +233,7 @@ client.on('message', async message => {
                             }
                             let num = parseInt(content);
                             if (content && num !== 0 && !num) {
-                                let embed = new Discord.MessageEmbed()
+                                let embed = new MessageEmbed()
                                     .setDescription(':x: **Invalid format**\n\n!queue [Tab number]')
                                     .setColor('#ff0000');
                                 message.channel.send({embeds: [embed]});
@@ -353,11 +242,11 @@ client.on('message', async message => {
 
                             num = (isNaN(num)) ? 1 : num;
 
-                            let embed = new Discord.MessageEmbed()
+                            let embed = new MessageEmbed()
                                 .setTitle('Queue for ' + message.guild.name + '\n\u200b')
                                 .setURL('https://github.com/sasjafor/PunkBot')
                                 .setColor('#0000e5');
-                            let desc = '\n\n__Now Playing:__\n[' + np.title + '](' + np.url + ') | `' + prettifyTime(np.duration) + ' Requested by: ' + np.requester.username + '`';
+                            let desc = '\n\n__Now Playing:__\n[' + np.title + '](' + np.url + ') | `' + prettifyTime(np.duration) + ' Requested by: ' + np.requesterName + '`';
 
                             let queue_length = player.getQueueLength();
                             let num_tabs = Math.ceil(queue_length / 10);
@@ -378,7 +267,7 @@ client.on('message', async message => {
                                 let stop = Math.min(k + 10, queue_length);
                                 for (let i = queue.get(k); k < stop; k++, i = queue.get(k)) {
                                     i = await i;
-                                    desc += '`' + (k+1) + '.` [' + i.title + '](' + i.url + ') | `' + prettifyTime(i.duration) + ' Requested by: ' + i.requester.username + '`\n\n';
+                                    desc += '`' + (k+1) + '.` [' + i.title + '](' + i.url + ') | `' + prettifyTime(i.duration) + ' Requested by: ' + i.requesterName + '`\n\n';
                                 }
                                 desc += '\n**' + queue_length + ' songs in queue | ' + prettifyTime(await player.getTotalQueueTime()) + ' total length**';
                                 if (num_tabs > 1) {
@@ -451,21 +340,6 @@ client.on('warn', warning => {
     debug(warning);
 });
 
-function prettifyTime(duration) {
-    if (duration) {
-        let hours = duration.hours() + duration.days() * 24;
-        let minutes = duration.minutes();
-        let seconds = duration.seconds();
-        var pretty_hours = ((hours / 10 < 1) ? '0' : '') + hours + ':';
-        var pretty_minutes = ((minutes / 10 < 1) ? '0' : '') + minutes + ':';
-        var pretty_seconds = ((seconds / 10 < 1) ? '0' : '') + seconds;
-        var pretty_time = ((hours > 0) ? pretty_hours : '') + pretty_minutes + pretty_seconds;
-        return pretty_time;
-    } else {
-        throw new Error('Invalid duration provided');
-    }
-}
-
 function buildProgressBar(progress, total_time) {
     let pr = progress.asSeconds();
     let tt = total_time.asSeconds();
@@ -486,63 +360,4 @@ function buildProgressBar(progress, total_time) {
         res += '▬';
     }
     return res;
-}
-
-async function handle_video(id, requester, url) {
-    if (id) {
-        let res = await video_info(id, video_opts);
-        res = res.results[0];
-
-        if (res) {
-            let YTurl = 'https://www.youtube.com/watch?v=' + id;
-            let title = res.title;
-            let thumbnailURL = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
-            let duration = moment.duration(res.duration);
-            let channelTitle = res.channelTitle;
-            return new PlaybackItem(YTurl, requester, title, thumbnailURL, duration, channelTitle);
-        } else {
-            throw new Error('Failed to get video info');
-        }
-    } else {
-        return new PlaybackItem(url, requester, url, null, moment.duration("0"), null);
-    }
-}
-
-async function handle_playlist(player, id, requester, skip_first, callback) {
-    let skipped = false;
-    let page_info = null;
-    let page_token = null;
-    let k = 0;
-    do {
-        let res = await playlist_info(id, playlist_opts, page_token);
-        page_info = res.pageInfo;
-        page_token = (page_info) ? page_info.nextPageToken : null;
-        let items = res.results;
-
-        for (let i of items) {
-            if (skipped || !skip_first) {
-                let video = handle_video(i.videoId, requester);
-                player.enqueue(video);
-            }
-            skipped = true;
-            k++;
-        }
-    } while (page_info.nextPageToken);
-    debugd('DONE processing playlist!');
-    if (callback) {
-        callback(k);
-    }
-}
-
-function getYTid(url) {
-    let id_regex = /(?:youtube(?:-nocookie)?\.com\/(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-    let match = url.match(id_regex);
-
-    if (match && match.length > 1) {
-        return match[1];
-    } else {
-        return null;
-    }
-
-    // return url.includes('youtube') || url.includes('youtu.be');
 }
