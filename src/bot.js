@@ -113,39 +113,19 @@ client.on('messageCreate', async message => {
             // case 'p':
             // case 'play':
                 
-            case 'summon':
-            case 'join':
-                {
-                    if (!message.member.voice.channel.joinable) {
-                        message.channel.send(strings.no_permission_to_connect + '`' + message.member.voice.channel.name + '`');
-                        return;
-                    }
-                    await player.connect(message.member.voice.channel);
-                    message.channel.send(strings.joined + '`' + message.member.voice.channel.name + '`');
-                    break;
-                }
+            // case 'summon':
+            // case 'join':
+
             default:
                 if (!player.conn && bot_in_voice_only_commands.includes(command)) {
                     message.channel.send(strings.not_connected);
                     return;
                 }
                 switch (command) {
-                    case 'skip':
-                        {
-                            let skip = player.skip();
-                            if (skip) {
-                                message.channel.send(strings.skipped);
-                            } else {
-                                message.channel.send(strings.nothing_playing);
-                            }
-                            break;
-                        }
-                    case 'clear':
-                        {
-                            player.clear();
-                            message.channel.send(strings.cleared);
-                            break;
-                        }
+                    // case 'skip':
+
+                    // case 'clear':
+
                     case 'remove':
                         {
                             let num = parseInt(content);
@@ -221,64 +201,8 @@ client.on('messageCreate', async message => {
                             }
                             break;
                         }
-                    case 'queue':
-                        {
-                            if (!player.playing) {
-                                message.channel.send(strings.nothing_playing);
-                                return;
-                            }
-                            let np = player.getNowPlaying();
-                            if (!np) {
-                                return;
-                            }
-                            let num = parseInt(content);
-                            if (content && num !== 0 && !num) {
-                                let embed = new MessageEmbed()
-                                    .setDescription(':x: **Invalid format**\n\n!queue [Tab number]')
-                                    .setColor('#ff0000');
-                                message.channel.send({embeds: [embed]});
-                                return;
-                            }
+                    // case 'queue':
 
-                            num = (isNaN(num)) ? 1 : num;
-
-                            let embed = new MessageEmbed()
-                                .setTitle('Queue for ' + message.guild.name + '\n\u200b')
-                                .setURL('https://github.com/sasjafor/PunkBot')
-                                .setColor('#0000e5');
-                            let desc = '\n\n__Now Playing:__\n[' + np.title + '](' + np.url + ') | `' + prettifyTime(np.duration) + ' Requested by: ' + np.requesterName + '`';
-
-                            let queue_length = player.getQueueLength();
-                            let num_tabs = Math.ceil(queue_length / 10);
-                            if (queue_length > 0) {
-                                let queue = player.getQueue();
-                                let k = 0;
-                                if (num > 1) {
-                                    if (num > num_tabs) {
-                                        message.channel.send(strings.invalid_queue_tab + '**1-' + num_tabs + '**');
-                                        return;
-                                    } else {
-                                        k = (num - 1) * 10 + 1;
-                                        desc = '';
-                                    }
-                                } else {
-                                    desc += '\n\n\n:arrow_down:__Up Next:__:arrow_down:\n\n';
-                                }
-                                let stop = Math.min(k + 10, queue_length);
-                                for (let i = queue.get(k); k < stop; k++, i = queue.get(k)) {
-                                    i = await i;
-                                    desc += '`' + (k+1) + '.` [' + i.title + '](' + i.url + ') | `' + prettifyTime(i.duration) + ' Requested by: ' + i.requesterName + '`\n\n';
-                                }
-                                desc += '\n**' + queue_length + ' songs in queue | ' + prettifyTime(await player.getTotalQueueTime()) + ' total length**';
-                                if (num_tabs > 1) {
-                                    embed.setFooter('Tab ' + num + '/' + num_tabs, message.author.avatarURL());
-                                }
-                            }
-
-                            embed.setDescription(desc);
-                            message.channel.send({embeds: [embed]});
-                            break;
-                        }
                     case 'shuffle':
                         {
                             player.shuffle();

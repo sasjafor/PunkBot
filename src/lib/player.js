@@ -129,11 +129,12 @@ function Player(channelId) {
 
     this.skip = function() {
         if (this.playing) {
+            let title = this.now_playing.title;
             if (this.loop) {
                 this.now_playing = this.queue.dequeue();
             }
             this.next();
-            return true;
+            return title;
         } else {
             return false;
         }
@@ -394,4 +395,4 @@ function Player(channelId) {
 
 module.exports = {
     Player,
-}
+};

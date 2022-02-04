@@ -5,9 +5,10 @@ const strings = {
     no_matches: ':x: **No matches**',
     joined: ':thumbsup: **Joined** ',
     not_connected: ':x: **I am not connected to a voice channel**, Use the summon command to get me in one',
-    skipped: ':fast_forward: ***Skipped*** :thumbsup:',
+    skipped: ':fast_forward: **Skipped** ',
+    playing: ':notes: **Playing** ',
     nothing_playing: ':x: **Nothing playing in this server**',
-    cleared: ':boom: ***Cleared...*** :stop_button:',
+    cleared: ':boom: **Cleared song queue!**',
     loop_enabled: ':repeat_one: **Enabled!**',
     loop_disabled: ':repeat_one: **Disabled!**',
     disconnected: ':mailbox_with_no_mail: **Successfully disconnected**',
@@ -24,4 +25,4 @@ const strings = {
 
 module.exports = {
     strings,
-}
+};

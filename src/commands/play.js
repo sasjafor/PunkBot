@@ -2,18 +2,19 @@ const { MessageEmbed } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const decode = require('unescape');
 const moment = require('moment');
-const { players, youtubeAPIKey } = require('../bot.js');
-const { fast_search,
-        playlist_info,
-        video_info,
-} = require('../lib/youtube_api.js');
-const { PlaybackItem } = require('../lib/playback_item.js');
-const { strings } = require('../lib/strings.js');
-const { prettifyTime } = require('../lib/util.js');
 const Debug = require('debug');
 const debug = Debug('punk_bot');
 const debugv = Debug('punk_bot:verbose');
 const debugd = Debug('punk_bot:debug');
+
+const { players, youtubeAPIKey } = require('../bot.js');
+const { PlaybackItem } = require('../lib/playback_item.js');
+const { strings } = require('../lib/strings.js');
+const { prettifyTime } = require('../lib/util.js');
+const { fast_search,
+        playlist_info,
+        video_info,
+} = require('../lib/youtube_api.js');
 
 var video_opts = {
     key: youtubeAPIKey,
@@ -32,12 +33,12 @@ module.exports = {
 		.setDescription('Plays a YouTube video.')
         .addStringOption(option => 
             option.setName('search')
-                .setDescription('YouTube link or search term')
+                .setDescription('YouTube link or search term.')
                 .setRequired(true))
     ,
 	async execute(interaction) {
-        let content = interaction.options.getString('search');
-        if (!content) {
+        let searchQuery = interaction.options.getString('search');
+        if (!searchQuery) {
             let embed = new MessageEmbed()
                 .setDescription(':x: **Missing args**\n\n!play [Link or query]')
                 .setColor('#ff0000');
@@ -45,7 +46,7 @@ module.exports = {
             return;
         }
         if (!interaction.member.voice.channel.joinable) {
-            interaction.reply({ content: strings.no_permission_to_connect + interaction.member.voice.channel.name, ephemeral: true});
+            interaction.reply({ content: strings.no_permission_to_connect + interaction.member.voice.channel.name, ephemeral: true });
             return;
         }
 
@@ -59,11 +60,11 @@ module.exports = {
         let search_res = null;
         let url = null;
         let id = null;
-        let title = content;
-        let search_string = content;
+        let title = searchQuery;
+        let search_string = searchQuery;
 
         let searchReply = interaction.reply({ content: strings.searching_for + '' + search_string + '' });
-        if (!content.startsWith('http')) {
+        if (!searchQuery.startsWith('http')) {
             try {
                 search_res = await fast_search(search_string, youtubeAPIKey);
                 if (search_res) {
@@ -79,7 +80,7 @@ module.exports = {
                 return;
             }
         } else {
-            url = content;
+            url = searchQuery;
         }
 
         let playlist_id_regex = /(?:youtube(?:-nocookie)?\.com\/(?:[^/\n\s]+\/\S+\/|(?:playlist|e(?:mbed)?\/videoseries)\/|\S*?\?list=)|youtu\.be\/)([a-zA-Z0-9_-]{34})/;
@@ -100,9 +101,9 @@ module.exports = {
                     url = 'https://www.youtube.com/watch?v=' + id;
                     title = playlist_res.results[0].title;
                 }
-                handle_playlist(player, playlist_id, interaction.member.displayName, true, playlist_callback);
+                handle_playlist(player, playlist_id, interaction.member, true, playlist_callback);
             } else {
-                handle_playlist(player, playlist_id, interaction.member.displayName, false, playlist_callback);
+                handle_playlist(player, playlist_id, interaction.member, false, playlist_callback);
                 return;
             }
         }
@@ -113,16 +114,16 @@ module.exports = {
 
         let isYT = id != null;
 
-        let pbP = handle_video(id, interaction.member.displayName, url);
+        let pbP = handle_video(id, interaction.member, url);
         if (!player.playing) {
-            let pb_short = new PlaybackItem(url, interaction.member.displayName, title);
+            let pb_short = new PlaybackItem(url, interaction.member.displayName, interaction.user.id, title);
             player.enqueue(pb_short);
 
             debugv('Added ' + url);
             await connecting;
             player.play();
             await searchReply;
-            interaction.editReply({ content: '**Playing** :notes: ' + decode(title) + ' - Now!' });
+            interaction.editReply({ content: strings.playing + decode(title) });
             let pb = await pbP;
             pb_short.setTitle(pb.title);
             pb_short.setDuration(pb.duration);
@@ -180,7 +181,7 @@ async function handle_video(id, requester, url) {
             let thumbnailURL = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
             let duration = moment.duration(res.duration);
             let channelTitle = res.channelTitle;
-            return new PlaybackItem(YTurl, requester, title, thumbnailURL, duration, channelTitle);
+            return new PlaybackItem(YTurl, requester.displayName, requester.user.id, title, thumbnailURL, duration, channelTitle);
         } else {
             throw new Error('Failed to get video info');
         }

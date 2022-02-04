@@ -15,4 +15,4 @@ function prettifyTime(duration) {
 
 module.exports = {
     prettifyTime,
-}
+};
