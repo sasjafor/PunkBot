@@ -12,7 +12,7 @@ const strings = {
     loop_enabled: ':repeat_one: **Enabled!**',
     loop_disabled: ':repeat_one: **Disabled!**',
     disconnected: ':mailbox_with_no_mail: **Successfully disconnected**',
-    volume_set: ':sound:  **Set to** ',
+    volume_set: ':sound:  **Set volume to** ',
     invalid_seek_format: ':x: **Invalid format**, Example formats:\n\n`0:30` `1:30` `2:15` `5:20`',
     invalid_vol_format: ':x: **Invalid format**, Example formats:\n\n\t`1`\t `2`\t `0.5`',
     seek_too_long: ':x: **Time cannot be longer than the song**',

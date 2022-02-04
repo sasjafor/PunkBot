@@ -160,26 +160,16 @@ client.on('messageCreate', async message => {
                             message.channel.send(strings.disconnected);
                             break;
                         }
-                    case 'vol':
-                    case 'volume':
-                        {
-                            let vol_regex = /(0\.)?[0-9]+/;
-                            if (!vol_regex.test(content)) {
-                                message.channel.send(strings.invalid_vol_format);
-                                return;
-                            }
-                            let value = content;
-                            player.setVolume(value);
-                            message.channel.send(strings.volume_set + '`' + value + '`');
-                            break;
-                        }
-                    case 'dbg':
-                    case 'debug':
-                        {
-                            debugd(player.conn);
-                            debugd(player.stream);
-                            break;
-                        }
+                    // case 'vol':
+                    // case 'volume':
+
+                    // case 'dbg':
+                    // case 'debug':
+                    //     {
+                    //         debugd(player.conn);
+                    //         debugd(player.stream);
+                    //         break;
+                    //     }
 
                     // case 'np':
                     // case 'now_playing':
