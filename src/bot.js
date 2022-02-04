@@ -144,16 +144,8 @@ client.on('messageCreate', async message => {
                             }
                             break;
                         }
-                    case 'loop':
-                        {
-                            player.loop = !player.loop;
-                            if (player.loop) {
-                                message.channel.send(strings.loop_enabled);
-                            } else {
-                                message.channel.send(strings.loop_disabled);
-                            }
-                            break;
-                        }
+                    // case 'loop':
+
                     case 'disconnect':
                         {
                             player.disconnect();
