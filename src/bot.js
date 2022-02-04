@@ -1,12 +1,9 @@
 const fs = require('fs');
 const path = require('path');
-const { Client, Collection, Intents, MessageEmbed } = require('discord.js');
+const { Client, Collection, Intents } = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
-const moment = require('moment');
-const youtubedl = require('youtube-dl-exec');
 const { Player } = require('./lib/player.js');
-const { prettifyTime } = require('./lib/util.js');
 const { strings } = require('./lib/strings.js');
 const Debug = require('debug');
 const debug = Debug('punk_bot');
@@ -29,7 +26,7 @@ const commandJSONs = [];
 module.exports = {
     players,
     youtubeAPIKey,
-}
+};
 
 for (const file of commandFiles) {
 	const command = require(`./commands/${file}`);
@@ -54,22 +51,30 @@ login();
 
 client.on('ready', async () => {
     debug('I am ready!');
-    console.log("Connected as " + client.user.username);
+    console.log('Connected as ' + client.user.username);
 
     // Push command to Discord application
     const rest = new REST({ version: '9' }).setToken(token);
 
-    await rest.put(Routes.applicationGuildCommands(client.user.id, '246328943299264513'), { body: commandJSONs })
+    // await rest.put(Routes.applicationGuildCommands(client.user.id, '246328943299264513'), { body: commandJSONs })
+    //     .then(() => console.log('Successfully registered application commands.'))
+    //     .catch(console.error);
+
+    await rest.put(Routes.applicationCommands(client.user.id), { body: commandJSONs })
         .then(() => console.log('Successfully registered application commands.'))
         .catch(console.error);
 });
 
 client.on('interactionCreate', async interaction => {
-    if (!interaction.isCommand()) return;
+    if (!interaction.isCommand()) {
+        return;
+    }
 
 	const command = commands.get(interaction.commandName);
 
-	if (!command) return;
+	if (!command) {
+        return;
+    }
 
     let guildId = interaction.guildId;
     let player = players[guildId];
@@ -100,7 +105,7 @@ client.on('messageCreate', async message => {
         }
         if (!message.member.voice.channel) {
             if (voice_only_commands.includes(command)) {
-                message.channel.send(strings.need_to_be_in_voice);
+                message.channel.send(strings.needToBeInVoice);
             }
             return;
         }
@@ -150,47 +155,10 @@ client.on('messageCreate', async message => {
 
                     // case 'shuffle':
 
-                    case 'seek':
-                        {
-                            let seek_time_regex = /(([0-9]+:)?([0-9]+:)?)?[0-9]+$/;
-                            if (!seek_time_regex.test(content) || (content.match(seek_time_regex))
-                                .index != 0) {
-                                message.channel.send(strings.invalid_seek_format);
-                                return;
-                            }
-                            let min_hour_regex = /([0-9]+)(?::)/g;
-                            let time1 = min_hour_regex.exec(content);
-                            let time2 = min_hour_regex.exec(content);
-                            let seconds = parseInt(content.match(/[0-9]+$/)[0], 10);
-                            let minutes = 0;
-                            let hours = 0;
-                            if (time1) {
-                                if (time2) {
-                                    minutes = parseInt(time2[1], 10);
-                                    hours = parseInt(time1[1], 10);
-                                } else {
-                                    minutes = parseInt(time1[1], 10);
-                                }
-                            }
-                            let seek_time = 3600 * hours + 60 * minutes + seconds;
-                            let duration = moment.duration(seek_time * 1000);
-                            let res_code = player.seek(seek_time);
-                            switch (res_code) {
-                                case 0:
-                                    var pretty_time = prettifyTime(duration);
-                                    message.channel.send(':musical_note: **Set position to**' + '`' + pretty_time + '`' + ':fast_forward:');
-                                    break;
-                                case 1:
-                                    message.channel.send(strings.seek_too_long);
-                                    break;
-                                case 2:
-                                    message.channel.send(strings.nothing_playing);
-                                    break;
-                            }
-                            break;
-                        }
+                    // case 'seek':
+
                     default:
-                        message.channel.send(strings.invalid_command);
+                        message.channel.send(strings.invalidCommand);
                 }
         }
     }

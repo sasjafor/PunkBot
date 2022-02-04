@@ -8,20 +8,20 @@ const debugv = Debug('punk_bot:verbose');
 const debugd = Debug('punk_bot:debug');
 
 const { players, youtubeAPIKey } = require('../bot.js');
-const { PlaybackItem } = require('../lib/playback_item.js');
+const { PlaybackItem } = require('../lib/playback-item.js');
 const { strings } = require('../lib/strings.js');
 const { prettifyTime } = require('../lib/util.js');
-const { fast_search,
-        playlist_info,
-        video_info,
-} = require('../lib/youtube_api.js');
+const { fastSearch,
+        playlistInfo,
+        videoInfo,
+} = require('../lib/youtube-api.js');
 
-var video_opts = {
+var videoOpts = {
     key: youtubeAPIKey,
     part: 'contentDetails,snippet'
 };
 
-var playlist_opts = {
+var playlistOpts = {
     key: youtubeAPIKey,
     part: 'contentDetails',
     maxResults: 50
@@ -46,7 +46,7 @@ module.exports = {
             return;
         }
         if (!interaction.member.voice.channel.joinable) {
-            interaction.reply({ content: strings.no_permission_to_connect + interaction.member.voice.channel.name, ephemeral: true });
+            interaction.reply({ content: strings.noPermissionToConnect + interaction.member.voice.channel.name, ephemeral: true });
             return;
         }
 
@@ -57,22 +57,22 @@ module.exports = {
             connecting = player.connect(interaction.member.voice.channel);
         }
 
-        let search_res = null;
+        let searchRes = null;
         let url = null;
         let id = null;
         let title = searchQuery;
-        let search_string = searchQuery;
+        let searchString = searchQuery;
 
-        let searchReply = interaction.reply({ content: strings.searching_for + '' + search_string + '' });
+        let searchReply = interaction.reply({ content: strings.searchingFor + '' + searchString + '' });
         if (!searchQuery.startsWith('http')) {
             try {
-                search_res = await fast_search(search_string, youtubeAPIKey);
-                if (search_res) {
-                    url = search_res.url;
-                    id = search_res.id;
-                    title = search_res.title;
+                searchRes = await fastSearch(searchString, youtubeAPIKey);
+                if (searchRes) {
+                    url = searchRes.url;
+                    id = searchRes.id;
+                    title = searchRes.title;
                 } else {
-                    interaction.reply({ content: strings.no_matches, ephemeral: true});
+                    interaction.reply({ content: strings.noMatches, ephemeral: true});
                     return;
                 }
             } catch (err) {
@@ -83,27 +83,27 @@ module.exports = {
             url = searchQuery;
         }
 
-        let playlist_id_regex = /(?:youtube(?:-nocookie)?\.com\/(?:[^/\n\s]+\/\S+\/|(?:playlist|e(?:mbed)?\/videoseries)\/|\S*?\?list=)|youtu\.be\/)([a-zA-Z0-9_-]{34})/;
-        if (playlist_id_regex.test(url)) {
-            let playlist_id = url.match(playlist_id_regex)[1];
+        let playlistIdRegex = /(?:youtube(?:-nocookie)?\.com\/(?:[^/\n\s]+\/\S+\/|(?:playlist|e(?:mbed)?\/videoseries)\/|\S*?\?list=)|youtu\.be\/)([a-zA-Z0-9_-]{34})/;
+        if (playlistIdRegex.test(url)) {
+            let playlistId = url.match(playlistIdRegex)[1];
             let playlist_callback = function(num) {
                 interaction.reply({ content: ':white_check_mark: **Enqueued** `' + num + '` songs' });
             };
             if (!player.playing) {
-                let custom_opts = {
-                    ...playlist_opts
+                let customOpts = {
+                    ...playlistOpts
                 };
-                custom_opts.maxResults = 1;
-                custom_opts.part = 'snippet,contentDetails';
-                let playlist_res = await playlist_info(playlist_id, custom_opts);
-                if (playlist_res) {
-                    id = playlist_res.results[0].videoId;
+                customOpts.maxResults = 1;
+                customOpts.part = 'snippet,contentDetails';
+                let playlistRes = await playlistInfo(playlistId, customOpts);
+                if (playlistRes) {
+                    id = playlistRes.results[0].videoId;
                     url = 'https://www.youtube.com/watch?v=' + id;
-                    title = playlist_res.results[0].title;
+                    title = playlistRes.results[0].title;
                 }
-                handle_playlist(player, playlist_id, interaction.member, true, playlist_callback);
+                handlePlaylist(player, playlistId, interaction.member, true, playlist_callback);
             } else {
-                handle_playlist(player, playlist_id, interaction.member, false, playlist_callback);
+                handlePlaylist(player, playlistId, interaction.member, false, playlist_callback);
                 return;
             }
         }
@@ -114,7 +114,7 @@ module.exports = {
 
         let isYT = id != null;
 
-        let pbP = handle_video(id, interaction.member, url);
+        let pbP = handleVideo(id, interaction.member, url);
         if (!player.playing) {
             let pb_short = new PlaybackItem(url, interaction.member.displayName, interaction.user.id, interaction.member.displayAvatarURL(), title);
             player.enqueue(pb_short);
@@ -134,9 +134,9 @@ module.exports = {
             let pb = await pbP;
             if (isYT) {
                 if (pb) {
-                    var pretty_duration = prettifyTime(pb.duration);
-                    var time_until_playing = await player.getTotalRemainingPlaybackTime();
-                    var pretty_tut = prettifyTime(time_until_playing);
+                    var prettyDuration = prettifyTime(pb.duration);
+                    var timeUntilPlaying = await player.getTotalRemainingPlaybackTime();
+                    var prettyTut = prettifyTime(timeUntilPlaying);
                     player.enqueue(pb);
                     embed = new MessageEmbed()
                         .setTitle(pb.title)
@@ -144,8 +144,8 @@ module.exports = {
                         .setURL(url)
                         .setThumbnail(pb.thumbnailURL)
                         .addField('Channel', pb.channelTitle)
-                        .addField('Song Duration', pretty_duration)
-                        .addField('Estimated time until playing', pretty_tut)
+                        .addField('Song Duration', prettyDuration)
+                        .addField('Estimated time until playing', prettyTut)
                         .addField('Position in queue', String(player.queue.getLength()));
                 }
             } else {
@@ -160,8 +160,8 @@ module.exports = {
 };
 
 function getYTid(url) {
-    let id_regex = /(?:youtube(?:-nocookie)?\.com\/(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-    let match = url.match(id_regex);
+    let idRegex = /(?:youtube(?:-nocookie)?\.com\/(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    let match = url.match(idRegex);
 
     if (match && match.length > 1) {
         return match[1];
@@ -170,9 +170,9 @@ function getYTid(url) {
     }
 }
 
-async function handle_video(id, requester, url) {
+async function handleVideo(id, requester, url) {
     if (id) {
-        let res = await video_info(id, video_opts);
+        let res = await videoInfo(id, videoOpts);
         res = res.results[0];
 
         if (res) {
@@ -186,24 +186,24 @@ async function handle_video(id, requester, url) {
             throw new Error('Failed to get video info');
         }
     } else {
-        return new PlaybackItem(url, requester, url, null, moment.duration("0"), null);
+        return new PlaybackItem(url, requester, url, null, moment.duration('0'), null);
     }
 }
 
-async function handle_playlist(player, id, requester, skip_first, callback) {
+async function handlePlaylist(player, id, requester, skip_first, callback) {
     let skipped = false;
     let page_info = null;
     let page_token = null;
     let k = 0;
     do {
-        let res = await playlist_info(id, playlist_opts, page_token);
+        let res = await playlistInfo(id, playlistOpts, page_token);
         page_info = res.pageInfo;
         page_token = (page_info) ? page_info.nextPageToken : null;
         let items = res.results;
 
         for (let i of items) {
             if (skipped || !skip_first) {
-                let video = handle_video(i.videoId, requester);
+                let video = handleVideo(i.videoId, requester);
                 player.enqueue(video);
             }
             skipped = true;

@@ -1,21 +1,22 @@
-const ytdl = require('ytdl-core');
-const ytdl_full = require('youtube-dl-exec');
-const playdl = require('play-dl');
-const prism = require('prism-media');
-const moment = require('moment');
-// const EventEmitter = require('events');
-const {Queue} = require('./queue.js');
-const Debug = require('debug');
 const { joinVoiceChannel, 
-        createAudioPlayer,
-        createAudioResource,
-        AudioPlayerStatus,
+    createAudioPlayer,
+    createAudioResource,
+    AudioPlayerStatus,
 } = require('@discordjs/voice');
+const Debug = require('debug');
 const debug = Debug('punk_bot');
 const debugv = Debug('punk_bot:verbose');
 const debugd = Debug('punk_bot:debug');
+const moment = require('moment');
+const playdl = require('play-dl');
+const prism = require('prism-media');
+// const ytdl = require('ytdl-core');
+// const ytdl_full = require('youtube-dl-exec');
+// const EventEmitter = require('events');
 
-var ytdl_opts = [];
+const { Queue } = require('./queue.js');
+
+// var ytdl_opts = [];
 
 // var playback_opts = {
 //     highWaterMark: 12,
@@ -266,7 +267,7 @@ function Player(channelId) {
             // opts.seek = time;
             this.last_seek_time = time * 1000;
             this.stream = await this.create_stream(this.now_playing.url, time);
-            this.dispatch();
+            await this.dispatch();
             return 0;
         } else {
             return 2;

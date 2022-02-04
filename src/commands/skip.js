@@ -16,7 +16,7 @@ module.exports = {
         if (skip) {
             interaction.reply({ content: strings.skipped + '`' + skip + '`'});
         } else {
-            interaction.reply({ content: strings.nothing_playing, ephemeral: true });
+            interaction.reply({ content: strings.nothingPlaying, ephemeral: true });
         }
     },
 };

@@ -14,9 +14,9 @@ module.exports = {
 
         player.loop = !player.loop;
         if (player.loop) {
-            interaction.reply({ content: strings.loop_enabled });
+            interaction.reply({ content: strings.loopEnabled });
         } else {
-            interaction.reply({ content: strings.loop_disabled });
+            interaction.reply({ content: strings.loopDisabled });
         }
     },
 };

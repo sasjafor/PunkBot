@@ -16,7 +16,7 @@ module.exports = {
         if (disconnectRes) {
             interaction.reply({ content: strings.disconnected });
         } else {
-            interaction.reply({ content: strings.notConnected, ephemeral: true })
+            interaction.reply({ content: strings.notConnected, ephemeral: true });
         }
     },
 };

@@ -17,18 +17,18 @@ module.exports = {
         let np = player.getNowPlaying();
         let progress = player.getProgress();
         if (np && progress) {
-            let progress_bar = buildProgressBar(progress, np.duration);
-            let progress_string = prettifyTime(progress) + ' / ' + prettifyTime(np.duration);
+            let progressBar = buildProgressBar(progress, np.duration);
+            let progressString = prettifyTime(progress) + ' / ' + prettifyTime(np.duration);
             let embed = new MessageEmbed()
                 .setTitle(np.title)
                 .setAuthor({ name: 'Now Playing ♪', iconURL: np.requesterIconURL, url: 'https://github.com/sasjafor/PunkBot' })
                 .setURL(np.url)
                 .setThumbnail(np.thumbnailURL)
                 .setColor('#0056bf')
-                .setDescription('\u200B\n`' + progress_bar + '`\n\n`' + progress_string + '`\n\n`Requested by:` <@' + np.requesterId + '>');
+                .setDescription('\u200B\n`' + progressBar + '`\n\n`' + progressString + '`\n\n`Requested by:` <@' + np.requesterId + '>');
             interaction.reply({ embeds: [embed] });
         } else {
-            interaction.reply({ content: strings.nothing_playing, ephemeral: true });
+            interaction.reply({ content: strings.nothingPlaying, ephemeral: true });
         }
     },
 };

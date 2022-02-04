@@ -121,7 +121,7 @@ function search(term, opts, cb) {
         });
 }
 
-async function fast_search(term, key) {
+async function fastSearch(term, key) {
     return new Promise(function(resolve, reject) {
         var params = {
             q: term,
@@ -164,7 +164,7 @@ async function fast_search(term, key) {
     });
 }
 
-function video_info(id, opts, cb) {
+function videoInfo(id, opts, cb) {
     if (typeof opts === 'function') {
         cb = opts;
         opts = {};
@@ -176,7 +176,7 @@ function video_info(id, opts, cb) {
 
     if (!cb) {
         return new Promise(function(resolve, reject) {
-            video_info(id, opts, function(err, results, pageInfo) {
+            videoInfo(id, opts, function(err, results, pageInfo) {
                 if (err) {
                     return reject(err);
                 }
@@ -229,14 +229,14 @@ function video_info(id, opts, cb) {
         });
 }
 
-function playlist_info(id, opts, page_token, cb) {
+function playlistInfo(id, opts, page_token, cb) {
     if (!opts) {
         opts = {};
     }
 
     if (!cb) {
         return new Promise(function(resolve, reject) {
-            playlist_info(id, opts, page_token, function(err, results, pageInfo) {
+            playlistInfo(id, opts, page_token, function(err, results, pageInfo) {
                 if (err) {
                     return reject(err);
                 }
@@ -291,7 +291,7 @@ function playlist_info(id, opts, page_token, cb) {
 
 module.exports = {
     search,
-    fast_search,
-    video_info,
-    playlist_info,
-}
+    fastSearch,
+    videoInfo,
+    playlistInfo,
+};

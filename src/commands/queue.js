@@ -24,7 +24,7 @@ module.exports = {
         let player = players[guildId];
 
         if (!player.playing) {
-            interaction.reply({ content: strings.nothing_playing });
+            interaction.reply({ content: strings.nothingPlaying });
             return;
         }
         let np = player.getNowPlaying();
@@ -38,14 +38,14 @@ module.exports = {
             .setColor('#0000e5');
         let desc = '__Now Playing:__\n[' + np.title + '](' + np.url + ') | ' + prettifyTime(np.duration) + ' Requested by: <@' + np.requesterId + '>';
 
-        let queue_length = player.getQueueLength();
-        let num_tabs = Math.ceil(queue_length / 10);
-        if (queue_length > 0) {
+        let queueLength = player.getQueueLength();
+        let numTabs = Math.ceil(queueLength / 10);
+        if (queueLength > 0) {
             let queue = player.getQueue();
             let k = 0;
             if (index > 1) {
-                if (index > num_tabs) {
-                    interaction.reply({ content: strings.invalid_queue_tab + '**1-' + num_tabs + '**', ephemeral: true });
+                if (index > numTabs) {
+                    interaction.reply({ content: strings.invalidQueueTab + '**1-' + numTabs + '**', ephemeral: true });
                     return;
                 } else {
                     k = (index - 1) * 10 + 1;
@@ -54,14 +54,14 @@ module.exports = {
             } else {
                 desc += '\n\n:arrow_down:__Up Next:__:arrow_down:\n\n';
             }
-            let stop = Math.min(k + 10, queue_length);
+            let stop = Math.min(k + 10, queueLength);
             for (let i = queue.get(k); k < stop; k++, i = queue.get(k)) {
                 i = await i;
                 desc += (k+1) + '. [' + i.title + '](' + i.url + ') | ' + prettifyTime(i.duration) + ' Requested by: <@' + i.requesterId + '>\n\n';
             }
-            desc += '\n**' + queue_length + ' songs in queue | ' + prettifyTime(await player.getTotalQueueTime()) + ' total length**';
-            if (num_tabs > 1) {
-                embed.setFooter('Tab ' + index + '/' + num_tabs, interaction.member.avatarURL());
+            desc += '\n**' + queueLength + ' songs in queue | ' + prettifyTime(await player.getTotalQueueTime()) + ' total length**';
+            if (numTabs > 1) {
+                embed.setFooter('Tab ' + index + '/' + numTabs, interaction.member.avatarURL());
             }
         }
 

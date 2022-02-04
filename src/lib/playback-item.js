@@ -30,4 +30,4 @@ class PlaybackItem {
 
 module.exports = {
     PlaybackItem,
-}
+};

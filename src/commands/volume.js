@@ -20,6 +20,6 @@ module.exports = {
         let player = players[guildId];
 
         player.setVolume(value);
-        interaction.reply({ content: strings.volume_set + value });
+        interaction.reply({ content: strings.volumeSet + value });
     },
 };
