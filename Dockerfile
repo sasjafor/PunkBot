@@ -1,37 +1,47 @@
-FROM node:15
+FROM node:17 AS BUILD_IMAGE
 
-# Generate locale
-#RUN apt-get update && \
-#    apt-get install -y --no-install-recommends locales && \
-#    locale-gen en_GB.UTF8
+WORKDIR /usr/src/app
+
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends python
+
+# Copy package.json
+COPY package.json /usr/src/app/
+
+# Install node dependencies
+RUN npm install --save-prod
+
+FROM node:17-alpine
+
+WORKDIR /usr/src/app
+
+# Set debug env
+ENV DEBUG basic,verbose
 
 # Set locale
 ENV LC_ALL C.UTF-8
 
 # Copy run script
-COPY src/run.sh /usr/src/
-
-# Copy package.json
-COPY package.json /usr/src/app/
+COPY src/run.sh ..
 
 # Setup apt, install non-node dependencies and create /config
 RUN mkdir /config
 
-# Install node dependencies
-RUN cd /usr/src/app && \
-    npm install --save-prod
+# Copy package.json
+COPY package.json .
 
-# Set debug env
-ENV DEBUG basic,verbose
+# Copy dependencies from build image
+COPY --from=BUILD_IMAGE /usr/src/app/node_modules ./node_modules
 
 # Copy lib folder
-COPY src/lib /usr/src/app/lib
+COPY src/lib ./lib
 
 # Copy commands folder
-COPY src/commands /usr/src/app/commands
+COPY src/commands ./commands
 
 # Copy bot script file
-COPY src/bot.js /usr/src/app/
+COPY src/bot.js .
 
 # Install youtube-dl
 ADD https://yt-dl.org/downloads/latest/youtube-dl /usr/local/bin/
