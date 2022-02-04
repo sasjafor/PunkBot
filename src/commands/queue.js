@@ -36,7 +36,7 @@ module.exports = {
             .setTitle('Queue for ' + interaction.guild.name + '\n\u200b')
             .setURL('https://github.com/sasjafor/PunkBot')
             .setColor('#0000e5');
-        let desc = '\n\n__Now Playing:__\n[' + np.title + '](' + np.url + ') | `' + prettifyTime(np.duration) + ' Requested by:` <@' + np.requesterId + '>';
+        let desc = '\n__Now Playing:__\n[' + np.title + '](' + np.url + ') | ' + prettifyTime(np.duration) + ' Requested by: <@' + np.requesterId + '>';
 
         let queue_length = player.getQueueLength();
         let num_tabs = Math.ceil(queue_length / 10);
@@ -52,12 +52,12 @@ module.exports = {
                     desc = '';
                 }
             } else {
-                desc += '\n\n\n:arrow_down:__Up Next:__:arrow_down:\n\n';
+                desc += '\n\n:arrow_down:__Up Next:__:arrow_down:\n\n';
             }
             let stop = Math.min(k + 10, queue_length);
             for (let i = queue.get(k); k < stop; k++, i = queue.get(k)) {
                 i = await i;
-                desc += (k+1) + '. [' + i.title + '](' + i.url + ') | `' + prettifyTime(i.duration) + ' Requested by:` <@' + i.requesterId + '>\n\n';
+                desc += (k+1) + '. [' + i.title + '](' + i.url + ') | ' + prettifyTime(i.duration) + ' Requested by: <@' + i.requesterId + '>\n\n';
             }
             desc += '\n**' + queue_length + ' songs in queue | ' + prettifyTime(await player.getTotalQueueTime()) + ' total length**';
             if (num_tabs > 1) {

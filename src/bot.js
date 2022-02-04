@@ -180,27 +180,10 @@ client.on('messageCreate', async message => {
                             debugd(player.stream);
                             break;
                         }
-                    case 'np':
-                    case 'now_playing':
-                        {
-                            let np = player.getNowPlaying();
-                            let progress = player.getProgress();
-                            if (np && progress) {
-                                let progress_bar = buildProgressBar(progress, np.duration);
-                                let progress_string = prettifyTime(progress) + ' / ' + prettifyTime(np.duration);
-                                let embed = new MessageEmbed()
-                                    .setTitle(np.title)
-                                    .setAuthor('Now Playing ♪', client.user.avatarURL(), 'https://github.com/sasjafor/PunkBot')
-                                    .setURL(np.url)
-                                    .setThumbnail(np.thumbnailURL)
-                                    .setColor('#0056bf')
-                                    .setDescription('\u200B\n`' + progress_bar + '`\n\n`' + progress_string + '`\n\n`Requested by:` ' + np.requesterName);
-                                message.channel.send({embeds: [embed]});
-                            } else {
-                                message.channel.send(strings.nothing_playing);
-                            }
-                            break;
-                        }
+
+                    // case 'np':
+                    // case 'now_playing':
+
                     // case 'queue':
 
                     case 'shuffle':
@@ -263,25 +246,3 @@ client.on('error', error => {
 client.on('warn', warning => {
     debug(warning);
 });
-
-function buildProgressBar(progress, total_time) {
-    let pr = progress.asSeconds();
-    let tt = total_time.asSeconds();
-
-    if (pr > tt) {
-        tt = pr;
-    }
-
-    let mul = 30 / tt;
-    let pos = Math.round(pr * mul);
-    let res = '';
-    for (let i = 0; i < pos; i++) {
-        res += '▬';
-    }
-    res += '🔘';
-    let rest = 30 - pos;
-    for (let i = 0; i < rest; i++) {
-        res += '▬';
-    }
-    return res;
-}

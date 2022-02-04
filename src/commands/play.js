@@ -116,7 +116,7 @@ module.exports = {
 
         let pbP = handle_video(id, interaction.member, url);
         if (!player.playing) {
-            let pb_short = new PlaybackItem(url, interaction.member.displayName, interaction.user.id, title);
+            let pb_short = new PlaybackItem(url, interaction.member.displayName, interaction.user.id, interaction.member.displayAvatarURL(), title);
             player.enqueue(pb_short);
 
             debugv('Added ' + url);
@@ -140,7 +140,7 @@ module.exports = {
                     player.enqueue(pb);
                     embed = new MessageEmbed()
                         .setTitle(title)
-                        .setAuthor({ name: 'Added to queue', iconURL: interaction.member.avatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
+                        .setAuthor({ name: 'Added to queue', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
                         .setURL(url)
                         .setThumbnail(pb.thumbnailURL)
                         .addField('Channel', pb.channelTitle)
@@ -181,7 +181,7 @@ async function handle_video(id, requester, url) {
             let thumbnailURL = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
             let duration = moment.duration(res.duration);
             let channelTitle = res.channelTitle;
-            return new PlaybackItem(YTurl, requester.displayName, requester.user.id, title, thumbnailURL, duration, channelTitle);
+            return new PlaybackItem(YTurl, requester.displayName, requester.user.id, requester.displayAvatarURL(), title, thumbnailURL, duration, channelTitle);
         } else {
             throw new Error('Failed to get video info');
         }
