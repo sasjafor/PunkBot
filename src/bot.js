@@ -59,7 +59,7 @@ client.on('ready', async () => {
     // Push command to Discord application
     const rest = new REST({ version: '9' }).setToken(token);
 
-    await rest.put(Routes.applicationGuildCommands(client.user.id, '374283832901500928'), { body: commandJSONs })
+    await rest.put(Routes.applicationGuildCommands(client.user.id, '246328943299264513'), { body: commandJSONs })
         .then(() => console.log('Successfully registered application commands.'))
         .catch(console.error);
 });
@@ -118,7 +118,7 @@ client.on('messageCreate', async message => {
 
             default:
                 if (!player.conn && bot_in_voice_only_commands.includes(command)) {
-                    message.channel.send(strings.not_connected);
+                    message.channel.send(strings.notConnected);
                     return;
                 }
                 switch (command) {
@@ -126,32 +126,12 @@ client.on('messageCreate', async message => {
 
                     // case 'clear':
 
-                    case 'remove':
-                        {
-                            let num = parseInt(content);
-                            if (num !== 0 && !num) {
-                                let embed = new MessageEmbed()
-                                    .setDescription(':x: **Invalid format**\n\n!remove [Entry]')
-                                    .setColor('#ff0000');
-                                message.channel.send({embeds: [embed]});
-                                return;
-                            }
-                            let remove_res = player.remove(num);
-                            if (remove_res) {
-                                message.channel.send(strings.removed + '`' + remove_res.title + '`');
-                            } else {
-                                message.channel.send(strings.out_of_range);
-                            }
-                            break;
-                        }
+                    // case 'remove':
+
                     // case 'loop':
 
-                    case 'disconnect':
-                        {
-                            player.disconnect();
-                            message.channel.send(strings.disconnected);
-                            break;
-                        }
+                    // case 'disconnect':
+
                     // case 'vol':
                     // case 'volume':
 

@@ -243,6 +243,9 @@ function Player(channelId) {
     };
 
     this.remove = function(num) {
+        if(!this.conn) {
+            return -1
+        }
         if (num > 0 && num <= this.queue.getLength()) {
             return this.queue.remove(num - 1)[0];
         } else {
@@ -332,6 +335,10 @@ function Player(channelId) {
             this.now_playing = null;
             this.stream = null;
             this.last_seek_time = 0;
+
+            return true;
+        } else {
+            return false;
         }
     };
 
