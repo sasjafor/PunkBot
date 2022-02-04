@@ -12,10 +12,16 @@ module.exports = {
         let guildId = interaction.guild.id;
         let player = players[guildId];
 
+        if (!player.conn) {
+            interaction.reply({ content: strings.notConnected, ephemeral: true });
+            return;
+        }
+
         let disconnectRes = player.disconnect();
         if (disconnectRes) {
             interaction.reply({ content: strings.disconnected });
         } else {
+            // TODO: this shouldn't happen, right?
             interaction.reply({ content: strings.notConnected, ephemeral: true });
         }
     },

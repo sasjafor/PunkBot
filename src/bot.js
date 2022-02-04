@@ -76,6 +76,11 @@ client.on('interactionCreate', async interaction => {
         return;
     }
 
+    if (!interaction.member || !interaction.member.voice.channel) {
+        await interaction.reply({ content: strings.needToBeInVoice });
+        return;
+    }
+
     let guildId = interaction.guildId;
     let player = players[guildId];
     if (!player) {
@@ -122,10 +127,10 @@ client.on('messageCreate', async message => {
             // case 'join':
 
             default:
-                if (!player.conn && bot_in_voice_only_commands.includes(command)) {
-                    message.channel.send(strings.notConnected);
-                    return;
-                }
+                // if (!player.conn && bot_in_voice_only_commands.includes(command)) {
+                //     message.channel.send(strings.notConnected);
+                //     return;
+                // }
                 switch (command) {
                     // case 'skip':
 

@@ -19,8 +19,14 @@ module.exports = {
         let guildId = interaction.guild.id;
         let player = players[guildId];
 
+        if (!player.conn) {
+            interaction.reply({ content: strings.notConnected, ephemeral: true });
+            return;
+        }
+
         let removeRes = player.remove(index);
         if (removeRes == -1) {
+            // TODO: might be unnecessary now
             interaction.reply({ content: strings.notConnected, ephemeral: true });
         } else if(removeRes) {
             interaction.reply({ content: strings.removed + removeRes.title });

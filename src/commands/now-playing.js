@@ -14,6 +14,11 @@ module.exports = {
         let guildId = interaction.guild.id;
         let player = players[guildId];
 
+        if (!player.conn) {
+            interaction.reply({ content: strings.notConnected, ephemeral: true });
+            return;
+        }
+
         let np = player.getNowPlaying();
         let progress = player.getProgress();
         if (np && progress) {

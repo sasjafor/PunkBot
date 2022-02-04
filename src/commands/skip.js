@@ -12,6 +12,11 @@ module.exports = {
         let guildId = interaction.guild.id;
         let player = players[guildId];
 
+        if (!player.conn) {
+            interaction.reply({ content: strings.notConnected, ephemeral: true });
+            return;
+        }
+
         let skip = player.skip();
         if (skip) {
             interaction.reply({ content: strings.skipped + '`' + skip + '`'});

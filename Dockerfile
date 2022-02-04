@@ -4,7 +4,8 @@ WORKDIR /usr/src/app
 
 # Install dependencies
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends python
+    apt-get install -y --no-install-recommends python3 \
+                                               python-is-python3
 
 # Copy package.json
 COPY package.json /usr/src/app/
@@ -12,7 +13,7 @@ COPY package.json /usr/src/app/
 # Install node dependencies
 RUN npm install --save-prod
 
-FROM node:17-alpine
+FROM node:17
 
 WORKDIR /usr/src/app
 
@@ -25,8 +26,13 @@ ENV LC_ALL C.UTF-8
 # Copy run script
 COPY src/run.sh ..
 
-# Setup apt, install non-node dependencies and create /config
+# Create /config
 RUN mkdir /config
+
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends python3 \
+                                               python-is-python3
 
 # Copy package.json
 COPY package.json .

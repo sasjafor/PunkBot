@@ -20,6 +20,11 @@ module.exports = {
         let guildId = interaction.guild.id;
         let player = players[guildId];
 
+        if (!player.conn) {
+            interaction.reply({ content: strings.notConnected, ephemeral: true });
+            return;
+        }
+
         let seek_time_regex = /(([0-9]+:)?([0-9]+:)?)?[0-9]+$/;
         if (!seek_time_regex.test(time) || (time.match(seek_time_regex)).index != 0) {
             interaction.reply({ content: strings.invalidSeekFormat, ephemeral: true });

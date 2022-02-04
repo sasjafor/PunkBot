@@ -23,6 +23,11 @@ module.exports = {
         let guildId = interaction.guild.id;
         let player = players[guildId];
 
+        if (!player.conn) {
+            interaction.reply({ content: strings.notConnected, ephemeral: true });
+            return;
+        }
+
         if (!player.playing) {
             interaction.reply({ content: strings.nothingPlaying });
             return;
