@@ -36,7 +36,7 @@ module.exports = {
             .setTitle('Queue for ' + interaction.guild.name + '\n\u200b')
             .setURL('https://github.com/sasjafor/PunkBot')
             .setColor('#0000e5');
-        let desc = '\n__Now Playing:__\n[' + np.title + '](' + np.url + ') | ' + prettifyTime(np.duration) + ' Requested by: <@' + np.requesterId + '>';
+        let desc = '__Now Playing:__\n[' + np.title + '](' + np.url + ') | ' + prettifyTime(np.duration) + ' Requested by: <@' + np.requesterId + '>';
 
         let queue_length = player.getQueueLength();
         let num_tabs = Math.ceil(queue_length / 10);

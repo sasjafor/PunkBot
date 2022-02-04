@@ -139,7 +139,7 @@ module.exports = {
                     var pretty_tut = prettifyTime(time_until_playing);
                     player.enqueue(pb);
                     embed = new MessageEmbed()
-                        .setTitle(title)
+                        .setTitle(pb.title)
                         .setAuthor({ name: 'Added to queue', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
                         .setURL(url)
                         .setThumbnail(pb.thumbnailURL)

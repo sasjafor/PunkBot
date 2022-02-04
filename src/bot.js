@@ -148,13 +148,8 @@ client.on('messageCreate', async message => {
 
                     // case 'queue':
 
-                    case 'shuffle':
-                        {
-                            player.shuffle();
-                            message.channel.send(strings.shuffled);
-                            debug('Shuffled queue');
-                            break;
-                        }
+                    // case 'shuffle':
+
                     case 'seek':
                         {
                             let seek_time_regex = /(([0-9]+:)?([0-9]+:)?)?[0-9]+$/;
