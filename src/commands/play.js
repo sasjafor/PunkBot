@@ -63,7 +63,15 @@ module.exports = {
         let title = searchQuery;
         let searchString = searchQuery;
 
-        let searchReply = interaction.reply({ content: strings.searchingFor + '' + searchString + '' });
+
+        let searchEmbed = new MessageEmbed()
+                    .setTitle(searchString)
+                    .setAuthor({ name: 'Searching', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
+                    .setURL(url);
+                    // .setThumbnail(pb.thumbnailURL)
+                    // .addField('Channel', pb.channelTitle)
+                    // .addField('Song Duration', prettyDuration);
+        let searchReply = interaction.reply({ embeds: [searchEmbed] });
         if (!searchQuery.startsWith('http')) {
             try {
                 searchRes = await fastSearch(searchString, youtubeAPIKey);
@@ -115,6 +123,8 @@ module.exports = {
         let isYT = id != null;
 
         let pbP = handleVideo(id, interaction.member, url);
+        let pb = null;
+        let queued = false;
         if (!player.playing) {
             let pb_short = new PlaybackItem(url, interaction.member.displayName, interaction.user.id, interaction.member.displayAvatarURL(), title);
             player.enqueue(pb_short);
@@ -122,39 +132,44 @@ module.exports = {
             debugv('Added ' + url);
             await connecting;
             player.play();
-            await searchReply;
-            interaction.editReply({ content: strings.playing + decode(title) });
-            let pb = await pbP;
+
+            pb = await pbP;
             pb_short.setTitle(pb.title);
             pb_short.setDuration(pb.duration);
             pb_short.setThumbnailURL(pb.thumbnailURL);
             pb_short.setChannelTitle(pb.channelTitle);
         } else {
-            let embed = null;
-            let pb = await pbP;
-            if (isYT) {
-                if (pb) {
-                    var prettyDuration = prettifyTime(pb.duration);
-                    var timeUntilPlaying = await player.getTotalRemainingPlaybackTime();
-                    var prettyTut = prettifyTime(timeUntilPlaying);
-                    player.enqueue(pb);
-                    embed = new MessageEmbed()
-                        .setTitle(pb.title)
-                        .setAuthor({ name: 'Added to queue', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
-                        .setURL(url)
-                        .setThumbnail(pb.thumbnailURL)
-                        .addField('Channel', pb.channelTitle)
-                        .addField('Song Duration', prettyDuration)
-                        .addField('Estimated time until playing', prettyTut)
-                        .addField('Position in queue', String(player.queue.getLength()));
+            queued = true;
+            pb = await pbP;
+            player.enqueue(pb);
+        }
+        let embed = null;
+        if (isYT) {
+            if (pb) {
+                var prettyDuration = prettifyTime(pb.duration);
+                embed = new MessageEmbed()
+                    .setTitle(decode(pb.title))
+                    .setAuthor({ name: 'Playing', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
+                    .setURL(url)
+                    .setThumbnail(pb.thumbnailURL)
+                    .addField('Channel', pb.channelTitle)
+                    .addField('Song Duration', prettyDuration);
+
+                if (queued) {
+                    let timeUntilPlaying = await player.getTotalRemainingPlaybackTime();
+                    let prettyTut = prettifyTime(timeUntilPlaying);
+                    embed = embed.setAuthor({ name: 'Added to queue', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
+                                 .addField('Estimated time until playing', prettyTut)
+                                 .addField('Position in queue', String(player.queue.getLength()));
                 }
-            } else {
-                //TODO: embed for non youtube links
             }
-            if (embed) {
-                await searchReply;
-                interaction.editReply({ content: null, embeds: [embed] });
-            }
+        } else {
+            //TODO: embed for non youtube links
+        }
+        
+        if (embed) {
+            await searchReply;
+            interaction.editReply({ content: null, embeds: [embed] });
         }
 	},
 };

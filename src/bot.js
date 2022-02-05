@@ -1,14 +1,17 @@
 const fs = require('fs');
 const path = require('path');
-const { Client, Collection, Intents } = require('discord.js');
+const { Client, Collection, GuildMember, Intents, TextChannel } = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
-const { Player } = require('./lib/player.js');
-const { strings } = require('./lib/strings.js');
 const Debug = require('debug');
 const debug = Debug('punk_bot');
+// eslint-disable-next-line no-unused-vars
 const debugv = Debug('punk_bot:verbose');
+// eslint-disable-next-line no-unused-vars
 const debugd = Debug('punk_bot:debug');
+
+const { Player } = require('./lib/player.js');
+const { strings } = require('./lib/strings.js');
 
 const token = process.env.DISCORD_APP_AUTH_TOKEN;
 const youtubeAPIKey = process.env.YOUTUBE_API_KEY;
@@ -71,6 +74,11 @@ client.on('interactionCreate', async interaction => {
         return;
     }
 
+    if (!(interaction.member instanceof GuildMember)) {
+        console.log('Member was not of GuildMember type');
+        return;
+    }
+
     if (!interaction.member || !interaction.member.voice.channel) {
         await interaction.reply({ content: strings.needToBeInVoice });
         return;
@@ -79,7 +87,7 @@ client.on('interactionCreate', async interaction => {
     let guildId = interaction.guildId;
     let player = players[guildId];
     if (!player) {
-        player = players[guildId] = new Player(interaction.member.voice.channel.id);
+        player = players[guildId] = new Player();
     }
 
 	try {
@@ -96,8 +104,7 @@ client.on('messageCreate', async message => {
     }
 
     if (message.content[0] == '!') {
-        if (!message.channel.permissionsFor(message.guild.me)
-            .has('SEND_MESSAGES')) {
+        if (!(message.channel instanceof TextChannel) || !message.channel.permissionsFor(message.guild.me).has('SEND_MESSAGES')) {
             return;
         }
 

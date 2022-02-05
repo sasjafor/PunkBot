@@ -25,7 +25,7 @@ const { Queue } = require('./queue.js');
 //     fec: true,
 // };
 
-function Player(channelId) {
+function Player() {
     this.queue = new Queue();
     this.now_playing = null;
     this.stream = null;
