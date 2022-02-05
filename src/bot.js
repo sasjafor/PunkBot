@@ -14,9 +14,6 @@ const token = process.env.DISCORD_APP_AUTH_TOKEN;
 const youtubeAPIKey = process.env.YOUTUBE_API_KEY;
 const client = new Client({ intents: [Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS] });
 
-const bot_in_voice_only_commands = ['skip', 'loop', 'clear', 'remove', 'seek', 'disconnect', 'volume', 'vol', 'np', 'now_playing', 'shuffle', 'queue'];
-const voice_only_commands = ['p', 'play', 'seek', 'summon', 'join', ...bot_in_voice_only_commands];
-
 const players = {};
 const commands = new Collection();
 const commandFiles = fs.readdirSync(path.resolve(__dirname, './commands')).filter(file => file.endsWith('.js'));
@@ -38,8 +35,6 @@ for (const file of commandFiles) {
 }
 
 function login() {
-    // const customytdlBinaryPath = path.resolve('/usr/local/bin/youtube-dl')
-    // youtubedl.setYtdlBinary(customytdlBinaryPath)
     try {
         client.login(token);
     } catch (err) {
@@ -101,71 +96,12 @@ client.on('messageCreate', async message => {
     }
 
     if (message.content[0] == '!') {
-        var regex_content = /^![a-zA-Z]* (.*)/;
-        var content = null;
-        var command = message.content.match(/^!([a-zA-Z]*)/)[1];
         if (!message.channel.permissionsFor(message.guild.me)
             .has('SEND_MESSAGES')) {
             return;
         }
-        if (!message.member.voice.channel) {
-            if (voice_only_commands.includes(command)) {
-                message.channel.send(strings.needToBeInVoice);
-            }
-            return;
-        }
-        if (regex_content.test(message.content)) {
-            content = message.content.match(regex_content)[1];
-        }
 
-        debugv('Command: ' + message.content);
-        switch (command) {
-            // case 'p':
-            // case 'play':
-                
-            // case 'summon':
-            // case 'join':
-
-            default:
-                // if (!player.conn && bot_in_voice_only_commands.includes(command)) {
-                //     message.channel.send(strings.notConnected);
-                //     return;
-                // }
-                switch (command) {
-                    // case 'skip':
-
-                    // case 'clear':
-
-                    // case 'remove':
-
-                    // case 'loop':
-
-                    // case 'disconnect':
-
-                    // case 'vol':
-                    // case 'volume':
-
-                    // case 'dbg':
-                    // case 'debug':
-                    //     {
-                    //         debugd(player.conn);
-                    //         debugd(player.stream);
-                    //         break;
-                    //     }
-
-                    // case 'np':
-                    // case 'now_playing':
-
-                    // case 'queue':
-
-                    // case 'shuffle':
-
-                    // case 'seek':
-
-                    default:
-                        message.channel.send(strings.invalidCommand);
-                }
-        }
+        message.channel.send({ content: strings.switchToSlashCommands });
     }
 });
 

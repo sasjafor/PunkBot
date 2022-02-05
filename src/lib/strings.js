@@ -16,6 +16,7 @@ const strings = {
     invalidSeekFormat: ':x: **Invalid format**, Example formats:\n\n`0:30` `1:30` `2:15` `5:20`',
     seekTooLong: ':x: **Time cannot be longer than the song**',
     invalidCommand: '**This command is invalid! Please use a valid one.**',
+    switchToSlashCommands: ':x: **Please use the new slash (/) commands**',
     removed: ':white_check_mark: **Removed** ',
     outOfRange: ':x: **Out of range**',
     shuffled: '**Shuffled queue** :ok_hand:',
