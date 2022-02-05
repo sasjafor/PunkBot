@@ -18,6 +18,7 @@ const youtubeAPIKey = process.env.YOUTUBE_API_KEY;
 const client = new Client({ intents: [Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS] });
 
 const players = {};
+const youtubeCache = {};
 const commands = new Collection();
 const commandFiles = fs.readdirSync(path.resolve(__dirname, './commands')).filter(file => file.endsWith('.js'));
 
@@ -26,6 +27,7 @@ const commandJSONs = [];
 module.exports = {
     players,
     youtubeAPIKey,
+    youtubeCache,
 };
 
 for (const file of commandFiles) {

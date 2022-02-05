@@ -107,7 +107,6 @@ class Player {
     }
 
     async dispatch() {
-        // set volume before playing
         this.stream = await this.stream;
         if (!this.stream) {
             return;
@@ -118,6 +117,7 @@ class Player {
             this.stream = await this.stream;
         }
 
+        // set volume before playing
         this.stream.volume.setVolume(this.volume);
         this.dispatcher.play(this.stream);
     }
@@ -150,11 +150,6 @@ class Player {
             return;
         }
         let stream = await this.create_stream(url);
-        // if (!stream) {
-        //     setTimeout(async function() {
-        //         stream = await this.create_stream(url);
-        //     }, 1000);
-        // }
 
         return stream;
     }
@@ -163,7 +158,7 @@ class Player {
      * @param {string} url
      */
     async create_stream(url, seektime=null) {
-        var stream = null;
+        let stream = null;
         // this is most likely unsafe, but it works for now
         if (url.slice(-4, -3) == '.') {
             stream = url;

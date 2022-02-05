@@ -9,22 +9,7 @@ class PlaybackItem {
         this.thumbnailURL = thumbnailURL;
         this.channelTitle = channelTitle;
         this.stream = null;
-    }
-
-    setTitle(title) {
-        this.title = title;
-    }
-
-    setDuration(duration) {
-        this.duration = duration;
-    }
-
-    setThumbnailURL(thumbnailURL) {
-        this.thumbnailURL = thumbnailURL;
-    }
-
-    setChannelTitle(title) {
-        this.channelTitle = title;
+        this.isYT = false;
     }
 }
 

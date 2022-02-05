@@ -7,7 +7,7 @@ const debug = Debug('punk_bot');
 const debugv = Debug('punk_bot:verbose');
 const debugd = Debug('punk_bot:debug');
 
-const { players, youtubeAPIKey } = require('../bot.js');
+const { players, youtubeAPIKey, youtubeCache } = require('../bot.js');
 const { PlaybackItem } = require('../lib/playback-item.js');
 const { strings } = require('../lib/strings.js');
 const { prettifyTime } = require('../lib/util.js');
@@ -63,94 +63,114 @@ module.exports = {
         let title = searchQuery;
         let searchString = searchQuery;
 
-
         let searchEmbed = new MessageEmbed()
                     .setTitle(searchString)
                     .setAuthor({ name: 'Searching', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
                     .setURL(url);
-                    // .setThumbnail(pb.thumbnailURL)
-                    // .addField('Channel', pb.channelTitle)
-                    // .addField('Song Duration', prettyDuration);
         let searchReply = interaction.reply({ embeds: [searchEmbed] });
-        if (!searchQuery.startsWith('http')) {
-            try {
-                searchRes = await fastSearch(searchString, youtubeAPIKey);
-                if (searchRes) {
-                    url = searchRes.url;
-                    id = searchRes.id;
-                    title = searchRes.title;
-                } else {
-                    interaction.reply({ content: strings.noMatches, ephemeral: true});
-                    return;
-                }
-            } catch (err) {
-                debug(err);
-                return;
-            }
-        } else {
-            url = searchQuery;
-        }
 
-        let playlistIdRegex = /(?:youtube(?:-nocookie)?\.com\/(?:[^/\n\s]+\/\S+\/|(?:playlist|e(?:mbed)?\/videoseries)\/|\S*?\?list=)|youtu\.be\/)([a-zA-Z0-9_-]{34})/;
-        if (playlistIdRegex.test(url)) {
-            let playlistId = url.match(playlistIdRegex)[1];
-            let playlist_callback = function(num) {
-                interaction.reply({ content: ':white_check_mark: **Enqueued** `' + num + '` songs' });
-            };
-            if (!player.playing) {
-                let customOpts = {
-                    ...playlistOpts
-                };
-                customOpts.maxResults = 1;
-                customOpts.part = 'snippet,contentDetails';
-                let playlistRes = await playlistInfo(playlistId, customOpts);
-                if (playlistRes) {
-                    id = playlistRes.results[0].videoId;
-                    url = 'https://www.youtube.com/watch?v=' + id;
-                    title = playlistRes.results[0].title;
-                }
-                handlePlaylist(player, playlistId, interaction.member, true, playlist_callback);
-            } else {
-                handlePlaylist(player, playlistId, interaction.member, false, playlist_callback);
-                return;
-            }
-        }
-
-        if (!id) {
-            id = getYTid(url);
-        }
-
-        let isYT = id != null;
-
-        let pbP = handleVideo(id, interaction.member, url);
         let pb = null;
         let queued = false;
-        if (!player.playing) {
-            let pb_short = new PlaybackItem(url, interaction.member.displayName, interaction.user.id, interaction.member.displayAvatarURL(), title);
-            player.enqueue(pb_short);
+        let pbCached = youtubeCache[searchString];
+        if (pbCached) {
+            pb = pbCached;
+            pb.requesterName = interaction.member.displayName;
+            pb.requesterId = interaction.user.id;
+            pb.requesterIconURL = interaction.member.displayAvatarURL();
 
-            debugv('Added ' + url);
-            await connecting;
-            player.play();
+            if (!player.playing) {
+                player.enqueue(pb);
 
-            pb = await pbP;
-            pb_short.setTitle(pb.title);
-            pb_short.setDuration(pb.duration);
-            pb_short.setThumbnailURL(pb.thumbnailURL);
-            pb_short.setChannelTitle(pb.channelTitle);
+                debugv('Added ' + url);
+                await connecting;
+                player.play();
+            } else {
+                queued = true;
+                player.enqueue(pb);
+            }
         } else {
-            queued = true;
-            pb = await pbP;
-            player.enqueue(pb);
+            if (!searchQuery.startsWith('http')) {
+                try {
+                    searchRes = await fastSearch(searchString, youtubeAPIKey);
+                    if (searchRes) {
+                        url = searchRes.url;
+                        id = searchRes.id;
+                        title = searchRes.title;
+                    } else {
+                        interaction.reply({ content: strings.noMatches, ephemeral: true});
+                        return;
+                    }
+                } catch (err) {
+                    debug(err);
+                    return;
+                }
+            } else {
+                url = searchQuery;
+            }
+
+            let playlistIdRegex = /(?:youtube(?:-nocookie)?\.com\/(?:[^/\n\s]+\/\S+\/|(?:playlist|e(?:mbed)?\/videoseries)\/|\S*?\?list=)|youtu\.be\/)([a-zA-Z0-9_-]{34})/;
+            if (playlistIdRegex.test(url)) {
+                let playlistId = url.match(playlistIdRegex)[1];
+                let playlist_callback = function(num) {
+                    interaction.reply({ content: ':white_check_mark: **Enqueued** `' + num + '` songs' });
+                };
+                if (!player.playing) {
+                    let customOpts = {
+                        ...playlistOpts
+                    };
+                    customOpts.maxResults = 1;
+                    customOpts.part = 'snippet,contentDetails';
+                    let playlistRes = await playlistInfo(playlistId, customOpts);
+                    if (playlistRes) {
+                        id = playlistRes.results[0].videoId;
+                        url = 'https://www.youtube.com/watch?v=' + id;
+                        title = playlistRes.results[0].title;
+                    }
+                    handlePlaylist(player, playlistId, interaction.member, true, playlist_callback);
+                } else {
+                    handlePlaylist(player, playlistId, interaction.member, false, playlist_callback);
+                    return;
+                }
+            }
+
+            if (!id) {
+                id = getYTid(url);
+            }
+
+            let isYT = id != null;
+
+            let pbP = handleVideo(id, interaction.member, url);
+            if (!player.playing) {
+                let pb_short = new PlaybackItem(url, interaction.member.displayName, interaction.user.id, interaction.member.displayAvatarURL(), title);
+                player.enqueue(pb_short);
+
+                debugv('Added ' + url);
+                await connecting;
+                player.play();
+
+                pb = await pbP;
+                pb_short.title = pb.title;
+                pb_short.duration = pb.duration;
+                pb_short.thumbnailURL = pb.thumbnailURL;
+                pb_short.channelTitle = pb.channelTitle;
+            } else {
+                queued = true;
+                pb = await pbP;
+                player.enqueue(pb);
+            }
+            pb.isYT = isYT;
+
+            youtubeCache[searchQuery] = pb;
         }
+
         let embed = null;
-        if (isYT) {
-            if (pb) {
+        if (pb) {
+            if (pb.isYT) {
                 var prettyDuration = prettifyTime(pb.duration);
                 embed = new MessageEmbed()
                     .setTitle(decode(pb.title))
                     .setAuthor({ name: 'Playing', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
-                    .setURL(url)
+                    .setURL(pb.url)
                     .setThumbnail(pb.thumbnailURL)
                     .addField('Channel', pb.channelTitle)
                     .addField('Song Duration', prettyDuration);
@@ -162,9 +182,9 @@ module.exports = {
                                  .addField('Estimated time until playing', prettyTut)
                                  .addField('Position in queue', String(player.queue.getLength()));
                 }
+            } else {
+                //TODO: embed for non youtube links
             }
-        } else {
-            //TODO: embed for non youtube links
         }
         
         if (embed) {
