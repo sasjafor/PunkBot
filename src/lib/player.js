@@ -25,20 +25,22 @@ const { Queue } = require('./queue.js');
 //     fec: true,
 // };
 
-function Player() {
-    this.queue = new Queue();
-    this.now_playing = null;
-    this.stream = null;
-    this.loop = false;
-    this.dispatcher = null;
-    this.playing = false;
-    this.timeout = null;
-    this.conn = null;
-    this.last_seek_time = 0;
-    this.subscription = null;
-    this.volume = 1;
+class Player {
+    constructor() {
+        this.queue = new Queue();
+        this.now_playing = null;
+        this.stream = null;
+        this.loop = false;
+        this.dispatcher = null;
+        this.playing = false;
+        this.timeout = null;
+        this.conn = null;
+        this.last_seek_time = 0;
+        this.subscription = null;
+        this.volume = 1;
+    }
 
-    this.play = function() {
+    play() {
         // if (this.playing) {
         //     return;
         // }
@@ -51,7 +53,7 @@ function Player() {
         }
 
         if (this.now_playing.stream) {
-            debugv("Using already prepared stream");
+            debugv('Using already prepared stream');
 
             this.stream = this.now_playing.stream;
         } else {
@@ -68,17 +70,17 @@ function Player() {
 
             this.dispatch();
         }
-    };
+    }
 
-    this.next = function() {
+    next() {
         if (!this.queue.isEmpty() || (this.loop && this.now_playing)) {
             this.play();
         } else {
             this.stop();
         }
-    };
+    }
 
-    this.stop = function() {
+    stop() {
         this.dispatcher.stop();
         this.playing = false;
         var context = this;
@@ -87,24 +89,24 @@ function Player() {
         }, 300000);
 
         return;
-    };
+    }
 
-    this.enqueue = function(item) {
+    enqueue(item) {
         if (this.queue.isEmpty()) {
             item.stream = this.prepare_stream(item);
         }
         this.queue.enqueue(item);
-    };
+    }
 
-    this.dequeue = function() {
+    dequeue() {
         return this.queue.dequeue();
-    };
+    }
 
-    this.peek = function() {
+    peek() {
         return this.queue.peek();
     }
 
-    this.dispatch = async function() {
+    async dispatch() {
         // set volume before playing
         this.stream = await this.stream;
         if (!this.stream) {
@@ -118,17 +120,17 @@ function Player() {
 
         this.stream.volume.setVolume(this.volume);
         this.dispatcher.play(this.stream);
-    };
+    }
 
-    this.setVolume = function(value) {
+    setVolume(value) {
         this.volume = value;
         if (this.stream) {
             this.stream.volume.setVolume(value);
-            debugv("Set volume to " + value);
+            debugv('Set volume to ' + value);
         }
-    };
+    }
 
-    this.skip = function() {
+    skip() {
         if (this.playing) {
             let title = this.now_playing.title;
             if (this.loop) {
@@ -139,10 +141,10 @@ function Player() {
         } else {
             return false;
         }
-    };
+    }
 
-    this.prepare_stream = async function(next) {
-        url = next.url;
+    async prepare_stream(next) {
+        let url = next.url;
 
         if (!url) {
             return;
@@ -157,7 +159,10 @@ function Player() {
         return stream;
     }
 
-    this.create_stream = async function(url, seektime=null) {
+    /**
+     * @param {string} url
+     */
+    async create_stream(url, seektime=null) {
         var stream = null;
         // this is most likely unsafe, but it works for now
         if (url.slice(-4, -3) == '.') {
@@ -225,36 +230,39 @@ function Player() {
         //         this.now_playing.duration = moment.duration(info._duration_hms);
         //     })
         // }
-        if (stream === url || stream.readable) {
-            resource = createAudioResource(stream, { inlineVolume: true });
+        if (stream === url || (stream instanceof prism.FFmpeg && stream.readable)) {
+            let resource = createAudioResource(stream, { inlineVolume: true });
             return resource;
         } else {
             debug('Encountered error with stream');
             setTimeout(function() {}, 1000);
             return await this.create_stream(url);
         }
-    };
+    }
 
     // this.retry_on_403 = function(url) {
     //
     // };
 
-    this.clear = function() {
+    clear() {
         this.queue = new Queue();
-    };
+    }
 
-    this.remove = function(num) {
+    /**
+     * @param {number} num
+     */
+    remove(num) {
         if(!this.conn) {
-            return -1
+            return -1;
         }
         if (num > 0 && num <= this.queue.getLength()) {
             return this.queue.remove(num - 1)[0];
         } else {
             return false;
         }
-    };
+    }
 
-    this.seek = async function(time) {
+    async seek(time) {
         if (this.playing) {
             if (time > this.now_playing.duration.asSeconds()) {
                 return 1;
@@ -272,9 +280,9 @@ function Player() {
         } else {
             return 2;
         }
-    };
+    }
 
-    this.connect = async function(channel) {
+    async connect(channel) {
         if (channel) {
             // this.conn = await channel.join();
             this.conn = joinVoiceChannel({
@@ -283,30 +291,18 @@ function Player() {
                 adapterCreator: channel.guild.voiceAdapterCreator,
             });
             var context = this;
-            this.conn.on('failed', err => {
-                debug(err);
-                context.connect();
-            });
-            this.conn.on('disconnect', () => {
-                if (context.playing) {
-                    context.connect();
-                }
-            });
             this.conn.on('error', err => {
                 debug(err);
                 if (context.playing) {
                     context.connect();
                 }
             });
-            this.conn.on('warning', err => {
-                debug(err);
-            });
             debug('Joined Voice Channel');
 
             this.dispatcher = createAudioPlayer();
 
             this.dispatcher.on(AudioPlayerStatus.Idle, () => {
-                debugv("Finished playing");
+                debugv('Finished playing');
                 if (!this.loop) {
                     this.now_playing = null;
                 }
@@ -319,9 +315,9 @@ function Player() {
 
             this.subscription = this.conn.subscribe(this.dispatcher);
         }
-    };
+    }
 
-    this.disconnect = function() {
+    disconnect() {
         if (this.conn) {
             if (this.dispatcher) {
                 // this.dispatcher.removeAllListeners();
@@ -341,21 +337,21 @@ function Player() {
         } else {
             return false;
         }
-    };
+    }
 
-    this.shuffle = function() {
+    shuffle() {
         this.queue.shuffle();
-    };
+    }
 
-    this.current_playback_progress = function() {
+    current_playback_progress() {
         if (this.dispatcher) {
             return this.stream.playbackDuration + this.last_seek_time;
         } else {
             return false;
         }
-    };
+    }
 
-    this.getTotalRemainingPlaybackTime = async function() {
+    async getTotalRemainingPlaybackTime() {
         let duration = moment.duration(0);
         for (let i of this.queue.queue) {
             i = await i;
@@ -366,39 +362,39 @@ function Player() {
                 .subtract(this.current_playback_progress(), 'ms');
         }
         return duration;
-    };
+    }
 
-    this.getTotalQueueTime = async function() {
+    async getTotalQueueTime() {
         let duration = moment.duration(0);
         for (let i of this.queue.queue) {
             i = await i;
             duration.add(i.duration);
         }
         return duration;
-    };
+    }
 
-    this.getNowPlaying = function() {
+    getNowPlaying() {
         return this.now_playing;
-    };
+    }
 
-    this.getProgress = function() {
+    getProgress() {
         if (this.dispatcher) {
             return moment.duration(this.current_playback_progress());
         } else {
             return false;
         }
-    };
+    }
 
-    this.getQueueLength = function() {
+    getQueueLength() {
         return this.queue.getLength();
-    };
+    }
 
     /* Returns the queue array, this is meant for read-only purposes and thus
      * avoids creating an unnecessary copy of the entire array
      */
-    this.getQueue = function() {
+    getQueue() {
         return this.queue;
-    };
+    }
 }
 
 module.exports = {
