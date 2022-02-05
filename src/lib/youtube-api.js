@@ -1,6 +1,6 @@
 // adapted from https://github.com/MaxGfeller/youtube-search
 const querystring = require('querystring');
-const axios = require('axios');
+const axios = require('axios').default;
 const http2 = require('http2');
 
 var allowedProperties = [
