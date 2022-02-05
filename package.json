@@ -31,6 +31,7 @@
     "discord.js": "^13.6.0",
     "erlpack": "^0.1.4",
     "ffmpeg-static": "^4.4.1",
+    "got": "^11.8.3",
     "moment": "^2.29.1",
     "play-dl": "^1.8.6",
     "prism-media": "^1.3.2",
@@ -38,6 +39,7 @@
     "unescape": "^1.0.1",
     "utf-8-validate": "^5.0.8",
     "youtube-dl-exec": "^2.0.2",
+    "youtube-dl-wrap": "^2.1.1",
     "ytdl-core": "^4.10.1",
     "zlib-sync": "^0.1.7"
   },

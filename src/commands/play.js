@@ -97,7 +97,7 @@ module.exports = {
                         id = searchRes.id;
                         title = searchRes.title;
                     } else {
-                        interaction.reply({ content: strings.noMatches, ephemeral: true});
+                        interaction.editReply({ content: strings.noMatches, ephemeral: true});
                         return;
                     }
                 } catch (err) {
@@ -149,6 +149,7 @@ module.exports = {
                 player.play();
 
                 pb = await pbP;
+                console.log(pb);
                 pb_short.title = pb.title;
                 pb_short.duration = pb.duration;
                 pb_short.thumbnailURL = pb.thumbnailURL;
@@ -205,6 +206,11 @@ function getYTid(url) {
     }
 }
 
+/**
+ * @param {string} id
+ * @param {{ displayName: any; user: { id: any; }; displayAvatarURL: () => any; }} requester
+ * @param {string} url
+ */
 async function handleVideo(id, requester, url) {
     if (id) {
         let res = await videoInfo(id, videoOpts);
@@ -221,7 +227,7 @@ async function handleVideo(id, requester, url) {
             throw new Error('Failed to get video info');
         }
     } else {
-        return new PlaybackItem(url, requester, url, null, moment.duration('0'), null);
+        return new PlaybackItem(url, requester.displayName, requester.user.id, requester.displayAvatarURL(), url, null, moment.duration('0'), null);
     }
 }
 
@@ -238,7 +244,8 @@ async function handlePlaylist(player, id, requester, skip_first, callback) {
 
         for (let i of items) {
             if (skipped || !skip_first) {
-                let video = handleVideo(i.videoId, requester);
+                let YTurl = 'https://www.youtube.com/watch?v=' + i.videoId;
+                let video = await handleVideo(i.videoId, requester, YTurl);
                 player.enqueue(video);
             }
             skipped = true;

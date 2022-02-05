@@ -29,7 +29,7 @@ module.exports = {
         }
 
         if (!player.playing) {
-            interaction.reply({ content: strings.nothingPlaying });
+            interaction.reply({ content: strings.nothingPlaying, ephemeral: true });
             return;
         }
         let np = player.getNowPlaying();
