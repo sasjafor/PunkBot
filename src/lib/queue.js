@@ -16,87 +16,85 @@ http://creativecommons.org/publicdomain/zero/1.0/legalcode
  */
 class Queue {
     constructor() {
-
         // initialise the queue and offset
         this.queue = [];
-        var offset = 0;
+        this.offset = 0;
+    }
 
-        // Returns the length of the queue.
-        this.getLength = function () {
-            return (this.queue.length - offset);
-        };
+    // Returns the length of the queue.
+    getLength() {
+        return (this.queue.length - this.offset);
+    }
 
-        // Returns true if the queue is empty, and false otherwise.
-        this.isEmpty = function () {
-            return (this.queue.length == 0);
-        };
+    // Returns true if the queue is empty, and false otherwise.
+    isEmpty() {
+        return (this.queue.length == 0);
+    }
 
-        /* Enqueues the specified item. The parameter is:
-         *
-         * item - the item to enqueue
-         */
-        this.enqueue = function (item) {
-            this.queue.push(item);
-        };
+    /* Enqueues the specified item. The parameter is:
+     *
+     * item - the item to enqueue
+     */
+    enqueue(item) {
+        this.queue.push(item);
+    }
 
-        /* Dequeues an item and returns it. If the queue is empty, the value
-         * 'undefined' is returned.
-         */
-        this.dequeue = function () {
+    /* Dequeues an item and returns it. If the queue is empty, the value
+     * 'undefined' is returned.
+     */
+    dequeue() {
+        // if the queue is empty, return immediately
+        if (this.queue.length == 0) {
+            return undefined;
+        }
 
-            // if the queue is empty, return immediately
-            if (this.queue.length == 0) {
-                return undefined;
-            }
+        // store the item at the front of the queue
+        var item = this.queue[this.offset];
 
-            // store the item at the front of the queue
-            var item = this.queue[offset];
+        // increment the offset and remove the free space if necessary
+        if (++this.offset * 2 >= this.queue.length) {
+            this.queue = this.queue.slice(this.offset);
+            this.offset = 0;
+        }
 
-            // increment the offset and remove the free space if necessary
-            if (++offset * 2 >= this.queue.length) {
-                this.queue = this.queue.slice(offset);
-                offset = 0;
-            }
+        // return the dequeued item
+        return item;
+    }
 
-            // return the dequeued item
-            return item;
-        };
+    /* Returns the item at the front of the queue (without dequeuing it). If the
+     * queue is empty then undefined is returned.
+     */
+    peek() {
+        return (this.queue.length > 0 ? this.queue[this.offset] : undefined);
+    }
 
-        /* Returns the item at the front of the queue (without dequeuing it). If the
-         * queue is empty then undefined is returned.
-         */
-        this.peek = function () {
-            return (this.queue.length > 0 ? this.queue[offset] : undefined);
-        };
+    /* Removes the item location at index from the queue.
+     * Not part of original code
+     *
+     * index - index of the item to be removed
+     */
+    remove(index) {
+        return this.queue.splice(index + this.offset, 1);
+    }
 
-        /* Removes the item location at index from the queue.
-         * Not part of original code
-         *
-         * index - index of the item to be removed
-         */
-        this.remove = function (index) {
-            return this.queue.splice(index + offset, 1);
-        };
+    get(index) {
+        return this.queue[index + this.offset];
+    }
 
-        this.get = function (index) {
-            return this.queue[index + offset];
-        };
+    /* Shuffles the queue
+     */
+    shuffle() {
+        var queue = this.queue;
+        var l = queue.length + 1;
+        while (l-- > this.offset) {
+            var r = ~~(Math.random() * (l - this.offset)) + this.offset, o = queue[r];
 
-        /* Shuffles the queue
-         */
-        this.shuffle = function () {
-            var queue = this.queue;
-            var l = queue.length + 1;
-            while (l-- > offset) {
-                var r = ~~(Math.random() * (l - offset)) + offset, o = queue[r];
-
-                queue[r] = queue[offset];
-                queue[offset] = o;
-            }
-        };
+            queue[r] = queue[this.offset];
+            queue[this.offset] = o;
+        }
     }
 }
 
 module.exports = {
     Queue,
-}
+};
