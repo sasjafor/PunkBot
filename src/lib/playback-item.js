@@ -9,22 +9,22 @@ class PlaybackItem {
         this.thumbnailURL = thumbnailURL;
         this.channelTitle = channelTitle;
         this.stream = null;
+    }
 
-        this.setTitle = function (title) {
-            this.title = title;
-        };
+    setTitle(title) {
+        this.title = title;
+    }
 
-        this.setDuration = function (duration) {
-            this.duration = duration;
-        };
+    setDuration(duration) {
+        this.duration = duration;
+    }
 
-        this.setThumbnailURL = function (thumbnailURL) {
-            this.thumbnailURL = thumbnailURL;
-        };
+    setThumbnailURL(thumbnailURL) {
+        this.thumbnailURL = thumbnailURL;
+    }
 
-        this.setChannelTitle = function (title) {
-            this.channelTitle = title;
-        };
+    setChannelTitle(title) {
+        this.channelTitle = title;
     }
 }
 
