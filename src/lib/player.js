@@ -70,11 +70,16 @@ class Player {
             next.stream = this.prepare_stream(next);
         }
 
-        if (this.stream && this.conn) {
-            debugd('Playing: ' + url);
+        console.log(this.stream);
+        let dispatchResult = null;
+        if (this.stream) {
+            if (this.conn) {
+                debugd('Playing: ' + url);
+                dispatchResult = this.dispatch();
+            }
+        } 
 
-            this.dispatch();
-        }
+        return dispatchResult;
     }
 
     next() {
@@ -114,7 +119,7 @@ class Player {
     async dispatch() {
         this.stream = await this.stream;
         if (!this.stream) {
-            return;
+            return -1;
         }
 
         if (this.stream.started) {

@@ -10,6 +10,7 @@ const debugv = Debug('punk_bot:verbose');
 // eslint-disable-next-line no-unused-vars
 const debugd = Debug('punk_bot:debug');
 
+const { LimitedDict } = require('./lib/limited-dict.js');
 const { Player } = require('./lib/player.js');
 const { strings } = require('./lib/strings.js');
 
@@ -18,7 +19,7 @@ const youtubeAPIKey = process.env.YOUTUBE_API_KEY;
 const client = new Client({ intents: [Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS] });
 
 const players = {};
-const youtubeCache = {};
+const youtubeCache = new LimitedDict(3);
 const commands = new Collection();
 const commandFiles = fs.readdirSync(path.resolve(__dirname, './commands')).filter(file => file.endsWith('.js'));
 

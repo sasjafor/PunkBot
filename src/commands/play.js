@@ -69,9 +69,10 @@ module.exports = {
                     .setURL(url);
         let searchReply = interaction.reply({ embeds: [searchEmbed] });
 
+        let playResult = 0;
         let pb = null;
         let queued = false;
-        let pbCached = youtubeCache[searchString];
+        let pbCached = youtubeCache.get(searchString);
         if (pbCached) {
             pb = pbCached;
             pb.requesterName = interaction.member.displayName;
@@ -146,10 +147,9 @@ module.exports = {
 
                 debugv('Added ' + url);
                 await connecting;
-                player.play();
+                playResult = player.play();
 
                 pb = await pbP;
-                console.log(pb);
                 pb_short.title = pb.title;
                 pb_short.duration = pb.duration;
                 pb_short.thumbnailURL = pb.thumbnailURL;
@@ -161,36 +161,47 @@ module.exports = {
             }
             pb.isYT = isYT;
 
-            youtubeCache[searchQuery] = pb;
-        }
-
-        let embed = null;
-        if (pb) {
-            if (pb.isYT) {
-                var prettyDuration = prettifyTime(pb.duration);
-                embed = new MessageEmbed()
-                    .setTitle(decode(pb.title))
-                    .setAuthor({ name: 'Playing', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
-                    .setURL(pb.url)
-                    .setThumbnail(pb.thumbnailURL)
-                    .addField('Channel', pb.channelTitle)
-                    .addField('Song Duration', prettyDuration);
-
-                if (queued) {
-                    let timeUntilPlaying = await player.getTotalRemainingPlaybackTime();
-                    let prettyTut = prettifyTime(timeUntilPlaying);
-                    embed = embed.setAuthor({ name: 'Added to queue', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
-                                 .addField('Estimated time until playing', prettyTut)
-                                 .addField('Position in queue', String(player.queue.getLength()));
-                }
-            } else {
-                //TODO: embed for non youtube links
-            }
+            youtubeCache.push(searchQuery, pb);
         }
         
-        if (embed) {
+        youtubeCache.printlist();
+        playResult = await playResult;
+        if (playResult == -1) {
             await searchReply;
-            interaction.editReply({ content: null, embeds: [embed] });
+            let failEmbed = new MessageEmbed()
+                    .setTitle(searchString)
+                    .setAuthor({ name: 'Failed to create stream for your request, try again!', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
+                    .setURL(url);
+            interaction.editReply({ embeds: [failEmbed], ephemeral: true });
+        } else {
+            let embed = null;
+            if (pb) {
+                if (pb.isYT) {
+                    var prettyDuration = prettifyTime(pb.duration);
+                    embed = new MessageEmbed()
+                        .setTitle(decode(pb.title))
+                        .setAuthor({ name: 'Playing', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
+                        .setURL(pb.url)
+                        .setThumbnail(pb.thumbnailURL)
+                        .addField('Channel', pb.channelTitle)
+                        .addField('Song Duration', prettyDuration);
+
+                    if (queued) {
+                        let timeUntilPlaying = await player.getTotalRemainingPlaybackTime();
+                        let prettyTut = prettifyTime(timeUntilPlaying);
+                        embed = embed.setAuthor({ name: 'Added to queue', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
+                                    .addField('Estimated time until playing', prettyTut)
+                                    .addField('Position in queue', String(player.queue.getLength()));
+                    }
+                } else {
+                    //TODO: embed for non youtube links
+                }
+            }
+
+            if (embed) {
+                await searchReply;
+                interaction.editReply({ content: null, embeds: [embed] });
+            }
         }
 	},
 };

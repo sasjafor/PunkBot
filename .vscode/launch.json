@@ -1,0 +1,24 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "pwa-node",
+            "runtimeVersion": "17.2.0",
+            "request": "launch",
+            "name": "Launch Program",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "env": {
+                "DEBUG": "punk_bot*",
+                "YOUTUBE_DL_DIR": "/usr/local/bin/youtube-dl",
+                "DISCORD_APP_AUTH_TOKEN": "MzQ3MzgxNTQyOTQ0NzY4MDEx.Xaso8A.YmD5j47VWPlfiH3bxmpwjLJd4Hc",
+                "YOUTUBE_API_KEY": "AIzaSyDbwqei2JaSu-wo49e9KdR6VHID-cXYAz4",
+            },
+            "program": "${workspaceFolder}/src/bot.js"
+        }
+    ]
+}

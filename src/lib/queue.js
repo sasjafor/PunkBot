@@ -35,6 +35,9 @@ class Queue {
      *
      * item - the item to enqueue
      */
+    /**
+     * @param {any} item
+     */
     enqueue(item) {
         this.queue.push(item);
     }
@@ -73,10 +76,16 @@ class Queue {
      *
      * index - index of the item to be removed
      */
+    /**
+     * @param {number} index
+     */
     remove(index) {
         return this.queue.splice(index + this.offset, 1);
     }
 
+    /**
+     * @param {number} index
+     */
     get(index) {
         return this.queue[index + this.offset];
     }
