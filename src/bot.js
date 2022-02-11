@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { Client, Collection, GuildMember, Intents, TextChannel } = require('discord.js');
+const { Client, Collection, GuildMember, Intents, TextChannel, DiscordAPIError } = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const Debug = require('debug');
@@ -19,7 +19,7 @@ const youtubeAPIKey = process.env.YOUTUBE_API_KEY;
 const client = new Client({ intents: [Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS] });
 
 const players = {};
-const youtubeCache = new LimitedDict(3);
+const youtubeCache = new LimitedDict(100);
 const commands = new Collection();
 const commandFiles = fs.readdirSync(path.resolve(__dirname, './commands')).filter(file => file.endsWith('.js'));
 
@@ -96,8 +96,20 @@ client.on('interactionCreate', async interaction => {
 	try {
 		await command.execute(interaction);
 	} catch (error) {
-		console.error(error);
-		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+		debug(error);
+        if (interaction.replied) {
+            await interaction.editReply({ content: 'There was an error while executing this command!', embeds: [] });
+        } else {
+            try {
+                await interaction.reply({ content: 'There was an error while executing this command!', embeds: [], ephemeral: true });
+            } catch (err) {
+                if (err instanceof DiscordAPIError && err.message.includes('Interaction has already been acknowledged.')) {
+                    await interaction.editReply({ content: 'There was an error while executing this command!', embeds: [] });
+                } else {
+                    debug(err);
+                }
+            }
+        }
 	}
 });
 

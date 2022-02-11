@@ -45,9 +45,6 @@ class Player {
     }
 
     play() {
-        // if (this.playing) {
-        //     return;
-        // }
         this.playing = true;
         
         clearTimeout(this.timeout);
@@ -70,7 +67,6 @@ class Player {
             next.stream = this.prepare_stream(next);
         }
 
-        console.log(this.stream);
         let dispatchResult = null;
         if (this.stream) {
             if (this.conn) {

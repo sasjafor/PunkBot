@@ -66,7 +66,7 @@ module.exports = {
             }
             desc += '\n**' + queueLength + ' songs in queue | ' + prettifyTime(await player.getTotalQueueTime()) + ' total length**';
             if (numTabs > 1) {
-                embed.setFooter('Tab ' + index + '/' + numTabs, interaction.member.avatarURL());
+                embed.setFooter({ text: 'Tab ' + index + '/' + numTabs, iconURL: interaction.member.avatarURL() });
             }
         }
 

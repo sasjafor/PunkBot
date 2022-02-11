@@ -164,6 +164,11 @@ async function fastSearch(term, key) {
     });
 }
 
+/**
+ * @param {any} id
+ * @param {{ [x: string]: any; part?: any; }} opts
+ * @param {{ (err: any, results: any, pageInfo: any): void; (arg0: any, arg1: undefined, arg2: { totalResults: any; resultsPerPage: any; }): any; }} cb
+ */
 function videoInfo(id, opts, cb) {
     if (typeof opts === 'function') {
         cb = opts;
@@ -229,14 +234,85 @@ function videoInfo(id, opts, cb) {
         });
 }
 
-function playlistInfo(id, opts, page_token, cb) {
+function playlistInfo(id, opts, pageToken, cb) {
     if (!opts) {
         opts = {};
     }
 
     if (!cb) {
         return new Promise(function(resolve, reject) {
-            playlistInfo(id, opts, page_token, function(err, results, pageInfo) {
+            playlistInfo(id, opts, pageToken, function(/** @type {any} */ err, /** @type {any} */ results, /** @type {any} */ pageInfo) {
+                if (err) {
+                    return reject(err);
+                }
+                resolve({
+                    results: results,
+                    pageInfo: pageInfo
+                });
+            });
+        });
+    }
+
+    var params = {
+        id: id,
+        part: opts.part,
+    };
+
+    if (pageToken) {
+        params.pageToken = pageToken;
+    }
+
+    Object.keys(opts)
+        .map(function(k) {
+            if (allowedProperties.indexOf(k) > -1) {
+                params[k] = opts[k];
+            }
+        });
+
+    axios.get('https://youtube.googleapis.com/youtube/v3/playlists?' + querystring.stringify(params))
+        .then(function(response) {
+            var result = response.data;
+
+            var pageInfo = {
+                totalResults: result.pageInfo.totalResults,
+                resultsPerPage: result.pageInfo.resultsPerPage,
+                nextPageToken: result.nextPageToken
+            };
+
+            var findings = result.items.map(function(item) {
+                return {
+                    kind: item.kind,
+                    publishedAt: item.snippet?.publishedAt,
+                    channelId: item.snippet?.channelId,
+                    channelTitle: item.snippet?.channelTitle,
+                    title: item.snippet?.title,
+                    description: item.snippet?.description,
+                    thumbnails: item.snippet?.thumbnails,
+                    itemCount: item.contentDetails?.itemCount,
+                };
+            });
+
+            return cb(null, findings, pageInfo);
+        })
+        .catch(function(err) {
+            return cb(err);
+        });
+}
+
+/**
+ * @param {any} id
+ * @param {{ [x: string]: any; part?: any; }} opts
+ * @param {any} page_token
+ * @param {{ (err: any, results: any, pageInfo: any): void; (arg0: any, arg1: undefined, arg2: { totalResults: any; resultsPerPage: any; nextPageToken: any; }): any; }} cb
+ */
+function playlistItems(id, opts, page_token, cb) {
+    if (!opts) {
+        opts = {};
+    }
+
+    if (!cb) {
+        return new Promise(function(resolve, reject) {
+            playlistItems(id, opts, page_token, function(/** @type {any} */ err, /** @type {any} */ results, /** @type {any} */ pageInfo) {
                 if (err) {
                     return reject(err);
                 }
@@ -250,7 +326,7 @@ function playlistInfo(id, opts, page_token, cb) {
 
     var params = {
         playlistId: id,
-        part: opts.part || 'snippet'
+        part: opts.part,
     };
 
     if (page_token) {
@@ -277,8 +353,8 @@ function playlistInfo(id, opts, page_token, cb) {
             var findings = result.items.map(function(item) {
                 return {
                     kind: item.kind,
-                    videoId: item.contentDetails.videoId,
-                    title: (params.part == 'snippet,contentDetails') ? item.snippet.title : null
+                    videoId: item.contentDetails?.videoId,
+                    title: item.snippet?.title,
                 };
             });
 
@@ -294,4 +370,5 @@ module.exports = {
     fastSearch,
     videoInfo,
     playlistInfo,
+    playlistItems,
 };

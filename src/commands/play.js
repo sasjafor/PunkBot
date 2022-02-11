@@ -13,6 +13,7 @@ const { strings } = require('../lib/strings.js');
 const { prettifyTime } = require('../lib/util.js');
 const { fastSearch,
         playlistInfo,
+        playlistItems,
         videoInfo,
 } = require('../lib/youtube-api.js');
 
@@ -21,9 +22,14 @@ var videoOpts = {
     part: 'contentDetails,snippet'
 };
 
+var playlistInfoOpts = {
+    key: youtubeAPIKey,
+    part: 'contentDetails,snippet',
+};
+
 var playlistOpts = {
     key: youtubeAPIKey,
-    part: 'contentDetails',
+    part: 'contentDetails,snippet',
     maxResults: 50
 };
 
@@ -58,7 +64,7 @@ module.exports = {
         }
 
         let searchRes = null;
-        let url = null;
+        let url = searchQuery;
         let id = null;
         let title = searchQuery;
         let searchString = searchQuery;
@@ -106,41 +112,76 @@ module.exports = {
                     return;
                 }
             } else {
-                url = searchQuery;
-            }
+                let playlistIdRegex = /(?:youtube(?:-nocookie)?\.com\/(?:[^/\n\s]+\/\S+\/|(?:playlist|e(?:mbed)?\/videoseries)\/|\S*?\?list=)|youtu\.be\/)([a-zA-Z0-9_-]{34})/;
+                if (playlistIdRegex.test(url)) {
+                    let playlistId = url.match(playlistIdRegex)[1];
+                    let playlistCallback = async function(num) {
+                        let playlistInfoRes;
+                        try {
+                            playlistInfoRes = await playlistInfo(playlistId, playlistInfoOpts);
+                        } catch(err) {
+                            debug(err);
+                        }
+                        if (playlistInfoRes) {
+                            let pi = playlistInfoRes.results[0];
 
-            let playlistIdRegex = /(?:youtube(?:-nocookie)?\.com\/(?:[^/\n\s]+\/\S+\/|(?:playlist|e(?:mbed)?\/videoseries)\/|\S*?\?list=)|youtu\.be\/)([a-zA-Z0-9_-]{34})/;
-            if (playlistIdRegex.test(url)) {
-                let playlistId = url.match(playlistIdRegex)[1];
-                let playlist_callback = function(num) {
-                    interaction.reply({ content: ':white_check_mark: **Enqueued** `' + num + '` songs' });
-                };
-                if (!player.playing) {
-                    let customOpts = {
-                        ...playlistOpts
+                            let playlistEmbed = new MessageEmbed()
+                                .setTitle(pi.title)
+                                .setAuthor({ name: 'Enqueued playlist', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot' })
+                                .setURL(url)
+                                .setThumbnail(pb.thumbnailURL)
+                                .addField('Channel', pi.channelTitle)
+                                .addField('Enqueued Items', String(num));
+                            interaction.channel.send({ embeds: [playlistEmbed] });
+                        }
                     };
-                    customOpts.maxResults = 1;
-                    customOpts.part = 'snippet,contentDetails';
-                    let playlistRes = await playlistInfo(playlistId, customOpts);
-                    if (playlistRes) {
-                        id = playlistRes.results[0].videoId;
-                        url = 'https://www.youtube.com/watch?v=' + id;
-                        title = playlistRes.results[0].title;
+                    if (!player.playing) {
+                        let customOpts = {
+                            ...playlistOpts
+                        };
+                        customOpts.maxResults = 1;
+                        customOpts.part = 'snippet,contentDetails';
+                        let playlistRes = null;
+                        try {
+                            playlistRes = await playlistItems(playlistId, customOpts);
+                        } catch(err) {
+                            if (err.response?.status == 404) {
+                                await searchReply;
+                                let failEmbed = new MessageEmbed()
+                                        .setTitle(searchString)
+                                        .setAuthor({ name: 'Playlist not found or private', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
+                                        .setURL(url);
+                                await interaction.editReply({ embeds: [failEmbed], ephemeral: true });
+                            }
+                            return;
+                        }
+                        if (playlistRes) {
+                            id = playlistRes.results[0].videoId;
+                            url = 'https://www.youtube.com/watch?v=' + id;
+                            title = playlistRes.results[0].title;
+                        }
+                        handlePlaylist(player, playlistId, interaction.member, true, playlistCallback);
+                    } else {
+                        handlePlaylist(player, playlistId, interaction.member, false, playlistCallback);
+                        return;
                     }
-                    handlePlaylist(player, playlistId, interaction.member, true, playlist_callback);
-                } else {
-                    handlePlaylist(player, playlistId, interaction.member, false, playlist_callback);
-                    return;
                 }
             }
 
             if (!id) {
                 id = getYTid(url);
             }
-
             let isYT = id != null;
 
-            let pbP = handleVideo(id, interaction.member, url);
+            if (!isYT) {
+                let fileNameRegex = /\/([\w\-. ]+)\.[\w\- ]+$/;
+                let matches = searchQuery.match(fileNameRegex);
+                if (matches) {
+                    title = matches[1];
+                }
+            }
+
+            let pbP = handleVideo(id, interaction.member, url, title);
             if (!player.playing) {
                 let pb_short = new PlaybackItem(url, interaction.member.displayName, interaction.user.id, interaction.member.displayAvatarURL(), title);
                 player.enqueue(pb_short);
@@ -161,10 +202,12 @@ module.exports = {
             }
             pb.isYT = isYT;
 
-            youtubeCache.push(searchQuery, pb);
+            if (isYT) {
+                youtubeCache.push(searchQuery, pb);
+            }
         }
         
-        youtubeCache.printlist();
+        // youtubeCache.printlist();
         playResult = await playResult;
         if (playResult == -1) {
             await searchReply;
@@ -195,6 +238,18 @@ module.exports = {
                     }
                 } else {
                     //TODO: embed for non youtube links
+                    embed = new MessageEmbed()
+                        .setTitle(decode(pb.title))
+                        .setAuthor({ name: 'Playing', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
+                        .setURL(pb.url);
+
+                    if (queued) {
+                        let timeUntilPlaying = await player.getTotalRemainingPlaybackTime();
+                        let prettyTut = prettifyTime(timeUntilPlaying);
+                        embed = embed.setAuthor({ name: 'Added to queue', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
+                                    .addField('Estimated time until playing', prettyTut)
+                                    .addField('Position in queue', String(player.queue.getLength()));
+                    }
                 }
             }
 
@@ -206,6 +261,9 @@ module.exports = {
 	},
 };
 
+/**
+ * @param {string} url
+ */
 function getYTid(url) {
     let idRegex = /(?:youtube(?:-nocookie)?\.com\/(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
     let match = url.match(idRegex);
@@ -219,36 +277,44 @@ function getYTid(url) {
 
 /**
  * @param {string} id
- * @param {{ displayName: any; user: { id: any; }; displayAvatarURL: () => any; }} requester
+ * @param {{displayName: any;user: {id: any;};displayAvatarURL: () => any;}} requester
  * @param {string} url
+ * @param {string | undefined} [title]
  */
-async function handleVideo(id, requester, url) {
+async function handleVideo(id, requester, url, title) {
     if (id) {
         let res = await videoInfo(id, videoOpts);
         res = res.results[0];
 
         if (res) {
-            let YTurl = 'https://www.youtube.com/watch?v=' + id;
-            let title = res.title;
-            let thumbnailURL = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
-            let duration = moment.duration(res.duration);
-            let channelTitle = res.channelTitle;
-            return new PlaybackItem(YTurl, requester.displayName, requester.user.id, requester.displayAvatarURL(), title, thumbnailURL, duration, channelTitle);
+            let ytUrl = 'https://www.youtube.com/watch?v=' + id;
+            let ytTitle = res.title;
+            let ytThumbnailURL = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
+            let ytDuration = moment.duration(res.duration);
+            let ytChannelTitle = res.channelTitle;
+            return new PlaybackItem(ytUrl, requester.displayName, requester.user.id, requester.displayAvatarURL(), ytTitle, ytThumbnailURL, ytDuration, ytChannelTitle);
         } else {
             throw new Error('Failed to get video info');
         }
     } else {
-        return new PlaybackItem(url, requester.displayName, requester.user.id, requester.displayAvatarURL(), url, null, moment.duration('0'), null);
+        return new PlaybackItem(url, requester.displayName, requester.user.id, requester.displayAvatarURL(), title, null, moment.duration('0'), null);
     }
 }
 
+/**
+ * @param {{ enqueue: (arg0: PlaybackItem) => void; }} player
+ * @param {any} id
+ * @param {{ displayName: any; user: { id: any; }; displayAvatarURL: () => any; }} requester
+ * @param {boolean} skip_first
+ * @param {{ (num: any): void; (num: any): void; (arg0: number): void; }} callback
+ */
 async function handlePlaylist(player, id, requester, skip_first, callback) {
     let skipped = false;
     let page_info = null;
     let page_token = null;
     let k = 0;
     do {
-        let res = await playlistInfo(id, playlistOpts, page_token);
+        let res = await playlistItems(id, playlistOpts, page_token);
         page_info = res.pageInfo;
         page_token = (page_info) ? page_info.nextPageToken : null;
         let items = res.results;
