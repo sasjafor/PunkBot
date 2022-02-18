@@ -66,11 +66,12 @@ module.exports = {
             .setTitle(searchString)
             .setAuthor({ name: 'Searching', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
             .setURL(url);
-        let searchReply = interaction.reply({ embeds: [searchEmbed], ephemeral: true });
+        let searchReply = interaction.reply({ embeds: [searchEmbed] });
 
         let playResult = 0;
         let pb = null;
         let queued = false;
+        let playlist = false;
         let pbCached = youtubeCache.get(searchString);
         if (pbCached) {
             pb = pbCached;
@@ -110,15 +111,16 @@ module.exports = {
                 url = searchQuery;
                 let playlistIdRegex = /(?:youtube(?:-nocookie)?\.com\/(?:[^/\n\s]+\/\S+\/|(?:playlist|e(?:mbed)?\/videoseries)\/|\S*?\?list=)|youtu\.be\/)([a-zA-Z0-9_-]{34})/;
                 if (playlistIdRegex.test(url)) {
+                    playlist = true;
                     let playlistId = url.match(playlistIdRegex)[1];
-                    let playlistCallback = async function(num) {
+                    let playlistCallback = async function(successCount, failCount) {
                         let playlistInfoRes;
                         try {
                             playlistInfoRes = await playlistInfo(playlistId, playlistInfoOpts);
                         } catch(error) {
                             console.trace(error.name + ': ' + error.message);
                             await searchReply;
-                            errorReply(interaction, searchString, err.response?.data?.error?.message, url);
+                            errorReply(interaction, searchString, error.response?.data?.error?.message, url);
                             return;
                         }
                         let pi = playlistInfoRes.results[0];
@@ -127,9 +129,9 @@ module.exports = {
                             .setTitle(pi.title)
                             .setAuthor({ name: 'Enqueued playlist', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot' })
                             .setURL(url)
-                            .setThumbnail(pb.thumbnailURL)
+                            .setThumbnail(pi.thumbnails.maxres.url)
                             .addField('Channel', pi.channelTitle)
-                            .addField('Enqueued Items', String(num));
+                            .addField('Enqueued Items', successCount + '/' + pi.itemCount);
                         interaction.channel.send({ embeds: [playlistEmbed] });
                     };
                     if (!player.playing) {
@@ -152,9 +154,9 @@ module.exports = {
                             url = 'https://www.youtube.com/watch?v=' + id;
                             title = playlistRes.results[0].title;
                         }
-                        handlePlaylist(player, playlistId, interaction.member, true, playlistCallback, interaction.channel);
+                        handlePlaylist(player, playlistId, interaction.member, true, playlistCallback, interaction.channel, interaction.member.displayAvatarURL());
                     } else {
-                        handlePlaylist(player, playlistId, interaction.member, false, playlistCallback, interaction.channel);
+                        handlePlaylist(player, playlistId, interaction.member, false, playlistCallback, interaction.channel, interaction.member.displayAvatarURL());
                         return;
                     }
                 }
@@ -206,7 +208,7 @@ module.exports = {
             }
             pb.isYT = isYT;
 
-            if (isYT) {
+            if (isYT && !playlist) {
                 youtubeCache.push(searchQuery, pb);
             }
         }
@@ -275,7 +277,7 @@ async function handleVideo(id, requester, url, title) {
         if (res) {
             let ytUrl = 'https://www.youtube.com/watch?v=' + id;
             let ytTitle = res.title;
-            let ytThumbnailURL = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
+            let ytThumbnailURL = res.thumbnails.maxres.url;
             let ytDuration = moment.duration(res.duration);
             let ytChannelTitle = res.channelTitle;
             return new PlaybackItem(ytUrl, requester.displayName, requester.user.id, requester.displayAvatarURL(), ytTitle, ytThumbnailURL, ytDuration, ytChannelTitle);
@@ -293,11 +295,14 @@ async function handleVideo(id, requester, url, title) {
  * @param {{ displayName: any; user: { id: any; }; displayAvatarURL: () => any; }} requester
  * @param {boolean} skipFirst
  */
-async function handlePlaylist(player, id, requester, skipFirst, callback, channel) {
+async function handlePlaylist(player, id, requester, skipFirst, callback, channel, avatarURL) {
     let skipped = false;
     let pageInfo = null;
     let pageToken = null;
     let successCount = 0;
+    if (skipFirst) {
+        successCount++;
+    }
     let failCount = 0;
     do {
         let res;
@@ -306,7 +311,7 @@ async function handlePlaylist(player, id, requester, skipFirst, callback, channe
         } catch(error) {
             console.trace(error.name + ': ' + error.message);
             let url = 'https://www.youtube.com/playlist?list=' + id;
-            errorReply(undefined, url, err.response?.data?.error?.message, url, channel);
+            errorReply(undefined, url, error.response?.data?.error?.message, url, channel, avatarURL);
             return null;
         }
         pageInfo = res.pageInfo;

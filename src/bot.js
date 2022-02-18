@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { Client, Collection, GuildMember, Intents, TextChannel, DiscordAPIError } = require('discord.js');
+const { Client, Collection, GuildMember, Intents, TextChannel } = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const Debug = require('debug');

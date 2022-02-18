@@ -2,20 +2,21 @@ const { DiscordAPIError,
         MessageEmbed } = require('discord.js');
 const { strings } = require('./strings');
 
-async function errorReply(interaction, msgContent, errorMessage = strings.commandFailed, url = null, channel = null) {
+async function errorReply(interaction, msgContent, errorMessage = strings.commandFailed, url = null, channel = null, avatarURL = null) {
     if (!msgContent) {
         msgContent = strings.errorMsgNotAvailable;
     }
     let embed = new MessageEmbed()
         .setColor('#FF0000')
-        .setTitle(msgContent)
-        .setAuthor({ name: errorMessage, iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'});
+        .setTitle(msgContent);
 
     if (url) {
         embed = embed.setURL(url);
     }
 
     if (interaction) {
+        embed = embed.setAuthor({ name: errorMessage, iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'});
+
         let message = { embeds: [embed], ephemeral: true };
         if (interaction.replied) {
             await interaction.editReply(message);
@@ -31,6 +32,8 @@ async function errorReply(interaction, msgContent, errorMessage = strings.comman
             }
         }
     } else {
+        embed = embed.setAuthor({ name: errorMessage, iconURL: avatarURL, url: 'https://github.com/sasjafor/PunkBot'});
+
         let message = { embeds: [embed] };
         channel.send(message);
     }
