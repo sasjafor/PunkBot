@@ -1,5 +1,7 @@
+const moment = require('moment');
+
 class PlaybackItem {
-    constructor(url, requesterName, requesterId, requesterIconURL, title, thumbnailURL, duration, channelTitle) {
+    constructor(url, requesterName, requesterId, requesterIconURL, title, thumbnailURL = null, duration = moment.duration('0'), channelTitle = null) {
         this.url = url;
         this.duration = duration;
         this.requesterName = requesterName;

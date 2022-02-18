@@ -72,7 +72,7 @@ function search(term, opts, cb) {
                 params[k] = opts[k];
             }
         });
-    axios.get('https://www.googleapis.com/youtube/v3/search?' + querystring.stringify(params))
+    axios.get('https://youtube.googleapis.com/youtube/v3/search?' + querystring.stringify(params))
         .then(function(response) {
             var result = response.data;
 
@@ -133,31 +133,35 @@ async function fastSearch(term, key) {
 
         var data = '';
 
-        const clientSession = http2.connect('https://www.googleapis.com');
+        const clientSession = http2.connect('https://youtube.googleapis.com');
 
         const req = clientSession.request({
             ':path': '/youtube/v3/search?' + querystring.stringify(params)
         });
 
         req.on('response', () => {
-                req.on('data', (d) => {
-                    data += d;
-                });
-                req.on('end', () => {
-                    var response = JSON.parse(data)
-                        .items[0];
-                    var result = {};
-                    if (response) {
-                        result.url = 'https://www.youtube.com/watch?v=' + response.id.videoId;
-                        result.id = response.id.videoId;
-                        result.title = response.snippet.title;
-                        clientSession.destroy();
-                    } else {
-                        resolve(false);
-                    }
-                    resolve(result);
-                });
-            })
+            req.on('data', (d) => {
+                data += d;
+            });
+            req.on('end', () => {
+                let json = JSON.parse(data);
+                if (json.error.code != 200) {
+                    console.error(json.error.message);
+                    return resolve(false);
+                }
+                var response = json.items[0];
+                var result = {};
+                if (response) {
+                    result.url = 'https://www.youtube.com/watch?v=' + response.id.videoId;
+                    result.id = response.id.videoId;
+                    result.title = response.snippet.title;
+                    clientSession.destroy();
+                } else {
+                    return resolve(false);
+                }
+                return resolve(result);
+            });
+        })
             .on('error', (e) => {
                 reject(e);
             });
@@ -205,7 +209,7 @@ function videoInfo(id, opts, cb) {
             }
         });
 
-    axios.get('https://www.googleapis.com/youtube/v3/videos?' + querystring.stringify(params))
+    axios.get('https://youtube.googleapis.com/youtube/v3/videos?' + querystring.stringify(params))
         .then(function(response) {
             var result = response.data;
 
@@ -302,17 +306,17 @@ function playlistInfo(id, opts, pageToken, cb) {
 /**
  * @param {any} id
  * @param {{ [x: string]: any; part?: any; }} opts
- * @param {any} page_token
+ * @param {any} pageToken
  * @param {{ (err: any, results: any, pageInfo: any): void; (arg0: any, arg1: undefined, arg2: { totalResults: any; resultsPerPage: any; nextPageToken: any; }): any; }} cb
  */
-function playlistItems(id, opts, page_token, cb) {
+function playlistItems(id, opts, pageToken, cb) {
     if (!opts) {
         opts = {};
     }
 
     if (!cb) {
         return new Promise(function(resolve, reject) {
-            playlistItems(id, opts, page_token, function(/** @type {any} */ err, /** @type {any} */ results, /** @type {any} */ pageInfo) {
+            playlistItems(id, opts, pageToken, function(/** @type {any} */ err, /** @type {any} */ results, /** @type {any} */ pageInfo) {
                 if (err) {
                     return reject(err);
                 }
@@ -329,8 +333,8 @@ function playlistItems(id, opts, page_token, cb) {
         part: opts.part,
     };
 
-    if (page_token) {
-        params.pageToken = page_token;
+    if (pageToken) {
+        params.pageToken = pageToken;
     }
 
     Object.keys(opts)
@@ -340,7 +344,7 @@ function playlistItems(id, opts, page_token, cb) {
             }
         });
 
-    axios.get('https://www.googleapis.com/youtube/v3/playlistItems?' + querystring.stringify(params))
+    axios.get('https://youtube.googleapis.com/youtube/v3/playlistItems?' + querystring.stringify(params))
         .then(function(response) {
             var result = response.data;
 

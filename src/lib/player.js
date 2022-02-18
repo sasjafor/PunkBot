@@ -15,8 +15,8 @@ const prism = require('prism-media');
 // const ytdl = require('ytdl-core');
 // const ytdl_full = require('youtube-dl-exec');
 // const EventEmitter = require('events');
-const YoutubeDlWrap = require('youtube-dl-wrap');
-const youtubeDlWrap = new YoutubeDlWrap('youtube-dl');
+// const YoutubeDlWrap = require('youtube-dl-wrap');
+// const youtubeDlWrap = new YoutubeDlWrap('youtube-dl');
 
 const { Queue } = require('./queue.js');
 

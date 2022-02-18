@@ -64,7 +64,7 @@ module.exports = {
         }
 
         let searchRes = null;
-        let url = searchQuery;
+        let url = null;
         let id = null;
         let title = searchQuery;
         let searchString = searchQuery;
@@ -88,7 +88,7 @@ module.exports = {
             if (!player.playing) {
                 player.enqueue(pb);
 
-                debugv('Added ' + url);
+                debugv('Added ' + pb.url);
                 await connecting;
                 player.play();
             } else {
@@ -112,6 +112,7 @@ module.exports = {
                     return;
                 }
             } else {
+                url = searchQuery;
                 let playlistIdRegex = /(?:youtube(?:-nocookie)?\.com\/(?:[^/\n\s]+\/\S+\/|(?:playlist|e(?:mbed)?\/videoseries)\/|\S*?\?list=)|youtu\.be\/)([a-zA-Z0-9_-]{34})/;
                 if (playlistIdRegex.test(url)) {
                     let playlistId = url.match(playlistIdRegex)[1];
@@ -143,7 +144,7 @@ module.exports = {
                         customOpts.part = 'snippet,contentDetails';
                         let playlistRes = null;
                         try {
-                            playlistRes = await playlistItems(playlistId, customOpts);
+                            playlistRes = await playlistItems(playlistId, customOpts, null, null);
                         } catch(err) {
                             if (err.response?.status == 404) {
                                 await searchReply;
@@ -152,6 +153,8 @@ module.exports = {
                                         .setAuthor({ name: 'Playlist not found or private', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
                                         .setURL(url);
                                 await interaction.editReply({ embeds: [failEmbed], ephemeral: true });
+                            } else {
+                                console.error(err.response.data.error.message);
                             }
                             return;
                         }
@@ -183,21 +186,27 @@ module.exports = {
 
             let pbP = handleVideo(id, interaction.member, url, title);
             if (!player.playing) {
-                let pb_short = new PlaybackItem(url, interaction.member.displayName, interaction.user.id, interaction.member.displayAvatarURL(), title);
-                player.enqueue(pb_short);
+                let pbShort = new PlaybackItem(url, interaction.member.displayName, interaction.user.id, interaction.member.displayAvatarURL(), title);
+                player.enqueue(pbShort);
 
                 debugv('Added ' + url);
                 await connecting;
                 playResult = player.play();
 
                 pb = await pbP;
-                pb_short.title = pb.title;
-                pb_short.duration = pb.duration;
-                pb_short.thumbnailURL = pb.thumbnailURL;
-                pb_short.channelTitle = pb.channelTitle;
+                if (pb == null) {
+                    return;
+                }
+                pbShort.title = pb.title;
+                pbShort.duration = pb.duration;
+                pbShort.thumbnailURL = pb.thumbnailURL;
+                pbShort.channelTitle = pb.channelTitle;
             } else {
                 queued = true;
                 pb = await pbP;
+                if (pb == null) {
+                    return;
+                }
                 player.enqueue(pb);
             }
             pb.isYT = isYT;
@@ -283,7 +292,13 @@ function getYTid(url) {
  */
 async function handleVideo(id, requester, url, title) {
     if (id) {
-        let res = await videoInfo(id, videoOpts);
+        let res;
+        try {
+            res = await videoInfo(id, videoOpts, null);
+        } catch(err) {
+            console.error(err.response.data.error.message);
+            return null;
+        }
         res = res.results[0];
 
         if (res) {
@@ -305,28 +320,36 @@ async function handleVideo(id, requester, url, title) {
  * @param {{ enqueue: (arg0: PlaybackItem) => void; }} player
  * @param {any} id
  * @param {{ displayName: any; user: { id: any; }; displayAvatarURL: () => any; }} requester
- * @param {boolean} skip_first
+ * @param {boolean} skipFirst
  * @param {{ (num: any): void; (num: any): void; (arg0: number): void; }} callback
  */
-async function handlePlaylist(player, id, requester, skip_first, callback) {
+async function handlePlaylist(player, id, requester, skipFirst, callback) {
     let skipped = false;
     let page_info = null;
     let page_token = null;
     let k = 0;
     do {
-        let res = await playlistItems(id, playlistOpts, page_token);
+        let res;
+        try {
+            res = await playlistItems(id, playlistOpts, page_token, null);
+        } catch(err) {
+            console.error(err.response.data.error.message);
+            return null;
+        }
         page_info = res.pageInfo;
         page_token = (page_info) ? page_info.nextPageToken : null;
         let items = res.results;
 
         for (let i of items) {
-            if (skipped || !skip_first) {
+            if (skipped || !skipFirst) {
                 let YTurl = 'https://www.youtube.com/watch?v=' + i.videoId;
                 let video = await handleVideo(i.videoId, requester, YTurl);
-                player.enqueue(video);
+                if (video != null) {
+                    k++;
+                    player.enqueue(video);
+                }
             }
             skipped = true;
-            k++;
         }
     } while (page_info.nextPageToken);
     debugd('DONE processing playlist!');
