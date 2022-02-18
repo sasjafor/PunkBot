@@ -32,10 +32,10 @@ module.exports = {
 };
 
 for (const file of commandFiles) {
-	const command = require(`./commands/${file}`);
-	// Set a new item in the Collection
-	// With the key as the command name and the value as the exported module
-	commands.set(command.data.name, command);
+    const command = require(`./commands/${file}`);
+    // Set a new item in the Collection
+    // With the key as the command name and the value as the exported module
+    commands.set(command.data.name, command);
     // Add command JSON to list
     commandJSONs.push(command.data.toJSON());
 }
@@ -71,9 +71,9 @@ client.on('interactionCreate', async interaction => {
         return;
     }
 
-	const command = commands.get(interaction.commandName);
+    const command = commands.get(interaction.commandName);
 
-	if (!command) {
+    if (!command) {
         return;
     }
 
@@ -93,10 +93,10 @@ client.on('interactionCreate', async interaction => {
         player = players[guildId] = new Player();
     }
 
-	try {
-		await command.execute(interaction);
-	} catch (error) {
-		debug(error);
+    try {
+        await command.execute(interaction);
+    } catch (error) {
+        debug(error);
         if (interaction.replied) {
             await interaction.editReply({ content: 'There was an error while executing this command!', embeds: [] });
         } else {
@@ -110,7 +110,7 @@ client.on('interactionCreate', async interaction => {
                 }
             }
         }
-	}
+    }
 });
 
 client.on('messageCreate', async message => {
@@ -118,7 +118,7 @@ client.on('messageCreate', async message => {
         return;
     }
 
-    if (message.content[0] == '!') {
+    if (message.content[0] === '!') {
         if (!(message.channel instanceof TextChannel) || !message.channel.permissionsFor(message.guild.me).has('SEND_MESSAGES')) {
             return;
         }

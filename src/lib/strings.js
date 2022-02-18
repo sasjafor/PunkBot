@@ -1,4 +1,5 @@
 const strings = {
+    commandFailed: 'Command failed',
     needToBeInVoice: ':x: **You have to be in a voice channel in this guild to use this command.**',
     noPermissionToConnect: ':no_good: **No permission to connect to** ',
     searchingFor: '<:youtube:519902612976304145> **Searching** :mag_right: ',

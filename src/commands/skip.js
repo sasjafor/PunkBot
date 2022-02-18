@@ -4,11 +4,11 @@ const { players } = require('../bot.js');
 const { strings } = require('../lib/strings.js');
 
 module.exports = {
-	data: new SlashCommandBuilder()
-		.setName('skip')
-		.setDescription('Skips the current song.')
+    data: new SlashCommandBuilder()
+        .setName('skip')
+        .setDescription('Skips the current song.')
     ,
-	async execute(interaction) {
+    async execute(interaction) {
         let guildId = interaction.guild.id;
         let player = players[guildId];
 

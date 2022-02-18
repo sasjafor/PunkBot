@@ -6,11 +6,11 @@ const { prettifyTime } = require('../lib/util.js');
 const { strings } = require('../lib/strings.js');
 
 module.exports = {
-	data: new SlashCommandBuilder()
-		.setName('now-playing')
-		.setDescription('Shows the song that is currently playing.')
+    data: new SlashCommandBuilder()
+        .setName('now-playing')
+        .setDescription('Shows the song that is currently playing.')
     ,
-	async execute(interaction) {
+    async execute(interaction) {
         let guildId = interaction.guild.id;
         let player = players[guildId];
 
@@ -38,9 +38,9 @@ module.exports = {
     },
 };
 
-function buildProgressBar(progress, total_time) {
+function buildProgressBar(progress, totalTime) {
     let pr = progress.asSeconds();
-    let tt = total_time.asSeconds();
+    let tt = totalTime.asSeconds();
 
     if (pr > tt) {
         tt = pr;

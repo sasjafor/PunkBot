@@ -25,7 +25,7 @@ class LimitedDict {
 
     // Returns whether the dict is empty
     isEmpty() {
-        return this.size == 0;
+        return this.size === 0;
     }
 
     /**
@@ -39,7 +39,7 @@ class LimitedDict {
 
         let newElem = new DictNode(item);
         newElem.next = null;
-        if (this.head != null) {
+        if (this.head) {
             this.tail.next = newElem;
             newElem.prev = this.tail;
             this.tail = newElem;
@@ -53,11 +53,11 @@ class LimitedDict {
 
     shift() {
         let oldHead = this.head;
-        if (this.size == 0) {
+        if (this.size === 0) {
             return;
-        } else if (this.size == 1) {
-            this.head == null;
-            this.tail == null;
+        } else if (this.size === 1) {
+            this.head = null;
+            this.tail = null;
         } else {
             this.head = oldHead.next;
             this.head.prev = null;
@@ -71,20 +71,20 @@ class LimitedDict {
      * @param {any} elem
      */
     remove(elem) {
-        if (this.head == null) {
+        if (!this.head) {
             return;
         }
 
-        if (this.head == elem) {
+        if (this.head === elem) {
             this.head = elem.next;
         }
-        if (this.tail == elem) {
+        if (this.tail === elem) {
             this.tail = elem.prev;
         }
-        if (elem.next != null) {
+        if (elem.next) {
             elem.next.prev = elem.prev;
         }
-        if (elem.prev != null) {
+        if (elem.prev) {
             elem.prev.next = elem.next;
         }
         this.size--;
@@ -96,10 +96,10 @@ class LimitedDict {
      */
     get(key) {
         let elem = this.dict[key];
-        if (elem == null) {
+        if (!elem) {
             return null;
         }
-        if (elem != this.tail) {
+        if (elem !== this.tail) {
             this.remove(elem);
             this.push(key, elem.value);
         }
@@ -112,7 +112,7 @@ class LimitedDict {
 
         // console.log(this.dict);
         let list = '[ Size: ' + this.size + ' | ';
-        while (curr != null) {
+        while (curr) {
             // console.log(curr);
             list += curr.value?.title + ', ';
             curr = curr.next;
@@ -120,7 +120,7 @@ class LimitedDict {
         list += ']';
 
         console.log(list);
-   }
+    }
 }
 
 class DictNode {

@@ -1,22 +1,16 @@
 const { joinVoiceChannel, 
-    createAudioPlayer,
-    createAudioResource,
-    AudioPlayerStatus,
+        createAudioPlayer,
+        createAudioResource,
+        AudioPlayerStatus,
 } = require('@discordjs/voice');
 const Debug = require('debug');
 const debug = Debug('punk_bot');
 const debugv = Debug('punk_bot:verbose');
 const debugd = Debug('punk_bot:debug');
 const got = require('got');
-const https = require('https');
 const moment = require('moment');
 const playdl = require('play-dl');
 const prism = require('prism-media');
-// const ytdl = require('ytdl-core');
-// const ytdl_full = require('youtube-dl-exec');
-// const EventEmitter = require('events');
-// const YoutubeDlWrap = require('youtube-dl-wrap');
-// const youtubeDlWrap = new YoutubeDlWrap('youtube-dl');
 
 const { Queue } = require('./queue.js');
 
@@ -59,12 +53,12 @@ class Player {
 
             this.stream = this.nowPlaying.stream;
         } else {
-            this.stream = this.prepare_stream(this.nowPlaying);
+            this.stream = this.prepareStream(this.nowPlaying);
         }
 
         let next = this.peek();
         if (next) {
-            next.stream = this.prepare_stream(next);
+            next.stream = this.prepareStream(next);
         }
 
         let dispatchResult = null;
@@ -99,7 +93,7 @@ class Player {
 
     enqueue(item) {
         if (this.queue.isEmpty()) {
-            item.stream = this.prepare_stream(item);
+            item.stream = this.prepareStream(item);
         }
         this.queue.enqueue(item);
     }
@@ -119,7 +113,7 @@ class Player {
         }
 
         if (this.stream.started) {
-            this.stream = this.prepare_stream(this.nowPlaying);
+            this.stream = this.prepareStream(this.nowPlaying);
             this.stream = await this.stream;
         }
 
@@ -152,13 +146,13 @@ class Player {
         }
     }
 
-    async prepare_stream(next) {
+    async prepareStream(next) {
         let url = next.url;
 
         if (!url) {
             return;
         }
-        let stream = await this.create_stream(url);
+        let stream = await this.createStream(url);
 
         return stream;
     }
@@ -166,10 +160,10 @@ class Player {
     /**
      * @param {string} url
      */
-    async create_stream(url, seektime=null) {
+    async createStream(url, seektime=null) {
         let stream = null;
         // this is most likely unsafe, but it works for now
-        if (url.slice(-4, -3) == '.') {
+        if (url.slice(-4, -3) === '.') {
             // stream = youtubeDlWrap.execStream([url]);
             // stream.on('error', err => {
             //     debug(err);
@@ -182,7 +176,7 @@ class Player {
             //     this.now_playing.duration = moment.duration(info._duration_hms);
             // })
 
-            if (seektime == null) {
+            if (!seektime) {
                 seektime = '0';
             }
             let ffmpeg = new prism.FFmpeg({
@@ -193,7 +187,7 @@ class Player {
                     '-f', 'opus', 
                     '-ar', '48000', 
                     '-ac', '2',
-                ]
+                ],
             });
 
             stream = await got.stream(url);
@@ -221,7 +215,7 @@ class Player {
                 }
             });
 
-            if (seektime == null) {
+            if (!seektime) {
                 seektime = '0';
             }
             stream = stream.pipe(new prism.FFmpeg({
@@ -233,7 +227,7 @@ class Player {
                     '-f', 'opus', 
                     '-ar', '48000', 
                     '-ac', '2',
-                ]
+                ],
             }));
             // console.log(stream);
         }
@@ -270,7 +264,7 @@ class Player {
         } else {
             debug('Encountered error with stream');
             setTimeout(function() {}, 1000);
-            return await this.create_stream(url);
+            return await this.createStream(url);
         }
     }
 
@@ -308,7 +302,7 @@ class Player {
             // };
             // opts.seek = time;
             this.lastSeekTime = time * 1000;
-            this.stream = await this.create_stream(this.nowPlaying.url, time);
+            this.stream = await this.createStream(this.nowPlaying.url, time);
             await this.dispatch();
             return 0;
         } else {
@@ -377,7 +371,7 @@ class Player {
         this.queue.shuffle();
     }
 
-    current_playback_progress() {
+    currentPlaybackProgress() {
         if (this.dispatcher) {
             return this.stream.playbackDuration + this.lastSeekTime;
         } else {
@@ -393,7 +387,7 @@ class Player {
         }
         if (this.nowPlaying && this.dispatcher) {
             duration.add(this.nowPlaying.duration)
-                .subtract(this.current_playback_progress(), 'ms');
+                .subtract(this.currentPlaybackProgress(), 'ms');
         }
         return duration;
     }
@@ -413,7 +407,7 @@ class Player {
 
     getProgress() {
         if (this.dispatcher) {
-            return moment.duration(this.current_playback_progress());
+            return moment.duration(this.currentPlaybackProgress());
         } else {
             return false;
         }

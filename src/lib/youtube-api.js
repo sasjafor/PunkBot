@@ -33,7 +33,7 @@ var allowedProperties = [
     'videoLicense',
     'videoSyndicated',
     'videoType',
-    'key'
+    'key',
 ];
 
 function search(term, opts, cb) {
@@ -54,7 +54,7 @@ function search(term, opts, cb) {
                 }
                 resolve({
                     results: results,
-                    pageInfo: pageInfo
+                    pageInfo: pageInfo,
                 });
             });
         });
@@ -63,7 +63,7 @@ function search(term, opts, cb) {
     var params = {
         q: term,
         part: opts.part || 'snippet',
-        maxResults: opts.maxResults || 30
+        maxResults: opts.maxResults || 30,
     };
 
     Object.keys(opts)
@@ -80,7 +80,7 @@ function search(term, opts, cb) {
                 totalResults: result.pageInfo.totalResults,
                 resultsPerPage: result.pageInfo.resultsPerPage,
                 nextPageToken: result.nextPageToken,
-                prevPageToken: result.prevPageToken
+                prevPageToken: result.prevPageToken,
             };
 
             var findings = result.items.map(function(item) {
@@ -110,7 +110,7 @@ function search(term, opts, cb) {
                     channelTitle: item.snippet.channelTitle,
                     title: item.snippet.title,
                     description: item.snippet.description,
-                    thumbnails: item.snippet.thumbnails
+                    thumbnails: item.snippet.thumbnails,
                 };
             });
 
@@ -128,7 +128,7 @@ async function fastSearch(term, key) {
             key: key,
             part: 'snippet',
             type: 'video',
-            maxResults: 1
+            maxResults: 1,
         };
 
         var data = '';
@@ -136,7 +136,7 @@ async function fastSearch(term, key) {
         const clientSession = http2.connect('https://youtube.googleapis.com');
 
         const req = clientSession.request({
-            ':path': '/youtube/v3/search?' + querystring.stringify(params)
+            ':path': '/youtube/v3/search?' + querystring.stringify(params),
         });
 
         req.on('response', () => {
@@ -145,9 +145,9 @@ async function fastSearch(term, key) {
             });
             req.on('end', () => {
                 let json = JSON.parse(data);
-                if (json.error.code != 200) {
+                if (json.error.code !== 200) {
                     console.error(json.error.message);
-                    return resolve(false);
+                    return reject(json.error.message);
                 }
                 var response = json.items[0];
                 var result = {};
@@ -191,7 +191,7 @@ function videoInfo(id, opts, cb) {
                 }
                 resolve({
                     results: results,
-                    pageInfo: pageInfo
+                    pageInfo: pageInfo,
                 });
             });
         });
@@ -199,7 +199,7 @@ function videoInfo(id, opts, cb) {
 
     var params = {
         id: id,
-        part: opts.part || 'snippet'
+        part: opts.part || 'snippet',
     };
 
     Object.keys(opts)
@@ -215,7 +215,7 @@ function videoInfo(id, opts, cb) {
 
             var pageInfo = {
                 totalResults: result.pageInfo.totalResults,
-                resultsPerPage: result.pageInfo.resultsPerPage
+                resultsPerPage: result.pageInfo.resultsPerPage,
             };
 
             var findings = result.items.map(function(item) {
@@ -227,7 +227,7 @@ function videoInfo(id, opts, cb) {
                     title: item.snippet.title,
                     description: item.snippet.description,
                     duration: item.contentDetails.duration,
-                    thumbnails: item.snippet.thumbnails
+                    thumbnails: item.snippet.thumbnails,
                 };
             });
 
@@ -251,7 +251,7 @@ function playlistInfo(id, opts, pageToken, cb) {
                 }
                 resolve({
                     results: results,
-                    pageInfo: pageInfo
+                    pageInfo: pageInfo,
                 });
             });
         });
@@ -280,7 +280,7 @@ function playlistInfo(id, opts, pageToken, cb) {
             var pageInfo = {
                 totalResults: result.pageInfo.totalResults,
                 resultsPerPage: result.pageInfo.resultsPerPage,
-                nextPageToken: result.nextPageToken
+                nextPageToken: result.nextPageToken,
             };
 
             var findings = result.items.map(function(item) {
@@ -322,7 +322,7 @@ function playlistItems(id, opts, pageToken, cb) {
                 }
                 resolve({
                     results: results,
-                    pageInfo: pageInfo
+                    pageInfo: pageInfo,
                 });
             });
         });
@@ -351,7 +351,7 @@ function playlistItems(id, opts, pageToken, cb) {
             var pageInfo = {
                 totalResults: result.pageInfo.totalResults,
                 resultsPerPage: result.pageInfo.resultsPerPage,
-                nextPageToken: result.nextPageToken
+                nextPageToken: result.nextPageToken,
             };
 
             var findings = result.items.map(function(item) {

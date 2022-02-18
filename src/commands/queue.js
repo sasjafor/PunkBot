@@ -6,15 +6,15 @@ const { prettifyTime } = require('../lib/util.js');
 const { strings } = require('../lib/strings.js');
 
 module.exports = {
-	data: new SlashCommandBuilder()
-		.setName('queue')
-		.setDescription('Show the queued songs.')
+    data: new SlashCommandBuilder()
+        .setName('queue')
+        .setDescription('Show the queued songs.')
         .addIntegerOption(option => 
             option.setName('index')
                 .setDescription('Index of page in the queue.')
                 .setMinValue(1))
     ,
-	async execute(interaction) {
+    async execute(interaction) {
         let index = interaction.options.getInteger('index');
         if (!index) {
             index = 1;
