@@ -165,8 +165,8 @@ class Player {
         // this is most likely unsafe, but it works for now
         if (url.slice(-4, -3) === '.') {
             // stream = youtubeDlWrap.execStream([url]);
-            // stream.on('error', err => {
-            //     debug(err);
+            // stream.on('error', error => {
+            //     console.trace(error.name + ': ' + error.message);
             // });
             // // stream.on('progress', progress => debug('PROGRESS:' + progress));
             // // stream.on('youtubeDlEvent', progress => debug('EVENT:' + progress));
@@ -198,17 +198,17 @@ class Player {
         } else {
             try {
                 stream = await playdl.stream(url, { discordPlayerCompatibility : true });
-            } catch(err) {
-                debug(err);
+            } catch(error) {
+                console.trace(error.name + ': ' + error.message);
                 this.skip();
                 return false;
             }
             stream = stream.stream;
 
-            stream.on('error', err => {
+            stream.on('error', error => {
                 debug(url);
-                debug(err);
-                if (err.message.includes('This video is not available.')) {
+                console.trace(error.name + ': ' + error.message);
+                if (error.message.includes('This video is not available.')) {
                     this.skip();
                 } else {
                     // context.retry_on_403(url);
@@ -239,9 +239,9 @@ class Player {
         //     };
         //     stream = ytdl(url, opts);
         //     let context = this;
-        //     stream.on('error', err => {
+        //     stream.on('error', error => {
         //         debug(url);
-        //         debug(err);
+        //         console.trace(error.name + ': ' + error.message);
         //         if (err.message.includes('This video is not available.')) {
         //             context.skip();
         //         } else {
@@ -250,8 +250,8 @@ class Player {
         //     });
         // } else {
         //     stream = ytdl_full(url, ytdl_opts);
-        //     stream.on('error', err => {
-        //         debug(err);
+        //     stream.on('error', error => {
+        //         console.trace(error.name + ': ' + error.message);
         //     });
         //     stream.on('info', info => {
         //         this.now_playing.title = info._filename;
@@ -319,8 +319,8 @@ class Player {
                 adapterCreator: channel.guild.voiceAdapterCreator,
             });
             var context = this;
-            this.conn.on('error', err => {
-                debug(err);
+            this.conn.on('error', error => {
+                console.trace(error.name + ': ' + error.message);
                 if (context.playing) {
                     context.connect();
                 }
@@ -337,7 +337,7 @@ class Player {
                 this.next();
             });
             this.dispatcher.on('error', error => {
-                debug(error);
+                console.trace(error.name + ': ' + error.message);
                 this.stop();
             });
 

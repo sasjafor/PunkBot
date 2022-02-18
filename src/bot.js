@@ -13,6 +13,7 @@ const debugd = Debug('punk_bot:debug');
 const { LimitedDict } = require('./lib/limited-dict.js');
 const { Player } = require('./lib/player.js');
 const { strings } = require('./lib/strings.js');
+const { errorReply } = require('./lib/util.js');
 
 const token = process.env.DISCORD_APP_AUTH_TOKEN;
 const youtubeAPIKey = process.env.YOUTUBE_API_KEY;
@@ -43,8 +44,8 @@ for (const file of commandFiles) {
 function login() {
     try {
         client.login(token);
-    } catch (err) {
-        debug(err);
+    } catch(error) {
+        console.trace(error.name + ': ' + error.message);
         login();
     }
 }
@@ -59,11 +60,11 @@ client.on('ready', async () => {
 
     // await rest.put(Routes.applicationGuildCommands(client.user.id, '246328943299264513'), { body: commandJSONs })
     //     .then(() => console.log('Successfully registered application commands.'))
-    //     .catch(console.error);
+    //     .catch(console.trace);
 
     await rest.put(Routes.applicationCommands(client.user.id), { body: commandJSONs })
         .then(() => console.log('Successfully registered application commands.'))
-        .catch(console.error);
+        .catch(console.trace);
 });
 
 client.on('interactionCreate', async interaction => {
@@ -96,20 +97,8 @@ client.on('interactionCreate', async interaction => {
     try {
         await command.execute(interaction);
     } catch (error) {
-        debug(error);
-        if (interaction.replied) {
-            await interaction.editReply({ content: 'There was an error while executing this command!', embeds: [] });
-        } else {
-            try {
-                await interaction.reply({ content: 'There was an error while executing this command!', embeds: [], ephemeral: true });
-            } catch (err) {
-                if (err instanceof DiscordAPIError && err.message.includes('Interaction has already been acknowledged.')) {
-                    await interaction.editReply({ content: 'There was an error while executing this command!', embeds: [] });
-                } else {
-                    debug(err);
-                }
-            }
-        }
+        console.trace(error.name + ': ' + error.message);
+        errorReply(interaction, error.message);
     }
 });
 
@@ -128,9 +117,9 @@ client.on('messageCreate', async message => {
 });
 
 client.on('error', error => {
-    debug(error);
+    console.trace(error.name + ': ' + error.message);
 });
 
 client.on('warn', warning => {
-    debug(warning);
+    console.warn(warning);
 });

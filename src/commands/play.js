@@ -44,15 +44,8 @@ module.exports = {
     ,
     async execute(interaction) {
         let searchQuery = interaction.options.getString('search');
-        if (!searchQuery) {
-            let embed = new MessageEmbed()
-                .setDescription(':x: **Missing args**\n\n!play [Link or query]')
-                .setColor('#ff0000');
-            interaction.reply({embeds: [embed], ephemeral: true});
-            return;
-        }
         if (!interaction.member.voice.channel.joinable) {
-            interaction.reply({ content: strings.noPermissionToConnect + interaction.member.voice.channel.name, ephemeral: true });
+            errorReply(interaction, strings.noPermissionToConnect + interaction.member.voice.channel.name);
             return;
         }
 
@@ -73,7 +66,7 @@ module.exports = {
             .setTitle(searchString)
             .setAuthor({ name: 'Searching', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
             .setURL(url);
-        let searchReply = interaction.reply({ embeds: [searchEmbed] });
+        let searchReply = interaction.reply({ embeds: [searchEmbed], ephemeral: true });
 
         let playResult = 0;
         let pb = null;
@@ -108,8 +101,9 @@ module.exports = {
                         errorReply(interaction, strings.noMatches);
                         return;
                     }
-                } catch (err) {
-                    errorReply(interaction, err);
+                } catch(error) {
+                    console.trace(error.name + ': ' + error.message);
+                    errorReply(interaction, searchString, error.response?.message);
                     return;
                 }
             } else {
@@ -121,21 +115,22 @@ module.exports = {
                         let playlistInfoRes;
                         try {
                             playlistInfoRes = await playlistInfo(playlistId, playlistInfoOpts);
-                        } catch(err) {
-                            debug(err);
+                        } catch(error) {
+                            console.trace(error.name + ': ' + error.message);
+                            await searchReply;
+                            errorReply(interaction, searchString, err.response?.data?.error?.message, url);
+                            return;
                         }
-                        if (playlistInfoRes) {
-                            let pi = playlistInfoRes.results[0];
+                        let pi = playlistInfoRes.results[0];
 
-                            let playlistEmbed = new MessageEmbed()
-                                .setTitle(pi.title)
-                                .setAuthor({ name: 'Enqueued playlist', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot' })
-                                .setURL(url)
-                                .setThumbnail(pb.thumbnailURL)
-                                .addField('Channel', pi.channelTitle)
-                                .addField('Enqueued Items', String(num));
-                            interaction.channel.send({ embeds: [playlistEmbed] });
-                        }
+                        let playlistEmbed = new MessageEmbed()
+                            .setTitle(pi.title)
+                            .setAuthor({ name: 'Enqueued playlist', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot' })
+                            .setURL(url)
+                            .setThumbnail(pb.thumbnailURL)
+                            .addField('Channel', pi.channelTitle)
+                            .addField('Enqueued Items', String(num));
+                        interaction.channel.send({ embeds: [playlistEmbed] });
                     };
                     if (!player.playing) {
                         let customOpts = {
@@ -146,17 +141,10 @@ module.exports = {
                         let playlistRes = null;
                         try {
                             playlistRes = await playlistItems(playlistId, customOpts, null, null);
-                        } catch(err) {
-                            if (err.response?.status === 404) {
-                                await searchReply;
-                                let failEmbed = new MessageEmbed()
-                                    .setTitle(searchString)
-                                    .setAuthor({ name: 'Playlist not found or private', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
-                                    .setURL(url);
-                                await interaction.editReply({ embeds: [failEmbed], ephemeral: true });
-                            } else {
-                                console.error(err.response.data.error.message);
-                            }
+                        } catch(error) {
+                            console.trace(error.name + ': ' + error.message);
+                            await searchReply;
+                            errorReply(interaction, searchString, error.response?.data?.error?.message, url);
                             return;
                         }
                         if (playlistRes) {
@@ -164,9 +152,9 @@ module.exports = {
                             url = 'https://www.youtube.com/watch?v=' + id;
                             title = playlistRes.results[0].title;
                         }
-                        handlePlaylist(player, playlistId, interaction.member, true, playlistCallback);
+                        handlePlaylist(player, playlistId, interaction.member, true, playlistCallback, interaction.channel);
                     } else {
-                        handlePlaylist(player, playlistId, interaction.member, false, playlistCallback);
+                        handlePlaylist(player, playlistId, interaction.member, false, playlistCallback, interaction.channel);
                         return;
                     }
                 }
@@ -185,7 +173,13 @@ module.exports = {
                 }
             }
 
-            let pbP = handleVideo(id, interaction.member, url, title);
+            let pbP = handleVideo(id, interaction.member, url, title)
+                .catch(async (error) => {
+                    console.trace(error.name + ': ' + error.message);
+                    await searchReply;
+                    errorReply(interaction, searchString, error.response?.data?.error?.message, url);
+                    return;
+                });
             if (!player.playing) {
                 let pbShort = new PlaybackItem(url, interaction.member.displayName, interaction.user.id, interaction.member.displayAvatarURL(), title);
                 player.enqueue(pbShort);
@@ -217,57 +211,38 @@ module.exports = {
             }
         }
         
-        // youtubeCache.printlist();
         playResult = await playResult;
         if (playResult === -1) {
             await searchReply;
-            let failEmbed = new MessageEmbed()
-                .setTitle(searchString)
-                .setAuthor({ name: 'Failed to create stream for your request, try again!', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
-                .setURL(url);
-            interaction.editReply({ embeds: [failEmbed], ephemeral: true });
-        } else {
-            let embed = null;
-            if (pb) {
-                if (pb.isYT) {
-                    var prettyDuration = prettifyTime(pb.duration);
-                    embed = new MessageEmbed()
-                        .setTitle(decode(pb.title))
-                        .setAuthor({ name: 'Playing', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
-                        .setURL(pb.url)
-                        .setThumbnail(pb.thumbnailURL)
-                        .addField('Channel', pb.channelTitle)
-                        .addField('Song Duration', prettyDuration);
-
-                    if (queued) {
-                        let timeUntilPlaying = await player.getTotalRemainingPlaybackTime();
-                        let prettyTut = prettifyTime(timeUntilPlaying);
-                        embed = embed.setAuthor({ name: 'Added to queue', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
-                            .addField('Estimated time until playing', prettyTut)
-                            .addField('Position in queue', String(player.queue.getLength()));
-                    }
-                } else {
-                    //TODO: embed for non youtube links
-                    embed = new MessageEmbed()
-                        .setTitle(decode(pb.title))
-                        .setAuthor({ name: 'Playing', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
-                        .setURL(pb.url);
-
-                    if (queued) {
-                        let timeUntilPlaying = await player.getTotalRemainingPlaybackTime();
-                        let prettyTut = prettifyTime(timeUntilPlaying);
-                        embed = embed.setAuthor({ name: 'Added to queue', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
-                            .addField('Estimated time until playing', prettyTut)
-                            .addField('Position in queue', String(player.queue.getLength()));
-                    }
-                }
-            }
-
-            if (embed) {
-                await searchReply;
-                interaction.editReply({ content: null, embeds: [embed] });
-            }
+            errorReply(interaction, searchString, 'Failed to create stream for your request, try again!', url);
+            return;
         }
+            
+        if (!pb) {
+            return;
+        }
+        var prettyDuration = prettifyTime(pb.duration);
+        let embed = new MessageEmbed()
+            .setTitle(decode(pb.title))
+            .setAuthor({ name: 'Playing', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
+            .setURL(pb.url);
+
+        if (pb.isYT) {
+            embed = embed.setThumbnail(pb.thumbnailURL)
+                .addField('Channel', pb.channelTitle)
+                .addField('Song Duration', prettyDuration);
+        }
+
+        if (queued) {
+            let timeUntilPlaying = await player.getTotalRemainingPlaybackTime();
+            let prettyTut = prettifyTime(timeUntilPlaying);
+            embed = embed.setAuthor({ name: 'Added to queue', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
+                .addField('Estimated time until playing', prettyTut)
+                .addField('Position in queue', String(player.queue.getLength()));
+        }
+
+        await searchReply;
+        interaction.editReply({ content: null, embeds: [embed] });
     },
 };
 
@@ -294,12 +269,7 @@ function getYTid(url) {
 async function handleVideo(id, requester, url, title) {
     if (id) {
         let res;
-        try {
-            res = await videoInfo(id, videoOpts, null);
-        } catch(err) {
-            console.error(err.response.data.error.message);
-            return null;
-        }
+        res = await videoInfo(id, videoOpts, null);
         res = res.results[0];
 
         if (res) {
@@ -322,19 +292,21 @@ async function handleVideo(id, requester, url, title) {
  * @param {any} id
  * @param {{ displayName: any; user: { id: any; }; displayAvatarURL: () => any; }} requester
  * @param {boolean} skipFirst
- * @param {{ (num: any): void; (num: any): void; (arg0: number): void; }} callback
  */
-async function handlePlaylist(player, id, requester, skipFirst, callback) {
+async function handlePlaylist(player, id, requester, skipFirst, callback, channel) {
     let skipped = false;
     let pageInfo = null;
     let pageToken = null;
-    let k = 0;
+    let successCount = 0;
+    let failCount = 0;
     do {
         let res;
         try {
             res = await playlistItems(id, playlistOpts, pageToken, null);
-        } catch(err) {
-            console.error(err.response.data.error.message);
+        } catch(error) {
+            console.trace(error.name + ': ' + error.message);
+            let url = 'https://www.youtube.com/playlist?list=' + id;
+            errorReply(undefined, url, err.response?.data?.error?.message, url, channel);
             return null;
         }
         pageInfo = res.pageInfo;
@@ -344,10 +316,14 @@ async function handlePlaylist(player, id, requester, skipFirst, callback) {
         for (let i of items) {
             if (skipped || !skipFirst) {
                 let YTurl = 'https://www.youtube.com/watch?v=' + i.videoId;
-                let video = await handleVideo(i.videoId, requester, YTurl);
+                let video = await handleVideo(i.videoId, requester, YTurl).catch((error) => {
+                    console.trace(error.name + ': ' + error.message);
+                });
                 if (video) {
-                    k++;
+                    successCount++;
                     player.enqueue(video);
+                } else {
+                    failCount++;
                 }
             }
             skipped = true;
@@ -355,6 +331,6 @@ async function handlePlaylist(player, id, requester, skipFirst, callback) {
     } while (pageInfo.nextPageToken);
     debugd('DONE processing playlist!');
     if (callback) {
-        callback(k);
+        callback(successCount, failCount);
     }
 }

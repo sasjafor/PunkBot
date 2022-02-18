@@ -2,30 +2,38 @@ const { DiscordAPIError,
         MessageEmbed } = require('discord.js');
 const { strings } = require('./strings');
 
-async function errorReply(interaction, msgContent, msgTitle = strings.commandFailed, url = null) {
-    let failEmbed = new MessageEmbed()
+async function errorReply(interaction, msgContent, errorMessage = strings.commandFailed, url = null, channel = null) {
+    if (!msgContent) {
+        msgContent = strings.errorMsgNotAvailable;
+    }
+    let embed = new MessageEmbed()
         .setColor('#FF0000')
         .setTitle(msgContent)
-        .setAuthor({ name: msgTitle, iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'});
+        .setAuthor({ name: errorMessage, iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'});
 
     if (url) {
-        failEmbed = failEmbed.setURL(url);
+        embed = embed.setURL(url);
     }
 
-    if (interaction.replied) {
-        await interaction.editReply({ embeds: [failEmbed], ephemeral: true });
-    } else {
-        try {
-            await interaction.reply({ embeds: [failEmbed], ephemeral: true });
-        } catch (err) {
-            if (err instanceof DiscordAPIError && err.message.includes('Interaction has already been acknowledged.')) {
-                await interaction.editReply({ embeds: [failEmbed], ephemeral: true });
-            } else {
-                console.error(err);
+    if (interaction) {
+        let message = { embeds: [embed], ephemeral: true };
+        if (interaction.replied) {
+            await interaction.editReply(message);
+        } else {
+            try {
+                await interaction.reply(message);
+            } catch(error) {
+                if (error instanceof DiscordAPIError && error.message.includes('Interaction has already been acknowledged.')) {
+                    await interaction.editReply(message);
+                } else {
+                    console.trace(error.name + ': ' + error.message);
+                }
             }
         }
+    } else {
+        let message = { embeds: [embed] };
+        channel.send(message);
     }
-    
 }
 
 function prettifyTime(duration) {

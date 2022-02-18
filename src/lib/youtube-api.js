@@ -146,8 +146,9 @@ async function fastSearch(term, key) {
             req.on('end', () => {
                 let json = JSON.parse(data);
                 if (json.error.code !== 200) {
-                    console.error(json.error.message);
-                    return reject(json.error.message);
+                    let error = new Error(json.error.message);
+                    error.response = json.error;
+                    return reject(error);
                 }
                 var response = json.items[0];
                 var result = {};
