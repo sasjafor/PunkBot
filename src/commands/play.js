@@ -3,6 +3,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const decode = require('unescape');
 const moment = require('moment');
 const Debug = require('debug');
+// eslint-disable-next-line no-unused-vars
 const debug = Debug('punk_bot');
 const debugv = Debug('punk_bot:verbose');
 const debugd = Debug('punk_bot:debug');
@@ -113,7 +114,7 @@ module.exports = {
                 if (playlistIdRegex.test(url)) {
                     playlist = true;
                     let playlistId = url.match(playlistIdRegex)[1];
-                    let playlistCallback = async function(successCount, failCount) {
+                    let playlistCallback = async function(successCount, _failCount) {
                         let playlistInfoRes;
                         try {
                             playlistInfoRes = await playlistInfo(playlistId, playlistInfoOpts);

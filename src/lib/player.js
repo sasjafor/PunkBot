@@ -2,6 +2,7 @@ const { joinVoiceChannel,
         createAudioPlayer,
         createAudioResource,
         AudioPlayerStatus,
+        NoSubscriberBehavior,
 } = require('@discordjs/voice');
 const Debug = require('debug');
 const debug = Debug('punk_bot');
@@ -162,20 +163,8 @@ class Player {
      */
     async createStream(url, seektime=null) {
         let stream = null;
-        // this is most likely unsafe, but it works for now
-        if (url.slice(-4, -3) === '.') {
-            // stream = youtubeDlWrap.execStream([url]);
-            // stream.on('error', error => {
-            //     console.trace(error.name + ': ' + error.message);
-            // });
-            // // stream.on('progress', progress => debug('PROGRESS:' + progress));
-            // // stream.on('youtubeDlEvent', progress => debug('EVENT:' + progress));
-            // stream.on('close', () => debug('DONE!'));
-            // stream.on('info', info => {
-            //     this.now_playing.title = info._filename;
-            //     this.now_playing.duration = moment.duration(info._duration_hms);
-            // })
-
+        let fileNameRegex = /\/([\w\-. ]+)\.[\w\- ]+$/;
+        if (fileNameRegex.test(url)) {
             if (!seektime) {
                 seektime = '0';
             }
@@ -193,8 +182,6 @@ class Player {
             stream = await got.stream(url);
 
             stream = await stream.pipe(ffmpeg);
-
-            // console.log(stream);
         } else {
             try {
                 stream = await playdl.stream(url, { discordPlayerCompatibility : true });
@@ -229,35 +216,8 @@ class Player {
                     '-ac', '2',
                 ],
             }));
-            // console.log(stream);
         }
-        // } else if (url.startsWith('https://www.youtube.com') || url.startsWith('https://youtu.be')) {
-        //     let opts = {
-        //         // highWaterMark: 1 << 26
-        //         quality: 'highestaudio',
-        //         filter: 'audioonly',
-        //     };
-        //     stream = ytdl(url, opts);
-        //     let context = this;
-        //     stream.on('error', error => {
-        //         debug(url);
-        //         console.trace(error.name + ': ' + error.message);
-        //         if (err.message.includes('This video is not available.')) {
-        //             context.skip();
-        //         } else {
-        //             // context.retry_on_403(url);
-        //         }
-        //     });
-        // } else {
-        //     stream = ytdl_full(url, ytdl_opts);
-        //     stream.on('error', error => {
-        //         console.trace(error.name + ': ' + error.message);
-        //     });
-        //     stream.on('info', info => {
-        //         this.now_playing.title = info._filename;
-        //         this.now_playing.duration = moment.duration(info._duration_hms);
-        //     })
-        // }
+
         if (stream.readable) {
             let resource = createAudioResource(stream, { inlineVolume: true });
             return resource;
@@ -327,7 +287,11 @@ class Player {
             });
             debug('Joined Voice Channel');
 
-            this.dispatcher = createAudioPlayer();
+            this.dispatcher = createAudioPlayer({
+                behaviors: {
+                    noSubscriber: NoSubscriberBehavior.Pause,
+                },
+            });
 
             this.dispatcher.on(AudioPlayerStatus.Idle, () => {
                 debugv('Finished playing');
