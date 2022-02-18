@@ -10,7 +10,7 @@ module.exports = {
     },
     'rules': {
         'indent': [
-            'off',
+            'warn',
             4,
             { 'SwitchCase': 1 }
         ],
@@ -31,6 +31,9 @@ module.exports = {
             '1tbs',
             { 'allowSingleLine': true }
         ],
-        'curly' : 'error'
+        'curly': 'error',
+        'camelcase': [
+            'warn',
+        ]
     }
 };
