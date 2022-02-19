@@ -278,7 +278,10 @@ async function handleVideo(id, requester, url, title) {
         if (res) {
             let ytUrl = 'https://www.youtube.com/watch?v=' + id;
             let ytTitle = res.title;
-            let ytThumbnailURL = res.thumbnails.maxres.url;
+            let ytThumbnailURL = res.thumbnails.maxres?.url;
+            if (!ytThumbnailURL) {
+                ytThumbnailURL = res.thumbnails.standard?.url;
+            }
             let ytDuration = moment.duration(res.duration);
             let ytChannelTitle = res.channelTitle;
             return new PlaybackItem(ytUrl, requester.displayName, requester.user.id, requester.displayAvatarURL(), ytTitle, ytThumbnailURL, ytDuration, ytChannelTitle);
