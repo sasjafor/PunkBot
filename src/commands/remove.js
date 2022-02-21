@@ -6,7 +6,7 @@ import { strings } from '../lib/strings.js';
 const data = new SlashCommandBuilder()
     .setName('remove')
     .setDescription('Remove the indicated track.')
-    .addIntegerOption(option => 
+    .addIntegerOption(option =>
         option.setName('index')
             .setDescription('Index to remove from queue.')
             .setRequired(true)
@@ -24,7 +24,7 @@ async function execute(interaction) {
     }
 
     let removeRes = player.remove(index);
-    if (removeRes == -1) {
+    if (removeRes === -1) {
         // TODO: might be unnecessary now
         interaction.reply({ content: strings.notConnected, ephemeral: true });
     } else if(removeRes) {
@@ -35,6 +35,6 @@ async function execute(interaction) {
 }
 
 export {
-	data,
-	execute,
+    data,
+    execute,
 };

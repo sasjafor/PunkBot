@@ -1,4 +1,4 @@
-import { DiscordAPIError, 
+import { DiscordAPIError,
          MessageEmbed } from 'discord.js';
 import { strings } from './strings.js';
 
@@ -39,7 +39,7 @@ async function errorReply(interaction, msgContent, errorMessage = strings.comman
     }
 }
 
-function prettifyTime(duration) {  
+function prettifyTime(duration) {
     if (duration) {
         let hours = duration.hours() + duration.days() * 24;
         let minutes = duration.minutes();

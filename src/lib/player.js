@@ -1,7 +1,7 @@
 import { AudioPlayerStatus,
          createAudioPlayer,
          createAudioResource,
-         joinVoiceChannel, 
+         joinVoiceChannel,
          NoSubscriberBehavior,
 } from '@discordjs/voice';
 import Debug from 'debug';
@@ -42,7 +42,7 @@ class Player {
 
     play() {
         this.playing = true;
-        
+
         clearTimeout(this.timeout);
         let url = '';
         if (!this.loop || !this.nowPlaying) {
@@ -69,7 +69,7 @@ class Player {
                 debugd('Playing: ' + url);
                 dispatchResult = this.dispatch();
             }
-        } 
+        }
 
         return dispatchResult;
     }
@@ -173,9 +173,9 @@ class Player {
                 args: [
                     '-ss', String(seektime),
                     '-i', '-',
-                    '-acodec', 'libopus', 
-                    '-f', 'opus', 
-                    '-ar', '48000', 
+                    '-acodec', 'libopus',
+                    '-f', 'opus',
+                    '-ar', '48000',
                     '-ac', '2',
                 ],
             });
@@ -210,10 +210,10 @@ class Player {
                 args: [
                     '-ss', String(seektime),
                     '-i', '-',
-                    '-loglevel', '0', 
-                    '-acodec', 'libopus', 
-                    '-f', 'opus', 
-                    '-ar', '48000', 
+                    '-loglevel', '0',
+                    '-acodec', 'libopus',
+                    '-f', 'opus',
+                    '-ar', '48000',
                     '-ac', '2',
                 ],
             }));

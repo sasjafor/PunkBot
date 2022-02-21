@@ -5,7 +5,7 @@ import { strings } from '../lib/strings.js';
 
 const data = new SlashCommandBuilder()
     .setName('loop')
-    .setDescription('Toggle looping of current track.')
+    .setDescription('Toggle looping of current track.');
 
 async function execute(interaction) {
     let guildId = interaction.guild.id;
@@ -20,6 +20,6 @@ async function execute(interaction) {
 }
 
 export {
-	data,
-	execute,
+    data,
+    execute,
 };

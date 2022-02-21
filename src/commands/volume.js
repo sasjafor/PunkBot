@@ -6,7 +6,7 @@ import { strings } from '../lib/strings.js';
 const data = new SlashCommandBuilder()
     .setName('volume')
     .setDescription('Set the playback volume.')
-    .addNumberOption(option => 
+    .addNumberOption(option =>
         option.setName('value')
             .setDescription('Volume to set.')
             .setRequired(true)
@@ -23,6 +23,6 @@ async function execute(interaction) {
 }
 
 export {
-	data,
-	execute,
+    data,
+    execute,
 };

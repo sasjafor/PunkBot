@@ -1,15 +1,15 @@
+import Debug from 'debug';
 import fs from 'fs';
-import path from 'path';
+
 import { Client, Collection, GuildMember, Intents, TextChannel } from 'discord.js';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 import { URL } from 'url';
-import Debug from 'debug';
 
+import { errorReply } from './lib/util.js';
 import { LimitedDict } from './lib/limited-dict.js';
 import { Player } from './lib/player.js';
 import { strings } from './lib/strings.js';
-import { errorReply } from './lib/util.js';
 
 const debug = Debug('punk_bot');
 // eslint-disable-next-line no-unused-vars

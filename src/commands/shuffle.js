@@ -9,18 +9,18 @@ const data = new SlashCommandBuilder()
 
 async function execute(interaction) {
     let guildId = interaction.guild.id;
-        let player = players[guildId];
+    let player = players[guildId];
 
-        if (!player.conn) {
-            interaction.reply({ content: strings.notConnected, ephemeral: true });
-            return;
-        }
+    if (!player.conn) {
+        interaction.reply({ content: strings.notConnected, ephemeral: true });
+        return;
+    }
 
-        player.shuffle();
-        interaction.reply({ content: strings.shuffled });
+    player.shuffle();
+    interaction.reply({ content: strings.shuffled });
 }
 
 export {
-	data,
-	execute,
+    data,
+    execute,
 };

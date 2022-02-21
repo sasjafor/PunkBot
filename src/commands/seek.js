@@ -1,5 +1,5 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
 import moment from 'moment';
+import { SlashCommandBuilder } from '@discordjs/builders';
 
 import { players } from '../bot.js';
 import { prettifyTime } from '../lib/util.js';
@@ -8,7 +8,7 @@ import { strings } from '../lib/strings.js';
 const data = new SlashCommandBuilder()
     .setName('seek')
     .setDescription('Seek to the provided position in the track.')
-    .addStringOption(option => 
+    .addStringOption(option =>
         option.setName('time')
             .setDescription('Time to seek to.')
             .setRequired(true));
@@ -24,14 +24,14 @@ async function execute(interaction) {
         return;
     }
 
-    let seek_time_regex = /(([0-9]+:)?([0-9]+:)?)?[0-9]+$/;
-    if (!seek_time_regex.test(time) || (time.match(seek_time_regex)).index != 0) {
+    let seekTimeRegex = /(([0-9]+:)?([0-9]+:)?)?[0-9]+$/;
+    if (!seekTimeRegex.test(time) || (time.match(seekTimeRegex)).index !== 0) {
         interaction.reply({ content: strings.invalidSeekFormat, ephemeral: true });
         return;
     }
-    let min_hour_regex = /([0-9]+)(?::)/g;
-    let time1 = min_hour_regex.exec(time);
-    let time2 = min_hour_regex.exec(time);
+    let minHourRegex = /([0-9]+)(?::)/g;
+    let time1 = minHourRegex.exec(time);
+    let time2 = minHourRegex.exec(time);
     let seconds = parseInt(time.match(/[0-9]+$/)[0], 10);
     let minutes = 0;
     let hours = 0;
@@ -43,13 +43,13 @@ async function execute(interaction) {
             minutes = parseInt(time1[1], 10);
         }
     }
-    let seek_time = 3600 * hours + 60 * minutes + seconds;
-    let duration = moment.duration(seek_time * 1000);
-    let res_code = await player.seek(seek_time);
-    switch (res_code) {
+    let seekTime = 3600 * hours + 60 * minutes + seconds;
+    let duration = moment.duration(seekTime * 1000);
+    let resCode = await player.seek(seekTime);
+    switch (resCode) {
         case 0:
-            var pretty_time = prettifyTime(duration);
-            interaction.reply({ content: strings.seeked + '`' + pretty_time + '`' });
+            var prettyTime = prettifyTime(duration);
+            interaction.reply({ content: strings.seeked + '`' + prettyTime + '`' });
             break;
         case 1:
             interaction.reply({ content: strings.seekTooLong, ephemeral: true });
@@ -61,6 +61,6 @@ async function execute(interaction) {
 }
 
 export {
-	data,
-	execute,
+    data,
+    execute,
 };

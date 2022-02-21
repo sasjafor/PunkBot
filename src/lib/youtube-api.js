@@ -1,7 +1,8 @@
 // adapted from https://github.com/MaxGfeller/youtube-search
-import querystring from 'querystring';
 import axios from 'axios';
 import http2 from 'http2';
+import querystring from 'querystring';
+
 import { HTTPError } from './util.js';
 
 var allowedProperties = [

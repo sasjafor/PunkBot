@@ -1,18 +1,19 @@
-import { MessageEmbed } from 'discord.js';
-import { SlashCommandBuilder } from '@discordjs/builders';
+import Debug from 'debug';
 import decode from 'unescape';
 import moment from 'moment';
-import Debug from 'debug';
 
-import { players, youtubeAPIKey, youtubeCache } from '../bot.js';
-import { PlaybackItem } from '../lib/playback-item.js';
-import { strings } from '../lib/strings.js';
-import { prettifyTime, errorReply } from '../lib/util.js';
+import { MessageEmbed } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
+
+import { errorReply, prettifyTime } from '../lib/util.js';
 import { fastSearch,
          playlistInfo,
          playlistItems,
          videoInfo,
 } from '../lib/youtube-api.js';
+import { players, youtubeAPIKey, youtubeCache } from '../bot.js';
+import { PlaybackItem } from '../lib/playback-item.js';
+import { strings } from '../lib/strings.js';
 
 // eslint-disable-next-line no-unused-vars
 const debug = Debug('punk_bot');
@@ -36,12 +37,12 @@ var playlistOpts = {
 };
 
 const data = new SlashCommandBuilder()
-.setName('play')
-.setDescription('Plays a YouTube video.')
-.addStringOption(option => 
-    option.setName('search')
-        .setDescription('YouTube link or search term.')
-        .setRequired(true));
+    .setName('play')
+    .setDescription('Plays a YouTube video.')
+    .addStringOption(option =>
+        option.setName('search')
+            .setDescription('YouTube link or search term.')
+            .setRequired(true));
 
 async function execute(interaction) {
     let searchQuery = interaction.options.getString('search');
@@ -213,14 +214,14 @@ async function execute(interaction) {
             youtubeCache.push(searchQuery, pb);
         }
     }
-    
+
     playResult = await playResult;
     if (playResult === -1) {
         await searchReply;
         errorReply(interaction, searchString, 'Failed to create stream for your request, try again!', url);
         return;
     }
-        
+
     if (!pb) {
         return;
     }

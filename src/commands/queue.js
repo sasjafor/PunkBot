@@ -8,7 +8,7 @@ import { strings } from '../lib/strings.js';
 const data = new SlashCommandBuilder()
     .setName('queue')
     .setDescription('Show the queued songs.')
-    .addIntegerOption(option => 
+    .addIntegerOption(option =>
         option.setName('index')
             .setDescription('Index of page in the queue.')
             .setMinValue(1));
