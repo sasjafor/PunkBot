@@ -72,7 +72,14 @@
         "sort-imports": [
             "warn",
             {
-                "ignoreCase": true
+                "ignoreCase": true,
+                "memberSyntaxSortOrder": [
+                    "none",
+                    "all",
+                    "multiple",
+                    "single"
+                ],
+                "allowSeparatedGroups": true
             }
         ],
         "sort-vars": [
