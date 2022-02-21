@@ -1,0 +1,82 @@
+{
+    "root": true,
+    "env": {
+        "es2021": true,
+        "node": true
+    },
+    "extends": "eslint:recommended",
+    "parserOptions": {
+        "ecmaVersion": 2021,
+        "sourceType": "module"
+    },
+    "rules": {
+        "brace-style": [
+            "error",
+            "1tbs",
+            { "allowSingleLine": true }
+        ],
+        "camelcase": [
+            "warn"
+        ],
+        "comma-dangle": [
+            "warn",
+            "always-multiline"
+        ],
+        "curly": [
+            "warn",
+            "all"
+        ],
+        "eqeqeq": [
+            "error",
+            "always",
+            {
+                "null": "always"
+            }
+        ],
+        "indent": [
+            "warn",
+            4,
+            { 
+                "SwitchCase": 1,
+                "ArrayExpression": "first",
+                "ImportDeclaration": "first",
+                "ObjectExpression": "first"
+            }
+        ],
+        "linebreak-style": [
+            "error",
+            "unix"
+        ],
+        "no-trailing-spaces": [
+            "warn"
+        ],
+        "no-unused-vars": [
+            "warn",
+            {
+                "argsIgnorePattern": "^_",
+                "varsIgnorePattern": "^_"
+            }
+        ],
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "semi": [
+            "error",
+            "always"
+        ],
+        "semi-style": [
+            "warn",
+            "last"
+        ],
+        "sort-imports": [
+            "warn",
+            {
+                "ignoreCase": true
+            }
+        ],
+        "sort-vars": [
+            "warn"
+        ]
+    }
+}
