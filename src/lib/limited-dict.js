@@ -134,6 +134,6 @@ class DictNode {
     }
 }
 
-module.exports = {
+export {
     LimitedDict,
 };

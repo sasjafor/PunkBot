@@ -1,19 +1,20 @@
-const { joinVoiceChannel, 
-        createAudioPlayer,
-        createAudioResource,
-        AudioPlayerStatus,
-        NoSubscriberBehavior,
-} = require('@discordjs/voice');
-const Debug = require('debug');
+import { AudioPlayerStatus,
+         createAudioPlayer,
+         createAudioResource,
+         joinVoiceChannel, 
+         NoSubscriberBehavior,
+} from '@discordjs/voice';
+import Debug from 'debug';
+import got from 'got';
+import moment from 'moment';
+import playdl from 'play-dl';
+import prism from 'prism-media';
+
+import { Queue } from './queue.js';
+
 const debug = Debug('punk_bot');
 const debugv = Debug('punk_bot:verbose');
 const debugd = Debug('punk_bot:debug');
-const got = require('got');
-const moment = require('moment');
-const playdl = require('play-dl');
-const prism = require('prism-media');
-
-const { Queue } = require('./queue.js');
 
 // var ytdl_opts = [];
 
@@ -389,6 +390,6 @@ class Player {
     }
 }
 
-module.exports = {
+export {
     Player,
 };

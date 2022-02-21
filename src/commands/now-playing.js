@@ -1,42 +1,40 @@
-const { MessageEmbed } = require('discord.js');
-const { SlashCommandBuilder } = require('@discordjs/builders');
+import { MessageEmbed } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
 
-const { players } = require('../bot.js');
-const { prettifyTime } = require('../lib/util.js');
-const { strings } = require('../lib/strings.js');
+import { players } from '../bot.js';
+import { prettifyTime } from '../lib/util.js';
+import { strings } from '../lib/strings.js';
 
-module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('now-playing')
-        .setDescription('Shows the song that is currently playing.')
-    ,
-    async execute(interaction) {
-        let guildId = interaction.guild.id;
-        let player = players[guildId];
+const data = new SlashCommandBuilder()
+    .setName('now-playing')
+    .setDescription('Shows the song that is currently playing.');
 
-        if (!player.conn) {
-            interaction.reply({ content: strings.notConnected, ephemeral: true });
-            return;
-        }
+async function execute(interaction) {
+    let guildId = interaction.guild.id;
+    let player = players[guildId];
 
-        let np = player.getNowPlaying();
-        let progress = player.getProgress();
-        if (np && progress) {
-            let progressBar = buildProgressBar(progress, np.duration);
-            let progressString = prettifyTime(progress) + ' / ' + prettifyTime(np.duration);
-            let embed = new MessageEmbed()
-                .setTitle(np.title)
-                .setAuthor({ name: 'Now Playing ♪', iconURL: np.requesterIconURL, url: 'https://github.com/sasjafor/PunkBot' })
-                .setURL(np.url)
-                .setThumbnail(np.thumbnailURL)
-                .setColor('#0056bf')
-                .setDescription('\u200B\n`' + progressBar + '`\n\n`' + progressString + '`\n\n`Requested by:` <@' + np.requesterId + '>');
-            interaction.reply({ embeds: [embed] });
-        } else {
-            interaction.reply({ content: strings.nothingPlaying, ephemeral: true });
-        }
-    },
-};
+    if (!player.conn) {
+        interaction.reply({ content: strings.notConnected, ephemeral: true });
+        return;
+    }
+
+    let np = player.getNowPlaying();
+    let progress = player.getProgress();
+    if (np && progress) {
+        let progressBar = buildProgressBar(progress, np.duration);
+        let progressString = prettifyTime(progress) + ' / ' + prettifyTime(np.duration);
+        let embed = new MessageEmbed()
+            .setTitle(np.title)
+            .setAuthor({ name: 'Now Playing ♪', iconURL: np.requesterIconURL, url: 'https://github.com/sasjafor/PunkBot' })
+            .setURL(np.url)
+            .setThumbnail(np.thumbnailURL)
+            .setColor('#0056bf')
+            .setDescription('\u200B\n`' + progressBar + '`\n\n`' + progressString + '`\n\n`Requested by:` <@' + np.requesterId + '>');
+        interaction.reply({ embeds: [embed] });
+    } else {
+        interaction.reply({ content: strings.nothingPlaying, ephemeral: true });
+    }
+}
 
 function buildProgressBar(progress, totalTime) {
     let pr = progress.asSeconds();
@@ -59,3 +57,8 @@ function buildProgressBar(progress, totalTime) {
     }
     return res;
 }
+
+export {
+    data,
+    execute,
+};

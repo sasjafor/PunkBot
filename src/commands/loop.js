@@ -1,22 +1,25 @@
-const { SlashCommandBuilder } = require('@discordjs/builders');
+import { SlashCommandBuilder } from '@discordjs/builders';
 
-const { players } = require('../bot.js');
-const { strings } = require('../lib/strings.js');
+import { players } from '../bot.js';
+import { strings } from '../lib/strings.js';
 
-module.exports = {
-	data: new SlashCommandBuilder()
-		.setName('loop')
-		.setDescription('Toggle looping of current track.')
-    ,
-	async execute(interaction) {
-        let guildId = interaction.guild.id;
-        let player = players[guildId];
+const data = new SlashCommandBuilder()
+    .setName('loop')
+    .setDescription('Toggle looping of current track.')
 
-        player.loop = !player.loop;
-        if (player.loop) {
-            interaction.reply({ content: strings.loopEnabled });
-        } else {
-            interaction.reply({ content: strings.loopDisabled });
-        }
-    },
+async function execute(interaction) {
+    let guildId = interaction.guild.id;
+    let player = players[guildId];
+
+    player.loop = !player.loop;
+    if (player.loop) {
+        interaction.reply({ content: strings.loopEnabled });
+    } else {
+        interaction.reply({ content: strings.loopDisabled });
+    }
+}
+
+export {
+	data,
+	execute,
 };

@@ -1,7 +1,8 @@
 // adapted from https://github.com/MaxGfeller/youtube-search
-const querystring = require('querystring');
-const axios = require('axios').default;
-const http2 = require('http2');
+import querystring from 'querystring';
+import axios from 'axios';
+import http2 from 'http2';
+import { HTTPError } from './util.js';
 
 var allowedProperties = [
     'fields',
@@ -146,7 +147,7 @@ async function fastSearch(term, key) {
             req.on('end', () => {
                 let json = JSON.parse(data);
                 if (json.error && json.error.code !== 200) {
-                    let error = new Error(json.error.message);
+                    let error = new HTTPError(json.error.message);
                     error.response = json.error;
                     return reject(error);
                 }
@@ -370,7 +371,7 @@ function playlistItems(id, opts, pageToken, cb) {
         });
 }
 
-module.exports = {
+export {
     search,
     fastSearch,
     videoInfo,

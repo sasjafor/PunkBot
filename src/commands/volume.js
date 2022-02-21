@@ -1,25 +1,28 @@
-const { SlashCommandBuilder } = require('@discordjs/builders');
+import { SlashCommandBuilder } from '@discordjs/builders';
 
-const { players } = require('../bot.js');
-const { strings } = require('../lib/strings.js');
+import { players } from '../bot.js';
+import { strings } from '../lib/strings.js';
 
-module.exports = {
-	data: new SlashCommandBuilder()
-		.setName('volume')
-		.setDescription('Set the playback volume.')
-        .addNumberOption(option => 
-            option.setName('value')
-                .setDescription('Volume to set.')
-                .setRequired(true)
-                .setMinValue(0))
-    ,
-	async execute(interaction) {
-        let value = interaction.options.getNumber('value');
+const data = new SlashCommandBuilder()
+    .setName('volume')
+    .setDescription('Set the playback volume.')
+    .addNumberOption(option => 
+        option.setName('value')
+            .setDescription('Volume to set.')
+            .setRequired(true)
+            .setMinValue(0));
 
-        let guildId = interaction.guild.id;
-        let player = players[guildId];
+async function execute(interaction) {
+    let value = interaction.options.getNumber('value');
 
-        player.setVolume(value);
-        interaction.reply({ content: strings.volumeSet + value });
-    },
+    let guildId = interaction.guild.id;
+    let player = players[guildId];
+
+    player.setVolume(value);
+    interaction.reply({ content: strings.volumeSet + value });
+}
+
+export {
+	data,
+	execute,
 };

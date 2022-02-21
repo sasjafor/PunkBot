@@ -1,14 +1,15 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
+        "module": "es2022",
         "target": "es2020",
         "jsx": "preserve",
         "checkJs": true,
-        "strictFunctionTypes": true
+        "strictFunctionTypes": true,
+        "moduleResolution": "node",
     },
     "exclude": [
         "node_modules",
-        "**/node_modules/*"
+        "**/node_modules/*",
     ],
     "typeAcquisition": {
         "exclude" : [ 

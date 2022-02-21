@@ -1,4 +1,4 @@
-const moment = require('moment');
+import moment from 'moment';
 
 class PlaybackItem {
     constructor(url, requesterName, requesterId, requesterIconURL, title, thumbnailURL = null, duration = moment.duration('0'), channelTitle = null) {
@@ -15,6 +15,6 @@ class PlaybackItem {
     }
 }
 
-module.exports = {
+export {
     PlaybackItem,
 };

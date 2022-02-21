@@ -1,6 +1,6 @@
-const { DiscordAPIError, 
-        MessageEmbed } = require('discord.js');
-const { strings } = require('./strings');
+import { DiscordAPIError, 
+         MessageEmbed } from 'discord.js';
+import { strings } from './strings.js';
 
 async function errorReply(interaction, msgContent, errorMessage = strings.commandFailed, url = null, channel = null, avatarURL = null) {
     if (!msgContent) {
@@ -39,7 +39,7 @@ async function errorReply(interaction, msgContent, errorMessage = strings.comman
     }
 }
 
-function prettifyTime(duration) {
+function prettifyTime(duration) {  
     if (duration) {
         let hours = duration.hours() + duration.days() * 24;
         let minutes = duration.minutes();
@@ -54,7 +54,15 @@ function prettifyTime(duration) {
     }
 }
 
-module.exports = {
+class HTTPError extends Error {
+    constructor(message) {
+        super(message);
+        this.response = null;
+    }
+}
+
+export {
     errorReply,
+    HTTPError,
     prettifyTime,
 };

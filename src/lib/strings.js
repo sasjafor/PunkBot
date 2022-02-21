@@ -26,6 +26,6 @@ const strings = {
     seeked: ':fast_forward: **Set position to** ',
 };
 
-module.exports = {
+export {
     strings,
 };

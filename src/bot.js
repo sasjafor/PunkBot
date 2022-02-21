@@ -1,19 +1,21 @@
-const fs = require('fs');
-const path = require('path');
-const { Client, Collection, GuildMember, Intents, TextChannel } = require('discord.js');
-const { REST } = require('@discordjs/rest');
-const { Routes } = require('discord-api-types/v9');
-const Debug = require('debug');
+import fs from 'fs';
+import path from 'path';
+import { Client, Collection, GuildMember, Intents, TextChannel } from 'discord.js';
+import { REST } from '@discordjs/rest';
+import { Routes } from 'discord-api-types/v9';
+import { URL } from 'url';
+import Debug from 'debug';
+
+import { LimitedDict } from './lib/limited-dict.js';
+import { Player } from './lib/player.js';
+import { strings } from './lib/strings.js';
+import { errorReply } from './lib/util.js';
+
 const debug = Debug('punk_bot');
 // eslint-disable-next-line no-unused-vars
 const debugv = Debug('punk_bot:verbose');
 // eslint-disable-next-line no-unused-vars
 const debugd = Debug('punk_bot:debug');
-
-const { LimitedDict } = require('./lib/limited-dict.js');
-const { Player } = require('./lib/player.js');
-const { strings } = require('./lib/strings.js');
-const { errorReply } = require('./lib/util.js');
 
 const token = process.env.DISCORD_APP_AUTH_TOKEN;
 const youtubeAPIKey = process.env.YOUTUBE_API_KEY;
@@ -22,24 +24,28 @@ const client = new Client({ intents: [Intents.FLAGS.GUILD_VOICE_STATES, Intents.
 const players = {};
 const youtubeCache = new LimitedDict(100);
 const commands = new Collection();
-const commandFiles = fs.readdirSync(path.resolve(__dirname, './commands')).filter(file => file.endsWith('.js'));
+const commandFilesPath = new URL('./commands', import.meta.url).pathname;
+const commandFiles = fs.readdirSync(commandFilesPath).filter(file => file.endsWith('.js'));
 
 const commandJSONs = [];
 
-module.exports = {
+export {
     players,
     youtubeAPIKey,
     youtubeCache,
 };
 
-for (const file of commandFiles) {
-    const command = require(`./commands/${file}`);
-    // Set a new item in the Collection
-    // With the key as the command name and the value as the exported module
-    commands.set(command.data.name, command);
-    // Add command JSON to list
-    commandJSONs.push(command.data.toJSON());
+async function importCommands() {
+    for (const file of commandFiles) {
+        const command = await import(`./commands/${file}`);
+        // Set a new item in the Collection
+        // With the key as the command name and the value as the exported module
+        commands.set(command.data.name, command);
+        // Add command JSON to list
+        commandJSONs.push(command.data.toJSON());
+    }
 }
+importCommands();
 
 function login() {
     try {

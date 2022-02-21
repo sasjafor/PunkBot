@@ -28,7 +28,7 @@ class Queue {
 
     // Returns true if the queue is empty, and false otherwise.
     isEmpty() {
-        return (this.queue.length == 0);
+        return (this.queue.length === 0);
     }
 
     /* Enqueues the specified item. The parameter is:
@@ -47,7 +47,7 @@ class Queue {
      */
     dequeue() {
         // if the queue is empty, return immediately
-        if (this.queue.length == 0) {
+        if (this.queue.length === 0) {
             return undefined;
         }
 
@@ -96,7 +96,8 @@ class Queue {
         var queue = this.queue;
         var l = queue.length + 1;
         while (l-- > this.offset) {
-            var r = ~~(Math.random() * (l - this.offset)) + this.offset, o = queue[r];
+            var r = ~~(Math.random() * (l - this.offset)) + this.offset;
+            var o = queue[r];
 
             queue[r] = queue[this.offset];
             queue[this.offset] = o;
@@ -104,6 +105,6 @@ class Queue {
     }
 }
 
-module.exports = {
+export {
     Queue,
 };

@@ -1,76 +1,79 @@
-const { MessageEmbed } = require('discord.js');
-const { SlashCommandBuilder } = require('@discordjs/builders');
+import { MessageEmbed } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
 
-const { players } = require('../bot.js');
-const { prettifyTime } = require('../lib/util.js');
-const { strings } = require('../lib/strings.js');
+import { players } from '../bot.js';
+import { prettifyTime } from '../lib/util.js';
+import { strings } from '../lib/strings.js';
 
-module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('queue')
-        .setDescription('Show the queued songs.')
-        .addIntegerOption(option => 
-            option.setName('index')
-                .setDescription('Index of page in the queue.')
-                .setMinValue(1))
-    ,
-    async execute(interaction) {
-        let index = interaction.options.getInteger('index');
-        if (!index) {
-            index = 1;
-        }
+const data = new SlashCommandBuilder()
+    .setName('queue')
+    .setDescription('Show the queued songs.')
+    .addIntegerOption(option => 
+        option.setName('index')
+            .setDescription('Index of page in the queue.')
+            .setMinValue(1));
 
-        let guildId = interaction.guild.id;
-        let player = players[guildId];
+async function execute(interaction) {
+    let index = interaction.options.getInteger('index');
+    if (!index) {
+        index = 1;
+    }
 
-        if (!player.conn) {
-            interaction.reply({ content: strings.notConnected, ephemeral: true });
-            return;
-        }
+    let guildId = interaction.guild.id;
+    let player = players[guildId];
 
-        if (!player.playing) {
-            interaction.reply({ content: strings.nothingPlaying, ephemeral: true });
-            return;
-        }
-        let np = player.getNowPlaying();
-        if (!np) {
-            return;
-        }
+    if (!player.conn) {
+        interaction.reply({ content: strings.notConnected, ephemeral: true });
+        return;
+    }
 
-        let embed = new MessageEmbed()
-            .setTitle('Queue for ' + interaction.guild.name + '\n\u200b')
-            .setURL('https://github.com/sasjafor/PunkBot')
-            .setColor('#0000e5');
-        let desc = '__Now Playing:__\n[' + np.title + '](' + np.url + ') | ' + prettifyTime(np.duration) + ' Requested by: <@' + np.requesterId + '>';
+    if (!player.playing) {
+        interaction.reply({ content: strings.nothingPlaying, ephemeral: true });
+        return;
+    }
+    let np = player.getNowPlaying();
+    if (!np) {
+        return;
+    }
 
-        let queueLength = player.getQueueLength();
-        let numTabs = Math.ceil(queueLength / 10);
-        if (queueLength > 0) {
-            let queue = player.getQueue();
-            let k = 0;
-            if (index > 1) {
-                if (index > numTabs) {
-                    interaction.reply({ content: strings.invalidQueueTab + '**1-' + numTabs + '**', ephemeral: true });
-                    return;
-                } else {
-                    k = (index - 1) * 10 + 1;
-                    desc = '';
-                }
+    let embed = new MessageEmbed()
+        .setTitle('Queue for ' + interaction.guild.name + '\n\u200b')
+        .setURL('https://github.com/sasjafor/PunkBot')
+        .setColor('#0000e5');
+    let desc = '__Now Playing:__\n[' + np.title + '](' + np.url + ') | ' + prettifyTime(np.duration) + ' Requested by: <@' + np.requesterId + '>';
+
+    let queueLength = player.getQueueLength();
+    let numTabs = Math.ceil(queueLength / 10);
+    if (queueLength > 0) {
+        let queue = player.getQueue();
+        let k = 0;
+        if (index > 1) {
+            if (index > numTabs) {
+                interaction.reply({ content: strings.invalidQueueTab + '**1-' + numTabs + '**', ephemeral: true });
+                return;
             } else {
-                desc += '\n\n:arrow_down:__Up Next:__:arrow_down:\n\n';
+                k = (index - 1) * 10 + 1;
+                desc = '';
             }
-            let stop = Math.min(k + 10, queueLength);
-            for (let i = queue.get(k); k < stop; k++, i = queue.get(k)) {
-                i = await i;
-                desc += (k+1) + '. [' + i.title + '](' + i.url + ') | ' + prettifyTime(i.duration) + ' Requested by: <@' + i.requesterId + '>\n\n';
-            }
-            desc += '\n**' + queueLength + ' songs in queue | ' + prettifyTime(await player.getTotalQueueTime()) + ' total length**';
-            if (numTabs > 1) {
-                embed.setFooter({ text: 'Tab ' + index + '/' + numTabs, iconURL: interaction.member.avatarURL() });
-            }
+        } else {
+            desc += '\n\n:arrow_down:__Up Next:__:arrow_down:\n\n';
         }
+        let stop = Math.min(k + 10, queueLength);
+        for (let i = queue.get(k); k < stop; k++, i = queue.get(k)) {
+            i = await i;
+            desc += (k+1) + '. [' + i.title + '](' + i.url + ') | ' + prettifyTime(i.duration) + ' Requested by: <@' + i.requesterId + '>\n\n';
+        }
+        desc += '\n**' + queueLength + ' songs in queue | ' + prettifyTime(await player.getTotalQueueTime()) + ' total length**';
+        if (numTabs > 1) {
+            embed.setFooter({ text: 'Tab ' + index + '/' + numTabs, iconURL: interaction.member.avatarURL() });
+        }
+    }
 
-        embed.setDescription(desc);
-        interaction.reply({embeds: [embed]});
-    },
+    embed.setDescription(desc);
+    interaction.reply({embeds: [embed]});
+}
+
+export {
+    data,
+    execute,
 };
