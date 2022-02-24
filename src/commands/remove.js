@@ -1,6 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 
-import { players } from '../bot.js';
 import { strings } from '../lib/strings.js';
 
 const data = new SlashCommandBuilder()
@@ -12,7 +11,7 @@ const data = new SlashCommandBuilder()
             .setRequired(true)
             .setMinValue(1));
 
-async function execute(interaction) {
+async function execute(interaction, players) {
     let index = interaction.options.getInteger('index');
 
     let guildId = interaction.guild.id;

@@ -101,7 +101,7 @@ client.on('interactionCreate', async interaction => {
     }
 
     try {
-        await command.execute(interaction);
+        await command.execute(interaction, players);
     } catch (error) {
         console.trace(error.name + ': ' + error.message);
         errorReply(interaction, error.message);

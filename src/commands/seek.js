@@ -1,7 +1,6 @@
 import moment from 'moment';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
-import { players } from '../bot.js';
 import { prettifyTime } from '../lib/util.js';
 import { strings } from '../lib/strings.js';
 
@@ -13,7 +12,7 @@ const data = new SlashCommandBuilder()
             .setDescription('Time to seek to.')
             .setRequired(true));
 
-async function execute(interaction) {
+async function execute(interaction, players) {
     let time = interaction.options.getString('time');
 
     let guildId = interaction.guild.id;

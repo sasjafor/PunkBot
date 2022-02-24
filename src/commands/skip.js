@@ -1,13 +1,12 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 
-import { players } from '../bot.js';
 import { strings } from '../lib/strings.js';
 
 const data = new SlashCommandBuilder()
     .setName('skip')
     .setDescription('Skips the current song.');
 
-async function execute(interaction) {
+async function execute(interaction, players) {
     let guildId = interaction.guild.id;
     let player = players[guildId];
 

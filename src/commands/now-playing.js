@@ -1,7 +1,6 @@
 import { MessageEmbed } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
-import { players } from '../bot.js';
 import { prettifyTime } from '../lib/util.js';
 import { strings } from '../lib/strings.js';
 
@@ -9,7 +8,7 @@ const data = new SlashCommandBuilder()
     .setName('now-playing')
     .setDescription('Shows the song that is currently playing.');
 
-async function execute(interaction) {
+async function execute(interaction, players) {
     let guildId = interaction.guild.id;
     let player = players[guildId];
 

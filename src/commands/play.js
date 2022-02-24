@@ -11,7 +11,7 @@ import { fastSearch,
          playlistItems,
          videoInfo,
 } from '../lib/youtube-api.js';
-import { players, youtubeAPIKey, youtubeCache } from '../bot.js';
+import { youtubeAPIKey, youtubeCache } from '../bot.js';
 import { PlaybackItem } from '../lib/playback-item.js';
 import { strings } from '../lib/strings.js';
 
@@ -44,7 +44,7 @@ const data = new SlashCommandBuilder()
             .setDescription('YouTube link or search term.')
             .setRequired(true));
 
-async function execute(interaction) {
+async function execute(interaction, players) {
     let searchQuery = interaction.options.getString('search');
     if (!interaction.member.voice.channel.joinable) {
         errorReply(interaction, strings.noPermissionToConnect + interaction.member.voice.channel.name);

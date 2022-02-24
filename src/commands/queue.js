@@ -1,7 +1,6 @@
 import { MessageEmbed } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
-import { players } from '../bot.js';
 import { prettifyTime } from '../lib/util.js';
 import { strings } from '../lib/strings.js';
 
@@ -13,7 +12,7 @@ const data = new SlashCommandBuilder()
             .setDescription('Index of page in the queue.')
             .setMinValue(1));
 
-async function execute(interaction) {
+async function execute(interaction, players) {
     let index = interaction.options.getInteger('index');
     if (!index) {
         index = 1;
