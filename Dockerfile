@@ -11,7 +11,7 @@ RUN apt-get update && \
 COPY package.json /usr/src/app/
 
 # Install node dependencies
-RUN npm install --save-prod
+RUN npm i --production
 
 FROM node:17
 
