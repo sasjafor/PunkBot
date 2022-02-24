@@ -44,16 +44,25 @@
     "zlib-sync": "^0.1.7"
   },
   "devDependencies": {
-    "chai": "^4.3.6",
-    "chai-as-promised": "^7.1.1",
+    "@babel/plugin-transform-modules-commonjs": "^7.16.8",
     "eslint": "^8.9.0",
-    "mocha": "^9.2.1",
-    "nyc": "^15.1.0",
-    "sinon": "^13.0.1"
+    "jest": "^27.5.1"
   },
   "scripts": {
     "lint:all": "npx eslint .",
-    "test": "mocha",
-    "coverage": "nyc --reporter=cobertura mocha"
+    "test": "jest",
+    "coverage": "jest --coverage"
+  },
+  "babel": {
+    "env": {
+      "test": {
+        "plugins": [
+          "@babel/plugin-transform-modules-commonjs"
+        ]
+      }
+    }
+  },
+  "jest": {
+    "collectCoverageFrom": ["src/**/*.js"]
   }
 }
