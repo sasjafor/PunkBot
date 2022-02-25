@@ -54,6 +54,28 @@ function prettifyTime(duration) {
     }
 }
 
+function buildProgressBar(progress, totalTime) {
+    let pr = progress.asSeconds();
+    let tt = totalTime.asSeconds();
+
+    if (pr > tt) {
+        tt = pr;
+    }
+
+    let mul = 30 / tt;
+    let pos = Math.round(pr * mul);
+    let res = '';
+    for (let i = 0; i < pos; i++) {
+        res += '▬';
+    }
+    res += '🔘';
+    let rest = 30 - pos;
+    for (let i = 0; i < rest; i++) {
+        res += '▬';
+    }
+    return res;
+}
+
 class HTTPError extends Error {
     constructor(message) {
         super(message);
@@ -62,6 +84,7 @@ class HTTPError extends Error {
 }
 
 export {
+    buildProgressBar,
     errorReply,
     HTTPError,
     prettifyTime,

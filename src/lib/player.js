@@ -241,9 +241,6 @@ class Player {
      * @param {number} num
      */
     remove(num) {
-        if(!this.conn) {
-            return -1;
-        }
         if (num > 0 && num <= this.queue.getLength()) {
             return this.queue.remove(num - 1)[0];
         } else {

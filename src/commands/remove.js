@@ -23,10 +23,7 @@ async function execute(interaction, players) {
     }
 
     let removeRes = player.remove(index);
-    if (removeRes === -1) {
-        // TODO: might be unnecessary now
-        interaction.reply({ content: strings.notConnected, ephemeral: true });
-    } else if(removeRes) {
+    if (removeRes) {
         interaction.reply({ content: strings.removed + removeRes.title });
     } else {
         interaction.reply({ content: strings.outOfRange, ephemeral: true });

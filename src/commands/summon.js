@@ -7,8 +7,8 @@ const data = new SlashCommandBuilder()
     .setDescription('Summons the bot to your voice channel.');
 
 async function execute(interaction, players) {
-    if (!interaction.member.voice.channel.joinable) {
-        interaction.reply({ content: strings.no_permission_to_connect + '`' + interaction.member.voice.channel.name + '`' , ephemeral: true });
+    if (!interaction?.member?.voice?.channel?.joinable) {
+        interaction.reply({ content: strings.no_permission_to_connect + '`' + interaction?.member?.voice?.channel?.name + '`' , ephemeral: true });
         return;
     }
 

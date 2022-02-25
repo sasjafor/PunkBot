@@ -1,7 +1,7 @@
 import { MessageEmbed } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
-import { prettifyTime } from '../lib/util.js';
+import { buildProgressBar, prettifyTime } from '../lib/util.js';
 import { strings } from '../lib/strings.js';
 
 const data = new SlashCommandBuilder()
@@ -33,28 +33,6 @@ async function execute(interaction, players) {
     } else {
         interaction.reply({ content: strings.nothingPlaying, ephemeral: true });
     }
-}
-
-function buildProgressBar(progress, totalTime) {
-    let pr = progress.asSeconds();
-    let tt = totalTime.asSeconds();
-
-    if (pr > tt) {
-        tt = pr;
-    }
-
-    let mul = 30 / tt;
-    let pos = Math.round(pr * mul);
-    let res = '';
-    for (let i = 0; i < pos; i++) {
-        res += '▬';
-    }
-    res += '🔘';
-    let rest = 30 - pos;
-    for (let i = 0; i < rest; i++) {
-        res += '▬';
-    }
-    return res;
 }
 
 export {
