@@ -6,3 +6,4 @@ debug_test_run.sh
 client_secret.json
 .vscode
 .nyc_output
+coverage
