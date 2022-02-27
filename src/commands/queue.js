@@ -64,7 +64,7 @@ async function execute(interaction, players) {
         }
         desc += '\n**' + queueLength + ' songs in queue | ' + prettifyTime(await player.getTotalQueueTime()) + ' total length**';
         if (numTabs > 1) {
-            embed.setFooter({ text: 'Tab ' + index + '/' + numTabs, iconURL: interaction.member.avatarURL() });
+            embed.setFooter({ text: 'Tab ' + index + '/' + numTabs, iconURL: interaction.member?.avatarURL() });
         }
     }
 
