@@ -14,8 +14,8 @@ async function execute(interaction, players) {
 
     let guildId = interaction.guild.id;
     let player = players[guildId];
-    await player.connect(interaction.member.voice.channel);
-    interaction.reply({ content: strings.joined + '`' + interaction.member.voice.channel.name + '`' });
+    await player.connect(interaction.member?.voice?.channel);
+    interaction.reply({ content: strings.joined + '`' + interaction.member?.voice?.channel?.name + '`' });
 }
 
 export {

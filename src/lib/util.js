@@ -15,7 +15,7 @@ async function errorReply(interaction, msgContent, errorMessage = strings.comman
     }
 
     if (interaction) {
-        embed = embed.setAuthor({ name: errorMessage, iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'});
+        embed = embed.setAuthor({ name: errorMessage, iconURL: interaction.member?.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'});
 
         let message = { embeds: [embed], ephemeral: true };
         if (interaction.replied) {

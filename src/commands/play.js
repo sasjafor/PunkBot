@@ -46,8 +46,8 @@ const data = new SlashCommandBuilder()
 
 async function execute(interaction, players) {
     let searchQuery = interaction.options.getString('search');
-    if (!interaction.member.voice.channel.joinable) {
-        errorReply(interaction, strings.noPermissionToConnect + interaction.member.voice.channel.name);
+    if (!interaction.member?.voice?.channel?.joinable) {
+        errorReply(interaction, strings.noPermissionToConnect + interaction.member?.voice?.channel?.name);
         return;
     }
 
@@ -55,7 +55,7 @@ async function execute(interaction, players) {
     let player = players[guildId];
     let connecting = null;
     if (!player.playing) {
-        connecting = player.connect(interaction.member.voice.channel);
+        connecting = player.connect(interaction.member?.voice?.channel);
     }
 
     let searchRes = null;
@@ -66,7 +66,7 @@ async function execute(interaction, players) {
 
     let searchEmbed = new MessageEmbed()
         .setTitle(searchString)
-        .setAuthor({ name: 'Searching', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
+        .setAuthor({ name: 'Searching', iconURL: interaction.member?.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
         .setURL(url);
     let searchReply = interaction.reply({ embeds: [searchEmbed] });
 
@@ -77,9 +77,9 @@ async function execute(interaction, players) {
     let pbCached = youtubeCache.get(searchString);
     if (pbCached) {
         pb = pbCached;
-        pb.requesterName = interaction.member.displayName;
+        pb.requesterName = interaction.member?.displayName;
         pb.requesterId = interaction.user.id;
-        pb.requesterIconURL = interaction.member.displayAvatarURL();
+        pb.requesterIconURL = interaction.member?.displayAvatarURL();
 
         if (!player.playing) {
             player.enqueue(pb);
@@ -129,7 +129,7 @@ async function execute(interaction, players) {
 
                     let playlistEmbed = new MessageEmbed()
                         .setTitle(pi.title)
-                        .setAuthor({ name: 'Enqueued playlist', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot' })
+                        .setAuthor({ name: 'Enqueued playlist', iconURL: interaction.member?.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot' })
                         .setURL(url)
                         .setThumbnail(pi.thumbnails.maxres.url)
                         .addField('Channel', pi.channelTitle)
@@ -156,9 +156,9 @@ async function execute(interaction, players) {
                         url = 'https://www.youtube.com/watch?v=' + id;
                         title = playlistRes.results[0].title;
                     }
-                    handlePlaylist(player, playlistId, interaction.member, true, playlistCallback, interaction.channel, interaction.member.displayAvatarURL());
+                    handlePlaylist(player, playlistId, interaction.member, true, playlistCallback, interaction.channel, interaction.member?.displayAvatarURL());
                 } else {
-                    handlePlaylist(player, playlistId, interaction.member, false, playlistCallback, interaction.channel, interaction.member.displayAvatarURL());
+                    handlePlaylist(player, playlistId, interaction.member, false, playlistCallback, interaction.channel, interaction.member?.displayAvatarURL());
                     return;
                 }
             }
