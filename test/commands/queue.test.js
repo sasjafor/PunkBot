@@ -18,7 +18,7 @@ describe('commands', function () {
                 getInteger: jest.fn(() => { return 1; }),
             },
             member: {
-                avatarURL: jest.fn(),
+                displayAvatarURL: jest.fn(),
             },
         };
 
