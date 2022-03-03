@@ -29,12 +29,6 @@ const commandFiles = fs.readdirSync(commandFilesPath).filter(file => file.endsWi
 
 const commandJSONs = [];
 
-export {
-    players,
-    youtubeAPIKey,
-    youtubeCache,
-};
-
 async function importCommands() {
     for (const file of commandFiles) {
         const command = await import(`./commands/${file}`);
@@ -101,7 +95,7 @@ client.on('interactionCreate', async interaction => {
     }
 
     try {
-        await command.execute(interaction, players);
+        await command.execute(interaction, players, youtubeAPIKey, youtubeCache);
     } catch (error) {
         console.trace(error.name + ': ' + error.message);
         errorReply(interaction, error.message);

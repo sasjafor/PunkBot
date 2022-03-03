@@ -1,6 +1,17 @@
+import Debug from 'debug';
+
 import { DiscordAPIError,
          MessageEmbed } from 'discord.js';
+import { playlistItems, videoInfo } from './youtube-api.js';
+import moment from 'moment';
+import { PlaybackItem } from './playback-item.js';
 import { strings } from './strings.js';
+
+// eslint-disable-next-line no-unused-vars
+const debug = Debug('punk_bot');
+// eslint-disable-next-line no-unused-vars
+const debugv = Debug('punk_bot:verbose');
+const debugd = Debug('punk_bot:debug');
 
 async function errorReply(interaction, msgContent, errorMessage = strings.commandFailed, url = null, channel = null, avatarURL = null) {
     if (!msgContent) {
@@ -76,6 +87,99 @@ function buildProgressBar(progress, totalTime) {
     return res;
 }
 
+/**
+ * @param {string} url
+ */
+function getYTid(url) {
+    let idRegex = /(?:youtube(?:-nocookie)?\.com\/(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    let match = url.match(idRegex);
+
+    if (match && match.length > 1) {
+        return match[1];
+    } else {
+        return null;
+    }
+}
+
+async function handleVideo(id, requester, url, title, youtubeAPIKey) {
+    if (id) {
+        let res;
+        let videoOpts = {
+            key: youtubeAPIKey,
+            part: 'contentDetails,snippet',
+        };
+
+        res = await videoInfo(id, videoOpts, null);
+        res = res.results[0];
+
+        if (res) {
+            let ytUrl = 'https://www.youtube.com/watch?v=' + id;
+            let ytTitle = res.title;
+            let ytThumbnailURL = res.thumbnails.maxres?.url;
+            if (!ytThumbnailURL) {
+                ytThumbnailURL = res.thumbnails.standard?.url;
+            }
+            let ytDuration = moment.duration(res.duration);
+            let ytChannelTitle = res.channelTitle;
+            return new PlaybackItem(ytUrl, requester.displayName, requester.user.id, requester.displayAvatarURL(), ytTitle, ytThumbnailURL, ytDuration, ytChannelTitle);
+        } else {
+            throw new Error('Failed to get video info');
+        }
+    } else {
+        return new PlaybackItem(url, requester.displayName, requester.user.id, requester.displayAvatarURL(), title, null, moment.duration('0'), null);
+    }
+}
+
+async function handlePlaylist(player, id, requester, skipFirst, callback, channel, avatarURL, youtubeAPIKey) {
+    let skipped = false;
+    let pageInfo = null;
+    let pageToken = null;
+    let successCount = 0;
+    if (skipFirst) {
+        successCount++;
+    }
+    let failCount = 0;
+    do {
+        let res;
+        try {
+            let playlistOpts = {
+                key: youtubeAPIKey,
+                part: 'contentDetails,snippet',
+                maxResults: 50,
+            };
+            res = await playlistItems(id, playlistOpts, pageToken, null);
+        } catch(error) {
+            console.trace(error.name + ': ' + error.message);
+            let url = 'https://www.youtube.com/playlist?list=' + id;
+            errorReply(undefined, url, error.response?.data?.error?.message, url, channel, avatarURL);
+            return null;
+        }
+        pageInfo = res.pageInfo;
+        pageToken = (pageInfo) ? pageInfo.nextPageToken : null;
+        let items = res.results;
+
+        for (let i of items) {
+            if (skipped || !skipFirst) {
+                let YTurl = 'https://www.youtube.com/watch?v=' + i.videoId;
+                let video = await handleVideo(i.videoId, requester, YTurl, null, youtubeAPIKey).catch((error) => {
+                    console.trace(error.name + ': ' + error.message);
+                });
+                if (video) {
+                    successCount++;
+                    player.enqueue(video);
+                } else {
+                    failCount++;
+                }
+            }
+            skipped = true;
+        }
+    } while (pageInfo.nextPageToken);
+    debugd('DONE processing playlist!');
+    if (callback) {
+        callback(successCount, failCount);
+    }
+}
+
 class HTTPError extends Error {
     constructor(message) {
         super(message);
@@ -86,6 +190,9 @@ class HTTPError extends Error {
 export {
     buildProgressBar,
     errorReply,
+    getYTid,
+    handlePlaylist,
+    handleVideo,
     HTTPError,
     prettifyTime,
 };

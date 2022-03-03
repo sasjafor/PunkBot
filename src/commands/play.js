@@ -1,39 +1,25 @@
 import Debug from 'debug';
 import decode from 'unescape';
-import moment from 'moment';
 
 import { MessageEmbed } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
-import { errorReply, prettifyTime } from '../lib/util.js';
+import { errorReply, getYTid, handlePlaylist, handleVideo, prettifyTime } from '../lib/util.js';
 import { fastSearch,
          playlistInfo,
          playlistItems,
-         videoInfo,
 } from '../lib/youtube-api.js';
-import { youtubeAPIKey, youtubeCache } from '../bot.js';
 import { PlaybackItem } from '../lib/playback-item.js';
 import { strings } from '../lib/strings.js';
 
 // eslint-disable-next-line no-unused-vars
 const debug = Debug('punk_bot');
 const debugv = Debug('punk_bot:verbose');
+// eslint-disable-next-line no-unused-vars
 const debugd = Debug('punk_bot:debug');
 
-var videoOpts = {
-    key: youtubeAPIKey,
-    part: 'contentDetails,snippet',
-};
-
 var playlistInfoOpts = {
-    key: youtubeAPIKey,
     part: 'contentDetails,snippet',
-};
-
-var playlistOpts = {
-    key: youtubeAPIKey,
-    part: 'contentDetails,snippet',
-    maxResults: 50,
 };
 
 const data = new SlashCommandBuilder()
@@ -44,7 +30,7 @@ const data = new SlashCommandBuilder()
             .setDescription('YouTube link or search term.')
             .setRequired(true));
 
-async function execute(interaction, players) {
+async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
     let searchQuery = interaction.options.getString('search');
     if (!interaction.member?.voice?.channel?.joinable) {
         errorReply(interaction, strings.noPermissionToConnect + interaction.member?.voice?.channel?.name);
@@ -118,6 +104,7 @@ async function execute(interaction, players) {
                 let playlistCallback = async function(successCount, _failCount) {
                     let playlistInfoRes;
                     try {
+                        playlistInfoOpts.key = youtubeAPIKey;
                         playlistInfoRes = await playlistInfo(playlistId, playlistInfoOpts);
                     } catch(error) {
                         console.trace(error.name + ': ' + error.message);
@@ -137,6 +124,11 @@ async function execute(interaction, players) {
                     interaction.channel.send({ embeds: [playlistEmbed] });
                 };
                 if (!player.playing) {
+                    let playlistOpts = {
+                        key: youtubeAPIKey,
+                        part: 'contentDetails,snippet',
+                        maxResults: 50,
+                    };
                     let customOpts = {
                         ...playlistOpts,
                     };
@@ -177,7 +169,7 @@ async function execute(interaction, players) {
             }
         }
 
-        let pbP = handleVideo(id, interaction.member, url, title)
+        let pbP = handleVideo(id, interaction.member, url, title, youtubeAPIKey)
             .catch(async (error) => {
                 console.trace(error.name + ': ' + error.message);
                 await searchReply;
@@ -247,101 +239,6 @@ async function execute(interaction, players) {
 
     await searchReply;
     interaction.editReply({ content: null, embeds: [embed] });
-}
-
-/**
- * @param {string} url
- */
-function getYTid(url) {
-    let idRegex = /(?:youtube(?:-nocookie)?\.com\/(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-    let match = url.match(idRegex);
-
-    if (match && match.length > 1) {
-        return match[1];
-    } else {
-        return null;
-    }
-}
-
-/**
- * @param {string} id
- * @param {{displayName: any;user: {id: any;};displayAvatarURL: () => any;}} requester
- * @param {string} url
- * @param {string | undefined} [title]
- */
-async function handleVideo(id, requester, url, title) {
-    if (id) {
-        let res;
-        res = await videoInfo(id, videoOpts, null);
-        res = res.results[0];
-
-        if (res) {
-            let ytUrl = 'https://www.youtube.com/watch?v=' + id;
-            let ytTitle = res.title;
-            let ytThumbnailURL = res.thumbnails.maxres?.url;
-            if (!ytThumbnailURL) {
-                ytThumbnailURL = res.thumbnails.standard?.url;
-            }
-            let ytDuration = moment.duration(res.duration);
-            let ytChannelTitle = res.channelTitle;
-            return new PlaybackItem(ytUrl, requester.displayName, requester.user.id, requester.displayAvatarURL(), ytTitle, ytThumbnailURL, ytDuration, ytChannelTitle);
-        } else {
-            throw new Error('Failed to get video info');
-        }
-    } else {
-        return new PlaybackItem(url, requester.displayName, requester.user.id, requester.displayAvatarURL(), title, null, moment.duration('0'), null);
-    }
-}
-
-/**
- * @param {{ enqueue: (arg0: PlaybackItem) => void; }} player
- * @param {any} id
- * @param {{ displayName: any; user: { id: any; }; displayAvatarURL: () => any; }} requester
- * @param {boolean} skipFirst
- */
-async function handlePlaylist(player, id, requester, skipFirst, callback, channel, avatarURL) {
-    let skipped = false;
-    let pageInfo = null;
-    let pageToken = null;
-    let successCount = 0;
-    if (skipFirst) {
-        successCount++;
-    }
-    let failCount = 0;
-    do {
-        let res;
-        try {
-            res = await playlistItems(id, playlistOpts, pageToken, null);
-        } catch(error) {
-            console.trace(error.name + ': ' + error.message);
-            let url = 'https://www.youtube.com/playlist?list=' + id;
-            errorReply(undefined, url, error.response?.data?.error?.message, url, channel, avatarURL);
-            return null;
-        }
-        pageInfo = res.pageInfo;
-        pageToken = (pageInfo) ? pageInfo.nextPageToken : null;
-        let items = res.results;
-
-        for (let i of items) {
-            if (skipped || !skipFirst) {
-                let YTurl = 'https://www.youtube.com/watch?v=' + i.videoId;
-                let video = await handleVideo(i.videoId, requester, YTurl).catch((error) => {
-                    console.trace(error.name + ': ' + error.message);
-                });
-                if (video) {
-                    successCount++;
-                    player.enqueue(video);
-                } else {
-                    failCount++;
-                }
-            }
-            skipped = true;
-        }
-    } while (pageInfo.nextPageToken);
-    debugd('DONE processing playlist!');
-    if (callback) {
-        callback(successCount, failCount);
-    }
 }
 
 export {
