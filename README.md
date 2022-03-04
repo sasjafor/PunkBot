@@ -4,7 +4,7 @@
 [![Build Status](https://img.shields.io/github/workflow/status/sasjafor/PunkBot/Docker%20Image%20CI?style=flat-square)](https://github.com/sasjafor/PunkBot/actions/workflows/docker-image-ci.yml)
 [![Total Downloads](https://img.shields.io/npm/dt/punk-bot.svg?style=flat-square)](https://www.npmjs.com/package/punk-bot)
 [![Latest Stable Version](https://img.shields.io/npm/v/punk-bot.svg?style=flat-square)](https://www.npmjs.com/package/punk-bot)
-[![codecov](https://codecov.io/gh/sasjafor/PunkBot/branch/master/graph/badge.svg?token=D6CFQCYDAL)](https://codecov.io/gh/sasjafor/PunkBot)
+[![codecov](https://img.shields.io/codecov/c/github/sasjafor/PunkBot?style=flat-square)](https://codecov.io/gh/sasjafor/PunkBot)
 [![Known Vulnerabilities](https://img.shields.io/snyk/vulnerabilities/github/sasjafor/PunkBot?style=flat-square)](https://snyk.io/test/github/sasjafor/PunkBot)
 [![License](https://img.shields.io/badge/license-GPL-lightgrey.svg?style=flat-square)](https://opensource.org/licenses/gpl-license)
 [![Discord Server](https://img.shields.io/discord/518113399448666113.svg?style=flat-square&colorB=7289DA)](https://discord.gg/qPxJfWw)
