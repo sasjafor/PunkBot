@@ -21,6 +21,7 @@ const pb = {
 };
 var mockHandleVideoRes = pb;
 
+// eslint-disable-next-line no-unused-vars
 import { errorReply, getYTid, handlePlaylist, handleVideo, prettifyTime } from '../../src/lib/util.js';
 jest.mock('../../src/lib/util.js', () => {
     return {
@@ -77,6 +78,7 @@ const mockPlaylistItemsRes = {
 };
 var mockPlaylistItemsError = false;
 
+// eslint-disable-next-line no-unused-vars
 import { fastSearch, playlistInfo, playlistItems } from '../../src/lib/youtube-api.js';
 jest.mock('../../src/lib/youtube-api.js', () => {
     return {
