@@ -118,10 +118,10 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
                         .setTitle(pi.title)
                         .setAuthor({ name: 'Enqueued playlist', iconURL: interaction.member?.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot' })
                         .setURL(url)
-                        .setThumbnail(pi.thumbnails.maxres.url)
+                        .setThumbnail(pi.thumbnails?.maxres?.url)
                         .addField('Channel', pi.channelTitle)
                         .addField('Enqueued Items', successCount + '/' + pi.itemCount);
-                    interaction.channel.send({ embeds: [playlistEmbed] });
+                    interaction.channel?.send({ embeds: [playlistEmbed] });
                 };
                 if (!player.playing) {
                     let playlistOpts = {
@@ -159,7 +159,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
         if (!id) {
             id = getYTid(url);
         }
-        let isYT = id !== null;
+        let isYT = !!id;
 
         if (!isYT) {
             let fileNameRegex = /\/([\w\-. ]+)\.[\w\- ]+$/;
@@ -177,7 +177,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
                 return;
             });
         if (!player.playing) {
-            let pbShort = new PlaybackItem(url, interaction.member.displayName, interaction.user.id, interaction.member.displayAvatarURL(), title);
+            let pbShort = new PlaybackItem(url, interaction.member?.displayName, interaction.user.id, interaction.member?.displayAvatarURL(), title);
             player.enqueue(pbShort);
 
             debugv('Added ' + url);
@@ -214,9 +214,6 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
         return;
     }
 
-    if (!pb) {
-        return;
-    }
     var prettyDuration = prettifyTime(pb.duration);
     let embed = new MessageEmbed()
         .setTitle(decode(pb.title))

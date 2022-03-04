@@ -126,7 +126,7 @@ async function handleVideo(id, requester, url, title, youtubeAPIKey) {
             throw new Error('Failed to get video info');
         }
     } else {
-        return new PlaybackItem(url, requester.displayName, requester.user.id, requester.displayAvatarURL(), title, null, moment.duration('0'), null);
+        return new PlaybackItem(url, requester.displayName, requester.user.id, requester.displayAvatarURL(), title);
     }
 }
 
@@ -180,19 +180,11 @@ async function handlePlaylist(player, id, requester, skipFirst, callback, channe
     }
 }
 
-class HTTPError extends Error {
-    constructor(message) {
-        super(message);
-        this.response = null;
-    }
-}
-
 export {
     buildProgressBar,
     errorReply,
     getYTid,
     handlePlaylist,
     handleVideo,
-    HTTPError,
     prettifyTime,
 };
