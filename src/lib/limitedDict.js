@@ -1,6 +1,6 @@
 /*
 
-limited-dcit.js
+limitedDict.js
 
 A dict class that supports maximum size with LRU replacement policy
 
@@ -33,11 +33,15 @@ class LimitedDict {
      * @param {any} key
      */
     push(key, item) {
+        if (this.dict[key]) {
+            return;
+        }
+
         if (this.size >= this.maxSize) {
             this.shift();
         }
 
-        let newElem = new DictNode(item);
+        let newElem = new DictNode(key, item);
         newElem.next = null;
         if (this.head) {
             this.tail.next = newElem;
@@ -64,6 +68,7 @@ class LimitedDict {
             oldHead.next = null;
         }
         this.size--;
+        delete this.dict[oldHead.key];
         return oldHead;
     }
 
@@ -88,6 +93,7 @@ class LimitedDict {
             elem.prev.next = elem.next;
         }
         this.size--;
+        delete this.dict[elem.key];
         return;
     }
 
@@ -110,10 +116,8 @@ class LimitedDict {
     printlist() {
         let curr = this.head;
 
-        // console.log(this.dict);
         let list = '[ Size: ' + this.size + ' | ';
         while (curr) {
-            // console.log(curr);
             list += curr.value?.title + ', ';
             curr = curr.next;
         }
@@ -127,7 +131,8 @@ class DictNode {
     /**
      * @param {any} value
      */
-    constructor(value) {
+    constructor(key, value) {
+        this.key = key;
         this.value = value;
         this.next = null;
         this.prev = null;

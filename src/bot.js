@@ -7,7 +7,7 @@ import { Routes } from 'discord-api-types/v9';
 import { URL } from 'url';
 
 import { errorReply } from './lib/util.js';
-import { LimitedDict } from './lib/limited-dict.js';
+import { LimitedDict } from './lib/limitedDict.js';
 import { Player } from './lib/player.js';
 import { strings } from './lib/strings.js';
 
