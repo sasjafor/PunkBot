@@ -3,7 +3,7 @@ import axios from 'axios';
 import http2 from 'http2';
 import querystring from 'querystring';
 
-import { HTTPError } from './errors';
+import { HTTPError } from './errors.js';
 
 var allowedProperties = [
     'fields',
