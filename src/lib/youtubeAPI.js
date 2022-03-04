@@ -171,11 +171,6 @@ async function fastSearch(term, key) {
     });
 }
 
-/**
- * @param {any} id
- * @param {{ [x: string]: any; part?: any; }} opts
- * @param {{ (err: any, results: any, pageInfo: any): void; (arg0: any, arg1: undefined, arg2: { totalResults: any; resultsPerPage: any; }): any; }} cb
- */
 function videoInfo(id, opts, cb) {
     if (typeof opts === 'function') {
         cb = opts;
@@ -306,12 +301,6 @@ function playlistInfo(id, opts, pageToken, cb) {
         });
 }
 
-/**
- * @param {any} id
- * @param {{ [x: string]: any; part?: any; }} opts
- * @param {any} pageToken
- * @param {{ (err: any, results: any, pageInfo: any): void; (arg0: any, arg1: undefined, arg2: { totalResults: any; resultsPerPage: any; nextPageToken: any; }): any; }} cb
- */
 function playlistItems(id, opts, pageToken, cb) {
     if (!opts) {
         opts = {};
