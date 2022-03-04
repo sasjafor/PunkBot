@@ -1,7 +1,14 @@
 # Punk Bot
 [![npm link](https://nodei.co/npm/punk-bot.png?downloads=true&downloadRank=true)](https://www.npmjs.com/package/punk-bot)
 
-[![Build Status](https://img.shields.io/github/workflow/status/sasjafor/PunkBot/Docker%20Image%20CI?style=flat-square)](https://github.com/sasjafor/PunkBot/actions/workflows/docker-image-ci.yml) [![Total Downloads](https://img.shields.io/npm/dt/punk-bot.svg?style=flat-square)](https://www.npmjs.com/package/punk-bot) [![Latest Stable Version](https://img.shields.io/npm/v/punk-bot.svg?style=flat-square)](https://www.npmjs.com/package/punk-bot) [![Known Vulnerabilities](https://img.shields.io/snyk/vulnerabilities/github/sasjafor/PunkBot?style=flat-square)](https://snyk.io/test/github/sasjafor/PunkBot) [![License](https://img.shields.io/badge/license-GPL-lightgrey.svg?style=flat-square)](https://opensource.org/licenses/gpl-license) [![Discord Server](https://img.shields.io/discord/518113399448666113.svg?style=flat-square&colorB=7289DA)](https://discord.gg/qPxJfWw) [![Discord Bot](https://img.shields.io/badge/discord-bot-blue.svg?style=flat-square&colorB=7289DA)](https://discordapp.com/api/oauth2/authorize?client_id=431490929677959178&permissions=120937536&scope=bot) 
+[![Build Status](https://img.shields.io/github/workflow/status/sasjafor/PunkBot/Docker%20Image%20CI?style=flat-square)](https://github.com/sasjafor/PunkBot/actions/workflows/docker-image-ci.yml)
+[![Total Downloads](https://img.shields.io/npm/dt/punk-bot.svg?style=flat-square)](https://www.npmjs.com/package/punk-bot)
+[![Latest Stable Version](https://img.shields.io/npm/v/punk-bot.svg?style=flat-square)](https://www.npmjs.com/package/punk-bot)
+[![codecov](https://codecov.io/gh/sasjafor/PunkBot/branch/master/graph/badge.svg?token=D6CFQCYDAL)](https://codecov.io/gh/sasjafor/PunkBot)
+[![Known Vulnerabilities](https://img.shields.io/snyk/vulnerabilities/github/sasjafor/PunkBot?style=flat-square)](https://snyk.io/test/github/sasjafor/PunkBot)
+[![License](https://img.shields.io/badge/license-GPL-lightgrey.svg?style=flat-square)](https://opensource.org/licenses/gpl-license)
+[![Discord Server](https://img.shields.io/discord/518113399448666113.svg?style=flat-square&colorB=7289DA)](https://discord.gg/qPxJfWw)
+[![Discord Bot](https://img.shields.io/badge/discord-bot-blue.svg?style=flat-square&colorB=7289DA)](https://discordapp.com/api/oauth2/authorize?client_id=431490929677959178&permissions=120937536&scope=bot) 
 
 A Discord music bot without limits.
 
