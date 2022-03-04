@@ -4,7 +4,7 @@ import { DiscordAPIError,
          MessageEmbed } from 'discord.js';
 import { playlistItems, videoInfo } from './youtubeAPI.js';
 import moment from 'moment';
-import { PlaybackItem } from './playback-item.js';
+import { PlaybackItem } from './playbackItem.js';
 import { strings } from './strings.js';
 
 // eslint-disable-next-line no-unused-vars

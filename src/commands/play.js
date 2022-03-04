@@ -9,7 +9,7 @@ import { fastSearch,
          playlistInfo,
          playlistItems,
 } from '../lib/youtubeAPI.js';
-import { PlaybackItem } from '../lib/playback-item.js';
+import { PlaybackItem } from '../lib/playbackItem.js';
 import { strings } from '../lib/strings.js';
 
 // eslint-disable-next-line no-unused-vars
