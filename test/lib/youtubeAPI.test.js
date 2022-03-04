@@ -123,13 +123,6 @@ describe('lib', function () {
             mockStream = new PassThrough();
         });
 
-        const cb = function(err, results, pageInfo) {
-            if (err) {
-                console.log('ERRR');
-            }
-            console.log('success');
-        };
-
         describe('search', function () {
             it('search no args, error', function() {
                 mockAxios.get = axiosError;
