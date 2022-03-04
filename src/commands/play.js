@@ -8,7 +8,7 @@ import { errorReply, getYTid, handlePlaylist, handleVideo, prettifyTime } from '
 import { fastSearch,
          playlistInfo,
          playlistItems,
-} from '../lib/youtube-api.js';
+} from '../lib/youtubeAPI.js';
 import { PlaybackItem } from '../lib/playback-item.js';
 import { strings } from '../lib/strings.js';
 

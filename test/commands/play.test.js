@@ -79,7 +79,7 @@ const mockPlaylistItemsRes = {
 var mockPlaylistItemsError = false;
 
 // eslint-disable-next-line no-unused-vars
-import { fastSearch, playlistInfo, playlistItems } from '../../src/lib/youtube-api.js';
+import { fastSearch, playlistInfo, playlistItems } from '../../src/lib/youtubeAPI.js';
 jest.mock('../../src/lib/youtube-api.js', () => {
     return {
         fastSearch: jest.fn(() => {
