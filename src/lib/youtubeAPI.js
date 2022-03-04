@@ -243,7 +243,7 @@ function playlistInfo(id, opts, pageToken, cb) {
 
     if (!cb) {
         return new Promise(function(resolve, reject) {
-            playlistInfo(id, opts, pageToken, function(/** @type {any} */ err, /** @type {any} */ results, /** @type {any} */ pageInfo) {
+            playlistInfo(id, opts, pageToken, function(err, results, pageInfo) {
                 if (err) {
                     return reject(err);
                 }
@@ -308,7 +308,7 @@ function playlistItems(id, opts, pageToken, cb) {
 
     if (!cb) {
         return new Promise(function(resolve, reject) {
-            playlistItems(id, opts, pageToken, function(/** @type {any} */ err, /** @type {any} */ results, /** @type {any} */ pageInfo) {
+            playlistItems(id, opts, pageToken, function(err, results, pageInfo) {
                 if (err) {
                     return reject(err);
                 }
