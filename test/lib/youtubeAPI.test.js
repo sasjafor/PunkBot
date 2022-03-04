@@ -1,0 +1,221 @@
+const { PassThrough } = require('stream');
+
+import * as youtubeAPI from '../../src/lib/youtubeAPI.js';
+
+import mockAxios from 'axios';
+jest.mock('axios');
+
+import mockHttp2 from 'http2';
+jest.mock('http2');
+
+describe('lib', function () {
+    describe('youtubeAPI', function () {
+        const query = 'last christmas';
+        const youtubeAPIKey = '12345';
+
+        const mockSearchResponse = {
+            data: {
+                pageInfo: {
+                    totalResults: '',
+                    resultsPerPage: '',
+                },
+                nextPageToken: '',
+                prevPageToken: '',
+                items: [
+                    {
+                        id: {
+                            kind: '',
+                            videoId: '',
+                        },
+                        snippet: {
+                            publishedAt: '',
+                            channelId: '',
+                            channelTitle: '',
+                            title: '',
+                            description: '',
+                            thumbnails: '',
+                        },
+                        contentDetails: {
+                            itemCount: '',
+                            videoId: '',
+                        },
+                    },
+                    {
+                        id: {
+                            kind: 'youtube#channel',
+                            channelId: '',
+                        },
+                        snippet: {
+                            publishedAt: '',
+                            channelId: '',
+                            channelTitle: '',
+                            title: '',
+                            description: '',
+                            thumbnails: '',
+                        },
+                    },
+                    {
+                        id: {
+                            kind: 'youtube#playlist',
+                            playlistId: '',
+                        },
+                        snippet: {
+                            publishedAt: '',
+                            channelId: '',
+                            channelTitle: '',
+                            title: '',
+                            description: '',
+                            thumbnails: '',
+                        },
+                    },
+                ],
+            },
+        };
+
+        const opts = {
+            key: youtubeAPIKey,
+            part: 'contentDetails,snippet',
+            maxResults: 50,
+        };
+
+        const axiosSuccess = jest.fn().mockResolvedValue(mockSearchResponse);
+        const axiosError = jest.fn().mockRejectedValue(new Error());
+
+        var mockStream = new PassThrough();
+        const mockSession = {
+            request: jest.fn(() => {
+                return mockStream;
+            }),
+            destroy: jest.fn(),
+        };
+        mockHttp2.connect = jest.fn().mockReturnValue(mockSession);
+
+        const jsonStringError =
+        '{\
+            "error":{\
+                "code":400\
+            }\
+        }';
+
+        const jsonStringSuccess =
+        '{\
+            "items":[\
+                {\
+                    "id":{\
+                        "videoId":1245\
+                    },\
+                    "snippet":{\
+                        "title":"Last Christmas"\
+                    }\
+                }\
+            ]\
+        }';
+
+        const jsonStringEmpty =
+        '{\
+            "items":[]\
+        }';
+
+        beforeEach(() => {
+            jest.clearAllMocks();
+
+            mockAxios.get = axiosSuccess;
+            mockStream = new PassThrough();
+        });
+
+        const cb = function(err, results, pageInfo) {
+            if (err) {
+                console.log('ERRR');
+            }
+            console.log('success');
+        };
+
+        describe('search', function () {
+            it('search no args, error', function() {
+                mockAxios.get = axiosError;
+                expect(youtubeAPI.search(query)).rejects.toThrow();
+            });
+
+            it('search', function() {
+                youtubeAPI.search(query, opts, jest.fn());
+            });
+
+            it('search no opts', function() {
+                youtubeAPI.search(query, jest.fn());
+            });
+        });
+
+        describe('videoInfo', function () {
+            it('videoInfo no args, error', function() {
+                mockAxios.get = axiosError;
+                expect(youtubeAPI.videoInfo(query)).rejects.toThrow();
+            });
+
+            it('videoInfo', function() {
+                youtubeAPI.videoInfo(query, opts, jest.fn());
+            });
+
+            it('videoInfo no opts', function() {
+                youtubeAPI.videoInfo(query, jest.fn());
+            });
+        });
+
+        describe('playlistInfo', function () {
+            it('playlistInfo no args, error', function() {
+                mockAxios.get = axiosError;
+                expect(youtubeAPI.playlistInfo(query)).rejects.toThrow();
+            });
+
+            it('playlistInfo', function() {
+                youtubeAPI.playlistInfo(query, opts, jest.fn());
+            });
+
+            it('playlistInfo no opts', function() {
+                youtubeAPI.playlistInfo(query, jest.fn());
+            });
+        });
+
+        describe('playlistItems', function () {
+            it('playlistItems no args, error', function() {
+                mockAxios.get = axiosError;
+                expect(youtubeAPI.playlistItems(query)).rejects.toThrow();
+            });
+
+            it('playlistItems', function() {
+                youtubeAPI.playlistItems(query, opts, jest.fn());
+            });
+
+            it('playlistItems no opts', function() {
+                youtubeAPI.playlistItems(query, jest.fn());
+            });
+        });
+
+        describe('fastSearch', function () {
+            it('fastSearch', function() {
+                youtubeAPI.fastSearch(query, youtubeAPIKey);
+                mockStream.emit('response');
+                mockStream.emit('data', jsonStringSuccess);
+                mockStream.emit('end');
+            });
+
+            it('fastSearch API error', function() {
+                expect(youtubeAPI.fastSearch(query, youtubeAPIKey)).rejects.toThrow();
+                mockStream.emit('response');
+                mockStream.emit('data', jsonStringError);
+                mockStream.emit('end');
+            });
+
+            it('fastSearch empty response', function() {
+                expect(youtubeAPI.fastSearch(query, youtubeAPIKey)).resolves.toBe(false);
+                mockStream.emit('response');
+                mockStream.emit('data', jsonStringEmpty);
+                mockStream.emit('end');
+            });
+
+            it('fastSearch emit error', function() {
+                expect(youtubeAPI.fastSearch(query, youtubeAPIKey)).rejects.toBe('Error');
+                mockStream.emit('error', 'Error');
+            });
+        });
+    });
+});
