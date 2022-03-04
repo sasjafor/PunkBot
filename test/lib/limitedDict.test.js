@@ -1,10 +1,10 @@
-import { LimitedDict } from '../../src/lib/limitedDict.js';
+import * as limitedDict from '../../src/lib/limitedDict.js';
 
 global.console.log = jest.fn();
 
 describe('lib', function () {
     describe('limitedDict', function () {
-        var ldict = new LimitedDict(3);
+        var ldict = new limitedDict.LimitedDict(3);
 
         const key1 = 'test1';
         const item1 = { value: '', next: null, prev: null };
