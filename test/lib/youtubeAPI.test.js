@@ -184,30 +184,34 @@ describe('lib', function () {
         });
 
         describe('fastSearch', function () {
-            it('fastSearch', function() {
-                youtubeAPI.fastSearch(query, youtubeAPIKey);
+            it('fastSearch', async function() {
+                let res = youtubeAPI.fastSearch(query, youtubeAPIKey);
                 mockStream.emit('response');
                 mockStream.emit('data', jsonStringSuccess);
                 mockStream.emit('end');
+                await res;
             });
 
-            it('fastSearch API error', function() {
-                expect(youtubeAPI.fastSearch(query, youtubeAPIKey)).rejects.toThrow();
+            it('fastSearch API error', async function() {
+                let res = expect(youtubeAPI.fastSearch(query, youtubeAPIKey)).rejects.toThrow();
                 mockStream.emit('response');
                 mockStream.emit('data', jsonStringError);
                 mockStream.emit('end');
+                await res;
             });
 
-            it('fastSearch empty response', function() {
-                expect(youtubeAPI.fastSearch(query, youtubeAPIKey)).resolves.toBe(false);
+            it('fastSearch empty response', async function() {
+                let res = expect(youtubeAPI.fastSearch(query, youtubeAPIKey)).resolves.toBe(false);
                 mockStream.emit('response');
                 mockStream.emit('data', jsonStringEmpty);
                 mockStream.emit('end');
+                await res;
             });
 
-            it('fastSearch emit error', function() {
-                expect(youtubeAPI.fastSearch(query, youtubeAPIKey)).rejects.toBe('Error');
+            it('fastSearch emit error', async function() {
+                let res = expect(youtubeAPI.fastSearch(query, youtubeAPIKey)).rejects.toBe('Error');
                 mockStream.emit('error', 'Error');
+                await res;
             });
         });
     });
