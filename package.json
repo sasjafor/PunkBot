@@ -14,7 +14,9 @@
     "punk"
   ],
   "files": [
-    "lib/*"
+    "src/lib/*",
+    "src/commands/*",
+    "cli.sh"
   ],
   "repository": "github:sasjafor/Announcer-Bot",
   "bin": {
