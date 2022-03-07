@@ -31,7 +31,7 @@ describe('lib', function () {
 
         it('get empty', function() {
             let el = ldict.get(key1);
-            expect(el).toBe(null);
+            expect(el).toBeFalsy();
         });
 
         it('remove on empty', function() {
