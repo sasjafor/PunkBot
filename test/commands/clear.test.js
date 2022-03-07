@@ -23,14 +23,14 @@ describe('commands', function () {
             jest.clearAllMocks();
         });
 
-        it('normal', function() {
-            clear.execute(interaction, players);
+        it('normal', async function() {
+            await clear.execute(interaction, players);
             expect(player.clear).toHaveBeenCalledTimes(1);
         });
 
-        it('conn == null', function() {
+        it('conn == null', async function() {
             player.conn = null;
-            clear.execute(interaction, players);
+            await clear.execute(interaction, players);
             expect(player.clear).toHaveBeenCalledTimes(0);
         });
     });

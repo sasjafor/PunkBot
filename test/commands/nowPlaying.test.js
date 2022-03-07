@@ -40,27 +40,27 @@ describe('commands', function () {
             jest.clearAllMocks();
         });
 
-        it('normal', function() {
-            nowPlaying.execute(interaction, players);
+        it('normal', async function() {
+            await nowPlaying.execute(interaction, players);
             expect(player.getNowPlaying).toHaveBeenCalledTimes(1);
             expect(player.getProgress).toHaveBeenCalledTimes(1);
             expect(buildProgressBar).toHaveBeenCalledTimes(1);
             expect(prettifyTime).toHaveBeenCalledTimes(2);
         });
 
-        it('normal', function() {
+        it('normal', async function() {
             player.getNowPlaying = jest.fn(() => { return null; });
 
-            nowPlaying.execute(interaction, players);
+            await nowPlaying.execute(interaction, players);
             expect(player.getNowPlaying).toHaveBeenCalledTimes(1);
             expect(player.getProgress).toHaveBeenCalledTimes(1);
             expect(buildProgressBar).toHaveBeenCalledTimes(0);
             expect(prettifyTime).toHaveBeenCalledTimes(0);
         });
 
-        it('conn == null', function() {
+        it('conn == null', async function() {
             player.conn = null;
-            nowPlaying.execute(interaction, players);
+            await nowPlaying.execute(interaction, players);
             expect(player.getNowPlaying).toHaveBeenCalledTimes(0);
             expect(player.getProgress).toHaveBeenCalledTimes(0);
         });

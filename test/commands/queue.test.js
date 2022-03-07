@@ -51,45 +51,46 @@ describe('commands', function () {
             jest.clearAllMocks();
         });
 
-        it('normal', function() {
-            queue.execute(interaction, players);
+        it('normal', async function() {
+            await queue.execute(interaction, players);
             expect(player.getQueueLength).toHaveBeenCalledTimes(1);
         });
 
-        it('index > 1', function() {
+        it('index > 1', async function() {
             interaction.options.getInteger = jest.fn(() => { return 2; });
-            queue.execute(interaction, players);
+            await queue.execute(interaction, players);
             expect(player.getQueueLength).toHaveBeenCalledTimes(1);
         });
 
-        it('index > numTabs', function() {
+        it('index > numTabs', async function() {
             interaction.options.getInteger = jest.fn(() => { return 3; });
-            queue.execute(interaction, players);
+            await queue.execute(interaction, players);
             expect(player.getQueueLength).toHaveBeenCalledTimes(1);
         });
 
-        it('getNowPlayingReturns nothing', function() {
+        it('getNowPlayingReturns nothing', async function() {
             player.getNowPlaying = jest.fn();
-            queue.execute(interaction, players);
+            await queue.execute(interaction, players);
             expect(player.getQueueLength).toHaveBeenCalledTimes(0);
         });
 
-        it('!player.playing', function() {
+        it('!player.playing', async function() {
             player.playing = false;
-            queue.execute(interaction, players);
+            await queue.execute(interaction, players);
             expect(player.getQueueLength).toHaveBeenCalledTimes(0);
         });
 
-        it('conn == null', function() {
+        it('conn == null', async function() {
             player.conn = null;
-            queue.execute(interaction, players);
+            await queue.execute(interaction, players);
             expect(player.getQueueLength).toHaveBeenCalledTimes(0);
         });
 
-        it('index undefined', function() {
+        it('index undefined', async function() {
             interaction.options.getInteger = jest.fn();
-            queue.execute(interaction, players);
+            await queue.execute(interaction, players);
             expect(player.getQueueLength).toHaveBeenCalledTimes(0);
+            expect(prettifyTime).toHaveBeenCalledTimes(0);
         });
     });
 });

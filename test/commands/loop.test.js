@@ -23,15 +23,15 @@ describe('commands', function () {
             jest.clearAllMocks();
         });
 
-        it('false => true', function() {
+        it('false => true', async function() {
             player.loop = false;
-            loop.execute(interaction, players);
+            await loop.execute(interaction, players);
             expect(player.loop).toBe(true);
         });
 
-        it('true => false', function() {
+        it('true => false', async function() {
             player.loop = true;
-            loop.execute(interaction, players);
+            await loop.execute(interaction, players);
             expect(player.loop).toBe(false);
         });
     });

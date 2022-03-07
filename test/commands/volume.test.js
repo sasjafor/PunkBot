@@ -26,8 +26,8 @@ describe('commands', function () {
             jest.clearAllMocks();
         });
 
-        it('normal', function() {
-            volume.execute(interaction, players);
+        it('normal', async function() {
+            await volume.execute(interaction, players);
             expect(player.setVolume).toHaveBeenCalledWith(volumeVal);
             expect(player.setVolume).toHaveBeenCalledTimes(1);
         });

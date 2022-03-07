@@ -22,53 +22,56 @@ describe('commands', function () {
             conn: 'Legit Connection',
             seek: jest.fn(),
         };
-        player.seek.mockResolvedValue(0);
 
         const players = { };
         players[guildId] = player;
 
         beforeEach(() => {
             jest.clearAllMocks();
-        });
 
-        it('normal', function() {
             player.seek.mockResolvedValue(0);
-            seek.execute(interaction, players);
-            expect(player.seek).toHaveBeenCalledTimes(1);
-            // expect(prettifyTime).toHaveBeenCalledTimes(1);
         });
 
-        it('normal', function() {
+        it('normal', async function() {
+            player.seek.mockResolvedValue(0);
+            await seek.execute(interaction, players);
+            expect(player.seek).toHaveBeenCalledTimes(1);
+            expect(prettifyTime).toHaveBeenCalledTimes(1);
+        });
+
+        it('normal', async function() {
             player.seek.mockResolvedValue(1);
-            seek.execute(interaction, players);
+            await seek.execute(interaction, players);
             expect(player.seek).toHaveBeenCalledTimes(1);
             expect(prettifyTime).toHaveBeenCalledTimes(0);
         });
 
-        it('normal', function() {
+        it('normal', async function() {
             player.seek.mockResolvedValue(2);
-            seek.execute(interaction, players);
+            await seek.execute(interaction, players);
             expect(player.seek).toHaveBeenCalledTimes(1);
             expect(prettifyTime).toHaveBeenCalledTimes(0);
         });
 
-        it('long seek time', function() {
+        it('long seek time', async function() {
             seekTime = '2:30:53';
-            seek.execute(interaction, players);
+            await seek.execute(interaction, players);
             expect(player.seek).toHaveBeenCalledTimes(1);
-            // expect(prettifyTime).toHaveBeenCalledTimes(1);
+            expect(prettifyTime).toHaveBeenCalledTimes(1);
         });
 
-        it('invalid seek time', function() {
+        it('invalid seek time', async function() {
             seekTime = 'aksf';
-            seek.execute(interaction, players);
+            await seek.execute(interaction, players);
             expect(player.seek).toHaveBeenCalledTimes(0);
+            expect(prettifyTime).toHaveBeenCalledTimes(0);
         });
 
-        it('conn == null', function() {
+        it('conn == null', async function() {
             player.conn = null;
-            seek.execute(interaction, players);
+            await seek.execute(interaction, players);
             expect(player.seek).toHaveBeenCalledTimes(0);
+            expect(prettifyTime).toHaveBeenCalledTimes(0);
         });
     });
 });

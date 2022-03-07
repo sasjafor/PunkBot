@@ -23,21 +23,21 @@ describe('commands', function () {
             jest.clearAllMocks();
         });
 
-        it('normal', function() {
-            skip.execute(interaction, players);
+        it('normal', async function() {
+            await skip.execute(interaction, players);
             expect(player.skip).toHaveBeenCalledTimes(1);
         });
 
-        it('skip failed', function() {
+        it('skip failed', async function() {
             player.skip = jest.fn(() => { return false; });
-            skip.execute(interaction, players);
+            await skip.execute(interaction, players);
             expect(player.skip).toHaveBeenCalledTimes(1);
         });
 
 
-        it('conn == null', function() {
+        it('conn == null', async function() {
             player.conn = null;
-            skip.execute(interaction, players);
+            await skip.execute(interaction, players);
             expect(player.skip).toHaveBeenCalledTimes(0);
         });
     });

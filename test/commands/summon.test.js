@@ -29,14 +29,14 @@ describe('commands', function () {
             jest.clearAllMocks();
         });
 
-        it('normal', function() {
-            summon.execute(interaction, players);
+        it('normal', async function() {
+            await summon.execute(interaction, players);
             expect(player.connect).toHaveBeenCalledTimes(1);
         });
 
-        it('not joinable', function() {
+        it('not joinable', async function() {
             interaction.member.voice.channel.joinable = false;
-            summon.execute(interaction, players);
+            await summon.execute(interaction, players);
             expect(player.connect).toHaveBeenCalledTimes(0);
         });
     });

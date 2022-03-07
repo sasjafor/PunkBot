@@ -26,21 +26,21 @@ describe('commands', function () {
             jest.clearAllMocks();
         });
 
-        it('normal', function() {
-            remove.execute(interaction, players);
+        it('normal', async function() {
+            await remove.execute(interaction, players);
             expect(player.remove).toHaveBeenCalledTimes(1);
         });
 
-        it('remove failed', function() {
+        it('remove failed', async function() {
             player.remove = jest.fn(() => { return false; });
-            remove.execute(interaction, players);
+            await remove.execute(interaction, players);
             expect(player.remove).toHaveBeenCalledTimes(1);
         });
 
 
-        it('conn == null', function() {
+        it('conn == null', async function() {
             player.conn = null;
-            remove.execute(interaction, players);
+            await remove.execute(interaction, players);
             expect(player.remove).toHaveBeenCalledTimes(0);
         });
     });
