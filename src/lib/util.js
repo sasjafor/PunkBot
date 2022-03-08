@@ -110,7 +110,7 @@ async function handleVideo(id, requester, url, title, youtubeAPIKey) {
         };
 
         res = await videoInfo(id, videoOpts, null);
-        res = res.results[0];
+        res = res?.results[0];
 
         if (res) {
             let ytUrl = 'https://www.youtube.com/watch?v=' + id;
