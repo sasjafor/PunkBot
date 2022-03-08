@@ -173,7 +173,7 @@ async function handlePlaylist(player, id, requester, skipFirst, callback, channe
             }
             skipped = true;
         }
-    } while (pageInfo.nextPageToken);
+    } while (pageInfo?.nextPageToken);
     debugd('DONE processing playlist!');
     if (callback) {
         callback(successCount, failCount);
