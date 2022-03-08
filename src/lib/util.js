@@ -163,6 +163,7 @@ async function handlePlaylist(player, id, requester, skipFirst, callback, channe
                 let YTurl = 'https://www.youtube.com/watch?v=' + i.videoId;
                 let video = await handleVideo(i.videoId, requester, YTurl, null, youtubeAPIKey).catch((error) => {
                     console.trace(error.name + ': ' + error.message);
+                    return null;
                 });
                 if (video) {
                     successCount++;
