@@ -1,4 +1,5 @@
 import Debug from 'debug';
+import { execa } from 'execa';
 import moment from 'moment';
 
 import { DiscordAPIError,
@@ -101,7 +102,7 @@ function getYTid(url) {
     }
 }
 
-async function handleVideo(id, requester, url, title, youtubeAPIKey) {
+async function handleVideo(id, requester, url, title, youtubeAPIKey, duration) {
     if (id) {
         let res;
         let videoOpts = {
@@ -126,7 +127,7 @@ async function handleVideo(id, requester, url, title, youtubeAPIKey) {
             throw new Error('Failed to get video info');
         }
     } else {
-        return new PlaybackItem(url, requester.displayName, requester.user.id, requester.displayAvatarURL(), title);
+        return new PlaybackItem(url, requester.displayName, requester.user.id, requester.displayAvatarURL(), title, null, duration, null);
     }
 }
 
@@ -181,9 +182,29 @@ async function handlePlaylist(player, id, requester, skipFirst, callback, channe
     }
 }
 
+async function getAudioDurationInSeconds(url) {
+    let params = [
+        '-v',
+        'error',
+        '-select_streams',
+        'a:0',
+        '-show_format',
+        '-show_streams',
+    ];
+
+    let { stdout } = await execa('ffprobe', [...params, url]);
+
+    let matches = stdout.match(/duration="?(\d*\.\d*)"?/);
+
+    if (matches && matches[1]) {
+        return parseFloat(matches[1]);
+    }
+}
+
 export {
     buildProgressBar,
     errorReply,
+    getAudioDurationInSeconds,
     getYTid,
     handlePlaylist,
     handleVideo,

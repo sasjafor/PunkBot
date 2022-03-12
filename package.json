@@ -32,6 +32,7 @@
     "discord-api-types": "^0.27.3",
     "discord.js": "^13.6.0",
     "erlpack": "^0.1.4",
+    "execa": "^6.1.0",
     "ffmpeg-static": "^4.4.1",
     "got": "^12.0.1",
     "moment": "^2.29.1",
@@ -49,7 +50,7 @@
     "@babel/plugin-transform-modules-commonjs": "^7.16.8",
     "@types/jest": "^27.4.1",
     "eslint": "^8.10.0",
-    "jest": "^27.5.1"
+    "jest": "^28.0.0-alpha.7"
   },
   "scripts": {
     "lint:all": "npx eslint .",
@@ -69,6 +70,9 @@
     "collectCoverageFrom": [
       "src/**/*.js"
     ],
-    "coverageProvider": "v8"
+    "coverageProvider": "v8",
+    "transform": {
+      "^.+\\.(ts|tsx|js)$": "babel-jest"
+    }
   }
 }

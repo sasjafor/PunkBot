@@ -1,16 +1,18 @@
 import Debug from 'debug';
+import moment from 'moment';
 import decode from 'unescape';
 
 import { MessageEmbed } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
-import { errorReply, getYTid, handlePlaylist, handleVideo, prettifyTime } from '../lib/util.js';
+import { errorReply, getAudioDurationInSeconds, getYTid, handlePlaylist, handleVideo, prettifyTime } from '../lib/util.js';
 import { fastSearch,
          playlistInfo,
          playlistItems,
 } from '../lib/youtubeAPI.js';
 import { PlaybackItem } from '../lib/playbackItem.js';
 import { strings } from '../lib/strings.js';
+
 
 // eslint-disable-next-line no-unused-vars
 const debug = Debug('punk_bot');
@@ -46,9 +48,15 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
 
     let searchRes = null;
     let url = null;
+    let isURL = false;
     let id = null;
     let title = searchQuery;
     let searchString = searchQuery;
+
+    if (searchQuery.startsWith('http')) {
+        isURL = true;
+        url = searchQuery;
+    }
 
     let searchEmbed = new MessageEmbed()
         .setTitle(searchString)
@@ -78,7 +86,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
             player.enqueue(pb);
         }
     } else {
-        if (!searchQuery.startsWith('http')) {
+        if (!isURL) {
             try {
                 searchRes = await fastSearch(searchString, youtubeAPIKey);
                 if (searchRes) {
@@ -96,7 +104,6 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
                 return;
             }
         } else {
-            url = searchQuery;
             let playlistIdRegex = /(?:youtube(?:-nocookie)?\.com\/(?:[^/\n\s]+\/\S+\/|(?:playlist|e(?:mbed)?\/videoseries)\/|\S*?\?list=)|youtu\.be\/)([a-zA-Z0-9_-]{34})/;
             if (playlistIdRegex.test(url)) {
                 playlist = true;
@@ -161,15 +168,18 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
         }
         let isYT = !!id;
 
+        let duration = undefined;
         if (!isYT) {
             let fileNameRegex = /\/([\w\-. ]+)\.[\w\- ]+$/;
             let matches = searchQuery.match(fileNameRegex);
             if (matches) {
                 title = matches[1];
             }
+
+            duration = moment.duration(await getAudioDurationInSeconds(url), 'seconds');
         }
 
-        let pbP = handleVideo(id, interaction.member, url, title, youtubeAPIKey)
+        let pbP = handleVideo(id, interaction.member, url, title, youtubeAPIKey, duration)
             .catch(async (error) => {
                 console.trace(error.name + ': ' + error.message);
                 await searchReply;
@@ -228,6 +238,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
 
     if (queued) {
         let timeUntilPlaying = await player.getTotalRemainingPlaybackTime();
+        timeUntilPlaying.subtract(pb.duration);
         let prettyTut = prettifyTime(timeUntilPlaying);
         embed = embed.setAuthor({ name: 'Added to queue', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
             .addField('Estimated time until playing', prettyTut)

@@ -3,9 +3,11 @@ import { AudioPlayerStatus,
          createAudioResource,
          joinVoiceChannel,
          NoSubscriberBehavior,
+         StreamType,
 } from '@discordjs/voice';
 import Debug from 'debug';
 import got from 'got';
+import http2 from 'http2';
 import moment from 'moment';
 import playdl from 'play-dl';
 import prism from 'prism-media';
@@ -171,8 +173,9 @@ class Player {
             }
             let ffmpeg = new prism.FFmpeg({
                 args: [
-                    '-ss', String(seektime),
                     '-i', '-',
+                    '-ss', String(seektime),
+                    '-loglevel', '0',
                     '-acodec', 'libopus',
                     '-f', 'opus',
                     '-ar', '48000',
@@ -182,7 +185,19 @@ class Player {
 
             stream = await got.stream(url);
 
-            stream = await stream.pipe(ffmpeg);
+            // let urlPartsRegex = /(https?:\/\/[^\/]+)(\/.*)/;
+            // let urlParts = url.match(urlPartsRegex);
+
+            // let server = urlParts[1];
+            // let filePath = urlParts[2];
+
+            // let httpClient = http2.connect(server);
+
+            // stream = httpClient.request({
+            //     ':path': filePath,
+            // });
+
+            stream = stream.pipe(ffmpeg);
         } else {
             try {
                 stream = await playdl.stream(url, { discordPlayerCompatibility : true });
