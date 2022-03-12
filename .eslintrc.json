@@ -58,6 +58,9 @@
                 "varsIgnorePattern": "^_"
             }
         ],
+        "no-useless-escape": [
+            "disable"
+        ],
         "quotes": [
             "error",
             "single"
