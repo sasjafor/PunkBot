@@ -198,6 +198,8 @@ async function getAudioDurationInSeconds(url) {
 
     if (matches && matches[1]) {
         return parseFloat(matches[1]);
+    } else {
+        '0';
     }
 }
 
