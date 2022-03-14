@@ -31,7 +31,8 @@ RUN mkdir /config
 
 # Install dependencies
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends python3 \
+    apt-get install -y --no-install-recommends ffmpeg \
+                                               python3 \
                                                python-is-python3
 
 # Copy package.json
