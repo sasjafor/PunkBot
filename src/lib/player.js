@@ -7,7 +7,6 @@ import { AudioPlayerStatus,
 } from '@discordjs/voice';
 import Debug from 'debug';
 import got from 'got';
-import http2 from 'http2';
 import moment from 'moment';
 import playdl from 'play-dl';
 import prism from 'prism-media';
@@ -32,6 +31,7 @@ class Player {
         this.queue = new Queue();
         this.nowPlaying = null;
         this.stream = null;
+        this.oldStream = null;
         this.loop = false;
         this.dispatcher = null;
         this.playing = false;
@@ -123,6 +123,7 @@ class Player {
 
         // set volume before playing
         this.stream.volume.setVolume(this.volume);
+        this.oldStream?.playStream?.destroy();
         this.dispatcher.play(this.stream);
     }
 
@@ -165,12 +166,15 @@ class Player {
      * @param {string} url
      */
     async createStream(url, seektime=null) {
+        if (!seektime) {
+            seektime = 0;
+        }
         let stream = null;
+        let type = null;
         let fileNameRegex = /\/([\w\-. ]+)\.[\w\- ]+$/;
         if (fileNameRegex.test(url)) {
-            if (!seektime) {
-                seektime = '0';
-            }
+            type = StreamType.OggOpus;
+
             let ffmpeg = new prism.FFmpeg({
                 args: [
                     '-i', '-',
@@ -185,57 +189,34 @@ class Player {
 
             stream = await got.stream(url);
 
-            // let urlPartsRegex = /(https?:\/\/[^\/]+)(\/.*)/;
-            // let urlParts = url.match(urlPartsRegex);
-
-            // let server = urlParts[1];
-            // let filePath = urlParts[2];
-
-            // let httpClient = http2.connect(server);
-
-            // stream = httpClient.request({
-            //     ':path': filePath,
-            // });
-
             stream = stream.pipe(ffmpeg);
         } else {
+            let playStream;
             try {
-                stream = await playdl.stream(url, { discordPlayerCompatibility : true });
+                playStream = await playdl.stream(url, { seek: seektime });
             } catch(error) {
                 console.trace(error.name + ': ' + error.message);
                 this.skip();
                 return false;
             }
-            stream = stream.stream;
-
-            stream.on('error', error => {
-                debug(url);
-                console.trace(error.name + ': ' + error.message);
-                if (error.message.includes('This video is not available.')) {
-                    this.skip();
-                } else {
-                    // context.retry_on_403(url);
-                }
-            });
-
-            if (!seektime) {
-                seektime = '0';
-            }
-            stream = stream.pipe(new prism.FFmpeg({
-                args: [
-                    '-ss', String(seektime),
-                    '-i', '-',
-                    '-loglevel', '0',
-                    '-acodec', 'libopus',
-                    '-f', 'opus',
-                    '-ar', '48000',
-                    '-ac', '2',
-                ],
-            }));
+            type = playStream.type;
+            stream = playStream.stream;
         }
 
+        stream.on('error', error => {
+            debug('Stream error for: ' + url);
+            if (error.message.includes('This video is not available.')) {
+                this.skip();
+            } else if (error.message.includes('Premature close')) {
+                debug('Known error "premature close occured"');
+            } else {
+                // context.retry_on_403(url);
+                console.trace(error.name + ': ' + error.message);
+            }
+        });
+
         if (stream.readable) {
-            let resource = createAudioResource(stream, { inlineVolume: true });
+            let resource = createAudioResource(stream, { inlineVolume: true, inputType: type });
             return resource;
         } else {
             debug('Encountered error with stream');
@@ -275,6 +256,7 @@ class Player {
             // };
             // opts.seek = time;
             this.lastSeekTime = time * 1000;
+            this.oldStream = this.stream;
             this.stream = await this.createStream(this.nowPlaying.url, time);
             await this.dispatch();
             return 0;
