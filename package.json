@@ -43,8 +43,9 @@
     "zlib-sync": "^0.1.7"
   },
   "devDependencies": {
-    "@babel/plugin-transform-modules-commonjs": "^7.16.8",
+    "@babel/preset-env": "^7.16.11",
     "@types/jest": "^27.4.1",
+    "babel-jest": "^28.0.0-alpha.7",
     "eslint": "^8.11.0",
     "jest": "^28.0.0-alpha.7"
   },
@@ -52,23 +53,5 @@
     "lint:all": "npx eslint .",
     "test": "jest",
     "coverage": "jest --coverage"
-  },
-  "babel": {
-    "env": {
-      "test": {
-        "plugins": [
-          "@babel/plugin-transform-modules-commonjs"
-        ]
-      }
-    }
-  },
-  "jest": {
-    "collectCoverageFrom": [
-      "src/**/*.js"
-    ],
-    "coverageProvider": "v8",
-    "transform": {
-      "^.+\\.(ts|tsx|js)$": "babel-jest"
-    }
   }
 }
