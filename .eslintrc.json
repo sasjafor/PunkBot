@@ -59,7 +59,7 @@
             }
         ],
         "no-useless-escape": [
-            "disable"
+            "off"
         ],
         "quotes": [
             "error",
