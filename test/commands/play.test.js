@@ -25,6 +25,10 @@ var mockHandleVideoRes = pb;
 import { errorReply, getYTid, handlePlaylist, handleVideo, prettifyTime } from '../../src/lib/util.js';
 jest.mock('../../src/lib/util.js', () => {
     return {
+        errorReply: jest.fn(),
+        getAudioDurationInSeconds: jest.fn(),
+        getYTid: jest.fn(() => { return mockGetYTidRes; }),
+        handlePlaylist: jest.fn((_player, _playlistId, _member, _skip, cb) => { cb(); }),
         handleVideo: jest.fn(async () => {
             if (mockHandleVideoError) {
                 throw mockAxiosErr;
@@ -32,9 +36,6 @@ jest.mock('../../src/lib/util.js', () => {
                 return Promise.resolve(mockHandleVideoRes);
             }
         }),
-        getYTid: jest.fn(() => { return mockGetYTidRes; }),
-        handlePlaylist: jest.fn((_player, _playlistId, _member, _skip, cb) => { cb(); }),
-        errorReply: jest.fn(),
         prettifyTime: jest.fn(() => { return '2:30'; }),
     };
 });
@@ -148,7 +149,7 @@ describe('commands', function () {
             connect: jest.fn(),
             play: jest.fn(() => { return playRes; }),
             enqueue: jest.fn(),
-            getTotalRemainingPlaybackTime: jest.fn(),
+            getTotalRemainingPlaybackTime: jest.fn(() => { return moment.duration(0); }),
             queue: {
                 getLength: jest.fn(() => { return 4; }),
             },
