@@ -17,6 +17,6 @@ describe('lib', function () {
         it('getQueue', function() {
             let queue = playerObj.getQueue();
             expect(queue).toBe(playerObj.queue);
-        });
+        }); 
     });
 });
