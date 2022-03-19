@@ -66,6 +66,17 @@ jest.mock('../../src/lib/youtubeAPI.js', () => {
     };
 });
 
+const durationString = 'duration=320.0';
+var mockDurationStringRes = durationString;
+import { execa } from 'execa';
+jest.mock('execa', () => {
+    return {
+        execa: jest.fn(() => {
+            return Promise.resolve({ stdout: mockDurationStringRes });
+        }),
+    };
+});
+
 global.console.trace = jest.fn();
 
 describe('lib', function () {
@@ -317,6 +328,27 @@ describe('lib', function () {
                 let res = await util.handlePlaylist(player, id, requester, skipFirst, callback, channel, avatarURL, youtubeAPIKey);
                 expect(playlistItems).toBeCalledTimes(1);
                 expect(res).toBeFalsy();
+            });
+        });
+
+        describe('getAudioDurationInSeconds', function() {
+            const url = 'https://www.youtube.com/watch?v=E8gmARGvPlI';
+
+            beforeEach(() => {
+                jest.clearAllMocks();
+
+                mockDurationStringRes = durationString;
+            });
+
+            it('normal', async function() {
+                let _res = await util.getAudioDurationInSeconds(url);
+                expect(execa).toBeCalledTimes(1);
+            });
+
+            it('no match', async function() {
+                mockDurationStringRes = '';
+                let _res = await util.getAudioDurationInSeconds(url);
+                expect(execa).toBeCalledTimes(1);
             });
         });
     });
