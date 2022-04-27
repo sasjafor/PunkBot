@@ -35,12 +35,11 @@ async function importCommands() {
 }
 importCommands();
 
-function login() {
+async function login() {
     try {
-        client.login(token);
+        await client.login(token);
     } catch(error) {
-        console.trace(error.name + ': ' + error.message);
-        login();
+        logger.error(error);
     }
 }
 login();
@@ -52,12 +51,12 @@ client.on('ready', async () => {
     const rest = new REST({ version: '9' }).setToken(token);
 
     // await rest.put(Routes.applicationGuildCommands(client.user.id, '246328943299264513'), { body: commandJSONs })
-    //     .then(() => winston.info('Successfully registered application commands.'))
-    //     .catch(console.trace);
+    //     .then(() => logger.info('Successfully registered application commands.'))
+    //     .catch(logger.error);
 
     await rest.put(Routes.applicationCommands(client.user.id), { body: commandJSONs })
         .then(() => logger.info('Successfully registered application commands.'))
-        .catch(console.trace);
+        .catch(logger.error);
 });
 
 client.on('interactionCreate', async interaction => {
@@ -90,7 +89,7 @@ client.on('interactionCreate', async interaction => {
     try {
         await command.execute(interaction, players, youtubeAPIKey, youtubeCache);
     } catch (error) {
-        console.trace(error.name + ': ' + error.message);
+        logger.error(error);
         errorReply(interaction, error.message);
     }
 });
@@ -110,9 +109,9 @@ client.on('messageCreate', async message => {
 });
 
 client.on('error', error => {
-    console.trace(error.name + ': ' + error.message);
+    logger.error(error);
 });
 
 client.on('warn', warning => {
-    console.warn(warning);
+    logger.warn(warning);
 });

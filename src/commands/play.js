@@ -92,7 +92,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
                     return;
                 }
             } catch(error) {
-                console.trace(error.name + ': ' + error.message);
+                logger.error(error);
                 errorReply(interaction, searchString, error.response?.message);
                 return;
             }
@@ -107,7 +107,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
                         playlistInfoOpts.key = youtubeAPIKey;
                         playlistInfoRes = await playlistInfo(playlistId, playlistInfoOpts);
                     } catch(error) {
-                        console.trace(error.name + ': ' + error.message);
+                        logger.error(error);
                         await searchReply;
                         errorReply(interaction, searchString, error.response?.data?.error?.message, url);
                         return;
@@ -138,7 +138,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
                     try {
                         playlistRes = await playlistItems(playlistId, customOpts, null, null);
                     } catch(error) {
-                        console.trace(error.name + ': ' + error.message);
+                        logger.error(error);
                         await searchReply;
                         errorReply(interaction, searchString, error.response?.data?.error?.message, url);
                         return;
@@ -174,7 +174,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
 
         let pbP = handleVideo(id, interaction.member, url, title, youtubeAPIKey, duration)
             .catch(async (error) => {
-                console.trace(error.name + ': ' + error.message);
+                logger.error(error);
                 await searchReply;
                 errorReply(interaction, searchString, error.response?.data?.error?.message, url);
                 return;

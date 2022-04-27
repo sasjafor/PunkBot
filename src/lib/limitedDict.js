@@ -1,3 +1,5 @@
+import { logger } from './../lib/log.js';
+
 /*
 
 limitedDict.js
@@ -123,7 +125,7 @@ class LimitedDict {
         }
         list += ']';
 
-        console.log(list);
+        logger.debug(list);
     }
 }
 

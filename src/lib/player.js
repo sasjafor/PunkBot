@@ -191,7 +191,7 @@ class Player {
             try {
                 playStream = await playdl.stream(url, { seek: seektime });
             } catch(error) {
-                console.trace(error.name + ': ' + error.message);
+                logger.error(error);
                 this.skip();
                 return false;
             }
@@ -207,7 +207,7 @@ class Player {
                 logger.error('Known error "premature close occured"');
             } else {
                 // context.retry_on_403(url);
-                console.trace(error.name + ': ' + error.message);
+                logger.error(error);
             }
         });
 
@@ -271,7 +271,7 @@ class Player {
             });
             var context = this;
             this.conn.on('error', error => {
-                console.trace(error.name + ': ' + error.message);
+                logger.error(error);
                 if (context.playing) {
                     context.connect();
                 }
@@ -292,7 +292,7 @@ class Player {
                 this.next();
             });
             this.dispatcher.on('error', error => {
-                console.trace(error.name + ': ' + error.message);
+                logger.error(error);
                 this.stop();
             });
 

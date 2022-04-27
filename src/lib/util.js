@@ -4,7 +4,7 @@ import moment from 'moment';
 import { DiscordAPIError,
          MessageEmbed } from 'discord.js';
 import { playlistItems, videoInfo } from './youtubeAPI.js';
-import { logger } from './../lib/log.js';
+import { logger } from './log.js';
 import { PlaybackItem } from './playbackItem.js';
 import { strings } from './strings.js';
 
@@ -33,7 +33,7 @@ async function errorReply(interaction, msgContent, errorMessage = strings.comman
                 if (error instanceof DiscordAPIError && error.message.includes('Interaction has already been acknowledged.')) {
                     await interaction.editReply(message);
                 } else {
-                    console.trace(error.name + ': ' + error.message);
+                    logger.error(error);
                 }
             }
         }
@@ -144,7 +144,7 @@ async function handlePlaylist(player, id, requester, skipFirst, callback, channe
             };
             res = await playlistItems(id, playlistOpts, pageToken, null);
         } catch(error) {
-            console.trace(error.name + ': ' + error.message);
+            logger.error(error);
             let url = 'https://www.youtube.com/playlist?list=' + id;
             errorReply(undefined, url, error.response?.data?.error?.message, url, channel, avatarURL);
             return null;
@@ -157,7 +157,7 @@ async function handlePlaylist(player, id, requester, skipFirst, callback, channe
             if (skipped || !skipFirst) {
                 let YTurl = 'https://www.youtube.com/watch?v=' + i.videoId;
                 let video = await handleVideo(i.videoId, requester, YTurl, null, youtubeAPIKey).catch((error) => {
-                    console.trace(error.name + ': ' + error.message);
+                    logger.error(error);
                     return null;
                 });
                 if (video) {
