@@ -1,4 +1,3 @@
-import Debug from 'debug';
 import decode from 'unescape';
 import moment from 'moment';
 
@@ -10,15 +9,9 @@ import { fastSearch,
          playlistInfo,
          playlistItems,
 } from '../lib/youtubeAPI.js';
+import { logger } from './../lib/log.js';
 import { PlaybackItem } from '../lib/playbackItem.js';
 import { strings } from '../lib/strings.js';
-
-
-// eslint-disable-next-line no-unused-vars
-const debug = Debug('punk_bot');
-const debugv = Debug('punk_bot:verbose');
-// eslint-disable-next-line no-unused-vars
-const debugd = Debug('punk_bot:debug');
 
 var playlistInfoOpts = {
     part: 'contentDetails,snippet',
@@ -78,7 +71,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
         if (!player.playing) {
             player.enqueue(pb);
 
-            debugv('Added ' + pb.url);
+            logger.debug('Added ' + pb.url);
             await connecting;
             player.play();
         } else {
@@ -190,7 +183,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
             let pbShort = new PlaybackItem(url, interaction.member?.displayName, interaction.user.id, interaction.member?.displayAvatarURL(), title);
             player.enqueue(pbShort);
 
-            debugv('Added ' + url);
+            logger.debug('Added ' + url);
             await connecting;
             playResult = player.play();
 

@@ -1,4 +1,3 @@
-import Debug from 'debug';
 import fs from 'fs';
 
 import { Client, Collection, GuildMember, Intents, TextChannel } from 'discord.js';
@@ -8,14 +7,9 @@ import { URL } from 'url';
 
 import { errorReply } from './lib/util.js';
 import { LimitedDict } from './lib/limitedDict.js';
+import { logger } from './lib/log.js';
 import { Player } from './lib/player.js';
 import { strings } from './lib/strings.js';
-
-const debug = Debug('punk_bot');
-// eslint-disable-next-line no-unused-vars
-const debugv = Debug('punk_bot:verbose');
-// eslint-disable-next-line no-unused-vars
-const debugd = Debug('punk_bot:debug');
 
 const token = process.env.DISCORD_APP_AUTH_TOKEN;
 const youtubeAPIKey = process.env.YOUTUBE_API_KEY;
@@ -52,18 +46,17 @@ function login() {
 login();
 
 client.on('ready', async () => {
-    debug('I am ready!');
-    console.log('Connected as ' + client.user.username);
+    logger.info('Connected as ' + client.user.username);
 
     // Push command to Discord application
     const rest = new REST({ version: '9' }).setToken(token);
 
     // await rest.put(Routes.applicationGuildCommands(client.user.id, '246328943299264513'), { body: commandJSONs })
-    //     .then(() => console.log('Successfully registered application commands.'))
+    //     .then(() => winston.info('Successfully registered application commands.'))
     //     .catch(console.trace);
 
     await rest.put(Routes.applicationCommands(client.user.id), { body: commandJSONs })
-        .then(() => console.log('Successfully registered application commands.'))
+        .then(() => logger.info('Successfully registered application commands.'))
         .catch(console.trace);
 });
 
@@ -79,7 +72,7 @@ client.on('interactionCreate', async interaction => {
     }
 
     if (!(interaction.member instanceof GuildMember)) {
-        console.log('Member was not of GuildMember type');
+        logger.debug('Member was not of GuildMember type');
         return;
     }
 

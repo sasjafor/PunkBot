@@ -5,17 +5,13 @@ import { AudioPlayerStatus,
          NoSubscriberBehavior,
          StreamType,
 } from '@discordjs/voice';
-import Debug from 'debug';
 import got from 'got';
 import moment from 'moment';
 import playdl from 'play-dl';
 import prism from 'prism-media';
 
+import { logger } from './../lib/log.js';
 import { Queue } from './queue.js';
-
-const debug = Debug('punk_bot');
-const debugv = Debug('punk_bot:verbose');
-const debugd = Debug('punk_bot:debug');
 
 // var ytdl_opts = [];
 
@@ -53,7 +49,7 @@ class Player {
         url = this.nowPlaying.url;
 
         if (this.nowPlaying.stream) {
-            debugv('Using already prepared stream');
+            logger.debug('Using already prepared stream');
 
             this.stream = this.nowPlaying.stream;
         } else {
@@ -68,7 +64,7 @@ class Player {
         let dispatchResult = null;
         if (this.stream) {
             if (this.conn) {
-                debugd('Playing: ' + url);
+                logger.debug('Playing: ' + url);
                 dispatchResult = this.dispatch();
             }
         }
@@ -134,7 +130,7 @@ class Player {
         this.volume = value;
         if (this.stream) {
             this.stream.volume.setVolume(value);
-            debugv('Set volume to ' + value);
+            logger.debug('Set volume to ' + value);
         }
     }
 
@@ -204,11 +200,11 @@ class Player {
         }
 
         stream.on('error', error => {
-            debug('Stream error for: ' + url);
+            logger.error('Stream error for: ' + url);
             if (error.message.includes('This video is not available.')) {
                 this.skip();
             } else if (error.message.includes('Premature close')) {
-                debug('Known error "premature close occured"');
+                logger.error('Known error "premature close occured"');
             } else {
                 // context.retry_on_403(url);
                 console.trace(error.name + ': ' + error.message);
@@ -219,7 +215,7 @@ class Player {
             let resource = createAudioResource(stream, { inlineVolume: true, inputType: type });
             return resource;
         } else {
-            debug('Encountered error with stream');
+            logger.error('Encountered error with stream');
             setTimeout(function() {}, 1000);
             return await this.createStream(url);
         }
@@ -249,7 +245,7 @@ class Player {
             if (time > this.nowPlaying.duration.asSeconds()) {
                 return 1;
             }
-            debugd('Seek_time=' + time);
+            logger.debug('Seek_time=' + time);
             // this.dispatcher.streamOptions.seek = time;
             // var opts = {
             //     ...playback_opts
@@ -280,7 +276,7 @@ class Player {
                     context.connect();
                 }
             });
-            debug('Joined Voice Channel');
+            logger.info('Joined Voice Channel');
 
             this.dispatcher = createAudioPlayer({
                 behaviors: {
@@ -289,7 +285,7 @@ class Player {
             });
 
             this.dispatcher.on(AudioPlayerStatus.Idle, () => {
-                debugv('Finished playing');
+                logger.debug('Finished playing');
                 if (!this.loop) {
                     this.nowPlaying = null;
                 }

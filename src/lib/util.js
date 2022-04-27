@@ -1,18 +1,12 @@
-import Debug from 'debug';
 import { execa } from 'execa';
 import moment from 'moment';
 
 import { DiscordAPIError,
          MessageEmbed } from 'discord.js';
 import { playlistItems, videoInfo } from './youtubeAPI.js';
+import { logger } from './../lib/log.js';
 import { PlaybackItem } from './playbackItem.js';
 import { strings } from './strings.js';
-
-// eslint-disable-next-line no-unused-vars
-const debug = Debug('punk_bot');
-// eslint-disable-next-line no-unused-vars
-const debugv = Debug('punk_bot:verbose');
-const debugd = Debug('punk_bot:debug');
 
 async function errorReply(interaction, msgContent, errorMessage = strings.commandFailed, url = null, channel = null, avatarURL = null) {
     if (!msgContent) {
@@ -176,7 +170,7 @@ async function handlePlaylist(player, id, requester, skipFirst, callback, channe
             skipped = true;
         }
     } while (pageInfo?.nextPageToken);
-    debugd('DONE processing playlist!');
+    logger.debug('DONE processing playlist!');
     if (callback) {
         callback(successCount, failCount);
     }
