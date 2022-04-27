@@ -5,6 +5,24 @@ import { HTTPError } from '../../src/lib/errors.js';
 
 global.console.trace = jest.fn();
 
+jest.mock('winston', () => ({
+    format: {
+        colorize: jest.fn(),
+        combine: jest.fn(),
+        errors: jest.fn(),
+        label: jest.fn(),
+        printf: jest.fn(),
+        timestamp: jest.fn(),
+    },
+    createLogger: jest.fn().mockReturnValue({
+        debug: jest.fn(),
+        error: jest.fn(),
+    }),
+    transports: {
+        Console: jest.fn(),
+    },
+}));
+
 var mockHandleVideoError = false;
 
 const ytIdVal = 'E8gmARGvPlI';

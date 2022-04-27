@@ -4,6 +4,24 @@ import { DiscordAPIError } from 'discord.js';
 
 import * as util from '../../src/lib/util.js';
 
+jest.mock('winston', () => ({
+    format: {
+        colorize: jest.fn(),
+        combine: jest.fn(),
+        errors: jest.fn(),
+        label: jest.fn(),
+        printf: jest.fn(),
+        timestamp: jest.fn(),
+    },
+    createLogger: jest.fn().mockReturnValue({
+        debug: jest.fn(),
+        error: jest.fn(),
+    }),
+    transports: {
+        Console: jest.fn(),
+    },
+}));
+
 const mockAxiosErr = {
     name: '',
     message: '',
