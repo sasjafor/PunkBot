@@ -1,6 +1,7 @@
 import winston from 'winston';
 
 const LOG_LEVEL = process.env.DEBUG || 'info';
+const USE_COLOR = (process.env.LOG_COLOR !== 'false');
 
 // setup logger
 const myFormat = winston.format.printf((info) => {
@@ -10,14 +11,26 @@ const myFormat = winston.format.printf((info) => {
         return `[${info.timestamp}] [${info.label}] ${info.level}: ${info.message}`;
     }
 });
-const logger = winston.createLogger({
-    format: winston.format.combine(
+
+var winstonFormat;
+
+if (USE_COLOR) {
+    winstonFormat = winston.format.combine(
         winston.format.errors({ stack: true }),
         winston.format.colorize(),
         winston.format.label({ label: 'punk-bot' }),
         winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-        myFormat,
-    ),
+        myFormat);
+} else {
+    winstonFormat = winston.format.combine(
+        winston.format.errors({ stack: true }),
+        winston.format.label({ label: 'punk-bot' }),
+        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        myFormat);
+}
+
+const logger = winston.createLogger({
+    format: winstonFormat,
     transports: [
         new winston.transports.Console({ level: LOG_LEVEL }),
     ],
