@@ -15,7 +15,7 @@ const logger = winston.createLogger({
         winston.format.errors({ stack: true }),
         winston.format.colorize(),
         winston.format.label({ label: 'punk-bot' }),
-        winston.format.timestamp({ format: 'YYYY-MM-DD hh:mm:ss' }),
+        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
         myFormat,
     ),
     transports: [
