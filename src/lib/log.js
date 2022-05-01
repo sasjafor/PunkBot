@@ -1,7 +1,7 @@
 import winston from 'winston';
 
 const LOG_LEVEL = process.env.DEBUG || 'info';
-const USE_COLOR = (process.env.LOG_COLOR !== 'false');
+const USE_COLOR = process.env.LOG_COLOR !== 'false';
 
 // setup logger
 const myFormat = winston.format.printf((info) => {

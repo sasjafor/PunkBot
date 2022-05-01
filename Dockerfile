@@ -17,14 +17,8 @@ FROM node:17
 
 WORKDIR /usr/src/app
 
-# Set debug env
-ENV DEBUG basic,verbose
-
 # Set locale
 ENV LC_ALL C.UTF-8
-
-# Copy run script
-COPY src/run.sh ..
 
 # Create /config
 RUN mkdir /config
@@ -53,6 +47,9 @@ COPY src/bot.js .
 # Install youtube-dl
 ADD https://yt-dl.org/downloads/latest/youtube-dl /usr/local/bin/
 RUN chmod a+rx /usr/local/bin/youtube-dl
+
+# Copy run script
+COPY src/run.sh ..
 
 EXPOSE 8080
 VOLUME /config
