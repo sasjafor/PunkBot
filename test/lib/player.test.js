@@ -28,6 +28,7 @@ const mockConn = {
 const mockAudioPlayer = {
     stop: jest.fn(),
     on: jest.fn(),
+    removeAllListeners: jest.fn(),
 };
 
 import { AudioPlayerStatus,
