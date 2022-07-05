@@ -102,6 +102,7 @@ describe('lib', function () {
 
         describe('connect', function () {
             it('normal', async function() {
+                playerObj.dispatcher = null;
                 let res = playerObj.connect(channel);
                 expect(mockConn.subscribe).toBeCalledTimes(1);
             });
