@@ -53,6 +53,7 @@ describe('lib', function () {
                             description: '',
                             thumbnails: '',
                         },
+                        contentDetails: {},
                     },
                     {
                         id: {
@@ -67,6 +68,7 @@ describe('lib', function () {
                             description: '',
                             thumbnails: '',
                         },
+                        contentDetails: {},
                     },
                 ],
             },
@@ -136,6 +138,10 @@ describe('lib', function () {
             it('search no opts', function() {
                 youtubeAPI.search(query, jest.fn());
             });
+
+            it('search no callback', function() {
+                youtubeAPI.search(query);
+            });
         });
 
         describe('videoInfo', function () {
@@ -150,6 +156,10 @@ describe('lib', function () {
 
             it('videoInfo no opts', function() {
                 youtubeAPI.videoInfo(query, jest.fn());
+            });
+
+            it('videoInfo no callback', function() {
+                youtubeAPI.videoInfo(query);
             });
         });
 
@@ -180,6 +190,10 @@ describe('lib', function () {
 
             it('playlistItems no opts', function() {
                 youtubeAPI.playlistItems(query, jest.fn());
+            });
+
+            it('playlistItems no callback', function() {
+                youtubeAPI.playlistItems(query);
             });
         });
 
