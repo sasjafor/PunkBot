@@ -24,6 +24,11 @@ const strings = {
     shuffled: '**Shuffled queue** :ok_hand:',
     invalidQueueTab: ':x: **Invalid queue tab, must be a number between** ',
     seeked: ':fast_forward: **Set position to** ',
+    resumed: ':arrow_forward: **Resumed** ',
+    alreadyPlaying: ':x: **Already Playing** ',
+    paused: ':pause_button: **Paused** ',
+    alreadyPaused: ':x: **Already Paused** ',
+    stopped: ':stop_button: **Stopped** ',
 };
 
 export {

@@ -1,9 +1,10 @@
-import { AudioPlayerStatus,
-         createAudioPlayer,
-         createAudioResource,
-         joinVoiceChannel,
-         NoSubscriberBehavior,
-         StreamType,
+import {
+    AudioPlayerStatus,
+    createAudioPlayer,
+    createAudioResource,
+    joinVoiceChannel,
+    NoSubscriberBehavior,
+    StreamType,
 } from '@discordjs/voice';
 import got from 'got';
 import moment from 'moment';
@@ -13,14 +14,7 @@ import prism from 'prism-media';
 import { logger } from './../lib/log.js';
 import { Queue } from './queue.js';
 
-// var ytdl_opts = [];
-
-// var playback_opts = {
-//     highWaterMark: 12,
-//     passes: 4,
-//     bitrate: 128,
-//     fec: true,
-// };
+const DISCONNECT_TIMEOUT = 300000; // 5 minutes timeout
 
 class Player {
     constructor() {
@@ -30,7 +24,6 @@ class Player {
         this.oldStream = null;
         this.loop = false;
         this.dispatcher = null;
-        this.playing = false;
         this.timeout = null;
         this.conn = null;
         this.lastSeekTime = 0;
@@ -39,8 +32,6 @@ class Player {
     }
 
     play() {
-        this.playing = true;
-
         clearTimeout(this.timeout);
         let url = '';
         if (!this.loop || !this.nowPlaying) {
@@ -81,14 +72,19 @@ class Player {
     }
 
     stop() {
-        this.dispatcher.stop();
-        this.playing = false;
-        var context = this;
-        this.timeout = setTimeout(function() {
-            context.disconnect();
-        }, 300000);
+        this.dispatcher.unpause();
+        let stop = this.dispatcher.stop();
+        if (stop) {
+            this.nowPlaying = null;
+            var context = this;
+            this.timeout = setTimeout(function () {
+                context.disconnect();
+            }, DISCONNECT_TIMEOUT);
 
-        return;
+            return 0;
+        } else {
+            return 1;
+        }
     }
 
     enqueue(item) {
@@ -135,7 +131,7 @@ class Player {
     }
 
     skip() {
-        if (this.playing) {
+        if (this.dispatcher.state.status === AudioPlayerStatus.Playing) {
             let title = this.nowPlaying.title;
             if (this.loop) {
                 this.nowPlaying = this.queue.dequeue();
@@ -144,6 +140,30 @@ class Player {
             return title;
         } else {
             return false;
+        }
+    }
+
+    pause() {
+        if (this.dispatcher.state.status === AudioPlayerStatus.Paused) {
+            return 2;
+        }
+        let pause = this.dispatcher.pause(true);
+        if (pause) {
+            return 0;
+        } else {
+            return 1;
+        }
+    }
+
+    resume() {
+        if (this.dispatcher.state.status === AudioPlayerStatus.Playing) {
+            return 2;
+        }
+        let unpause = this.dispatcher.unpause();
+        if (unpause) {
+            return 0;
+        } else {
+            return 1;
         }
     }
 
@@ -161,7 +181,7 @@ class Player {
     /**
      * @param {string} url
      */
-    async createStream(url, seektime=null) {
+    async createStream(url, seektime = null) {
         if (!seektime) {
             seektime = 0;
         }
@@ -190,7 +210,7 @@ class Player {
             let playStream;
             try {
                 playStream = await playdl.stream(url, { seek: seektime });
-            } catch(error) {
+            } catch (error) {
                 logger.error(error);
                 this.skip();
                 return false;
@@ -215,7 +235,7 @@ class Player {
             return resource;
         } else {
             logger.error('Encountered error with stream');
-            setTimeout(function() {}, 1000);
+            setTimeout(function () { }, 1000);
             return await this.createStream(url);
         }
     }
@@ -236,7 +256,7 @@ class Player {
     }
 
     async seek(time) {
-        if (this.playing) {
+        if (this.dispatcher.state.status === AudioPlayerStatus.Playing) {
             if (time > this.nowPlaying.duration.asSeconds()) {
                 return 1;
             }
@@ -267,45 +287,45 @@ class Player {
             var context = this;
             this.conn.on('error', error => {
                 logger.error(error);
-                if (context.playing) {
+                if (context.dispatcher.state.status === AudioPlayerStatus.Paused) {
                     context.connect();
                 }
             });
             logger.info('Joined Voice Channel');
 
-            this.dispatcher = createAudioPlayer({
-                behaviors: {
-                    noSubscriber: NoSubscriberBehavior.Pause,
-                },
-            });
+            if (!this.dispatcher) {
+                this.dispatcher = createAudioPlayer({
+                    behaviors: {
+                        noSubscriber: NoSubscriberBehavior.Pause,
+                    },
+                });
 
-            this.dispatcher.on(AudioPlayerStatus.Idle, () => {
-                logger.debug('Finished playing');
-                if (!this.loop) {
-                    this.nowPlaying = null;
-                }
-                this.next();
-            });
-            this.dispatcher.on('error', error => {
-                logger.error(error);
-                this.stop();
-            });
+                this.dispatcher.on(AudioPlayerStatus.Idle, () => {
+                    logger.debug('Finished playing');
+                    if (!this.loop) {
+                        this.nowPlaying = null;
+                    }
+                    this.next();
+                });
+                this.dispatcher.on('error', error => {
+                    logger.error(error);
+                    this.stop();
+                });
 
-            this.subscription = this.conn.subscribe(this.dispatcher);
+                this.subscription = this.conn.subscribe(this.dispatcher);
+            }
         }
     }
 
     disconnect() {
         if (this.conn) {
             if (this.dispatcher) {
-                // this.dispatcher.removeAllListeners();
+                this.dispatcher.removeAllListeners();
                 this.dispatcher.stop();
-                // this.dispatcher = null;
             }
             this.conn.destroy();
             this.conn = null;
             this.queue = new Queue();
-            this.playing = false;
             this.dispatcher = null;
             this.nowPlaying = null;
             this.stream = null;
