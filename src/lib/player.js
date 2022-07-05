@@ -206,7 +206,6 @@ class Player {
             } else if (error.message.includes('Premature close')) {
                 logger.error('Known error "premature close occured"');
             } else {
-                // context.retry_on_403(url);
                 logger.error(error);
             }
         });
@@ -220,10 +219,6 @@ class Player {
             return await this.createStream(url);
         }
     }
-
-    // this.retry_on_403 = function(url) {
-    //
-    // };
 
     clear() {
         this.queue = new Queue();
