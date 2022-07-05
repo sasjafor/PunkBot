@@ -7,3 +7,4 @@ client_secret.json
 .vscode
 .nyc_output
 coverage
+test_videos.txt
