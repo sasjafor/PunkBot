@@ -1,4 +1,6 @@
+// @ts-nocheck
 import * as player from '../../src/lib/player.js';
+import { EventEmitter } from 'events';
 
 jest.mock('winston', () => ({
     format: {
@@ -19,27 +21,35 @@ jest.mock('winston', () => ({
     },
 }));
 
-const mockConn = {
-    on: jest.fn(),
-    destroy: jest.fn(),
-    subscribe: jest.fn(),
+const mockConn = new EventEmitter();
+mockConn.destroy = jest.fn();
+mockConn.subscribe = jest.fn();
+
+const mockAudioPlayer = new EventEmitter();
+mockAudioPlayer.pause = jest.fn();
+mockAudioPlayer.unpause = jest.fn();
+mockAudioPlayer.stop = jest.fn();
+mockAudioPlayer.state = {
+    status: AudioPlayerStatus.Idle,
 };
 
-const mockAudioPlayer = {
-    stop: jest.fn(),
-    on: jest.fn(),
-    removeAllListeners: jest.fn(),
-};
-
-import { AudioPlayerStatus,
-    createAudioPlayer,
-    createAudioResource,
-    joinVoiceChannel,
-    NoSubscriberBehavior,
-    StreamType } from '@discordjs/voice';
+import {
+    _createAudioPlayer,
+    _createAudioResource,
+    _joinVoiceChannel,
+    _NoSubscriberBehavior,
+    _StreamType,
+    AudioPlayerStatus
+} from '@discordjs/voice';
 jest.mock('@discordjs/voice', () => {
     return {
-        AudioPlayerStatus: '',
+        AudioPlayerStatus: {
+            Idle: 'idle',
+            Buffering: 'buffering',
+            Paused: 'paused',
+            Playing: 'playing',
+            AutoPaused: 'autopaused',
+        },
         AudioPlayer: jest.fn(),
         joinVoiceChannel: jest.fn(() => {
             return mockConn;
@@ -47,25 +57,73 @@ jest.mock('@discordjs/voice', () => {
         createAudioPlayer: jest.fn(() => {
             return mockAudioPlayer;
         }),
+        createAudioResource: jest.fn(() => {
+            return {};
+        }),
         NoSubscriberBehavior: '',
+        StreamType: '',
+    };
+});
+
+const mockPlayStream = {
+    type: '',
+    stream: new EventEmitter(),
+};
+var mockPlayThrowErr = false;
+
+import playdl from 'play-dl';
+jest.mock('play-dl', () => {
+    return {
+        stream: jest.fn(() => {
+            if (mockPlayThrowErr) {
+                throw new Error();
+            } else {
+                return mockPlayStream;
+            }
+        }),
     };
 });
 
 import got from 'got';
 import moment from 'moment';
-jest.mock('got');
+import { resolveMx } from 'dns';
+jest.mock('got', () => {
+    return {
+        stream: jest.fn(() => {
+            return {
+                pipe: jest.fn(() => {
+                    return mockPlayStream.stream;
+                }),
+            };
+        }),
+    };
+});
+
+import prism from 'prism-media';
+jest.mock('prism-media');
 
 global.console.log = jest.fn();
 global.console.trace = jest.fn();
+global.setTimeout = jest.fn();
 
 describe('lib', function () {
     describe('player', function () {
         const playerObj = new player.Player();
         const np = {
-            duration: moment.duration(300),
+            duration: moment.duration(30000),
         };
         const playbackDurationVal = 120;
         const queue = playerObj.queue;
+        const next = playerObj.next;
+        const dispatch = playerObj.dispatch;
+        const createStream = playerObj.createStream;
+        const skip = playerObj.skip;
+
+        const videoURL = 'https://www.youtube.com/watch?v=E8gmARGvPlI';
+        const fileURL = 'https://static.wikia.nocookie.net/smite_gamepedia/images/d/db/ClassyFenrir_Ability_2a.ogg';
+
+        const seekTime = 21;
+
         // const joinConfig = {
         //     guildId: '',
         //     channelId: '',
@@ -98,17 +156,147 @@ describe('lib', function () {
             };
             playerObj.nowPlaying = np;
             playerObj.queue = queue;
+            playerObj.next = next;
+            playerObj.dispatch = dispatch;
+            playerObj.createStream = createStream;
+            playerObj.skip = skip;
+
+            mockPlayStream.stream.readable = true;
+            mockPlayThrowErr = false;
+        });
+
+        describe('createStream', function () {
+            const videoUnavailable = 'This video is not available.';
+            const prematureClose = 'Premature close';
+            const streamError = {
+                message: '',
+            };
+
+            it('normal video', async function () {
+                let res = await playerObj.createStream(videoURL);
+                expect(res).toBeTruthy();
+            });
+
+            it('normal file', async function () {
+                let res = await playerObj.createStream(fileURL);
+                expect(res).toBeTruthy();
+            });
+
+            it('stream not readable', async function () {
+                mockPlayStream.stream.readable = false;
+
+                let res = playerObj.createStream(videoURL);
+                playerObj.createStream = null;
+                expect(res).rejects.toThrowError();
+            });
+
+            it('stream error generic', async function () {
+                let res = playerObj.createStream(videoURL);
+                mockPlayStream.stream.emit('error', streamError);
+                expect(await res).toBeTruthy();
+            });
+
+            it('stream error video unavailable', async function () {
+                streamError.message = videoUnavailable;
+                let res = playerObj.createStream(videoURL);
+                mockPlayStream.stream.emit('error', streamError);
+                expect(await res).toBeTruthy();
+            });
+
+            it('stream error prematureClose', async function () {
+                streamError.message = prematureClose;
+                let res = playerObj.createStream(videoURL);
+                mockPlayStream.stream.emit('error', streamError);
+                expect(await res).toBeTruthy();
+            });
+
+            it('playStream error', async function () {
+                mockPlayThrowErr = true;
+                let res = await playerObj.createStream(videoURL);
+                expect(res).toBeFalsy();
+            });
+        });
+
+        describe('clear', function () {
+            it('normal', function () {
+                playerObj.clear();
+                expect(playerObj.queue.getLength()).toBe(0);
+            });
+        });
+
+        describe('remove', function () {
+            it('normal', function () {
+                let res = playerObj.remove(1);
+                expect(res).toBe(np);
+
+                playerObj.queue.enqueue(np);
+            });
+
+            it('fail', function () {
+                let res = playerObj.remove(0);
+                expect(res).toBeFalsy();
+            });
+        });
+
+        describe('seek', function () {
+            beforeEach(() => {
+                playerObj.dispatcher.state.status = AudioPlayerStatus.Playing;
+
+                playerObj.dispatch = jest.fn();
+                playerObj.createStream = jest.fn();
+            });
+
+            it('normal', async function () {
+                let res = await playerObj.seek(seekTime);
+                expect(res).toBe(0);
+            });
+
+            it('not playing', async function () {
+                playerObj.dispatcher.state.status = AudioPlayerStatus.Idle;
+
+                let res = await playerObj.seek(seekTime);
+                expect(res).toBe(2);
+            });
+
+            it('seek time too long', async function () {
+                playerObj.dispatcher.state.status = AudioPlayerStatus.Idle;
+
+                let res = await playerObj.seek(50);
+                expect(res).toBe(2);
+            });
         });
 
         describe('connect', function () {
-            it('normal', async function() {
+            beforeEach(() => {
+                playerObj.next = jest.fn();
+            });
+
+            it('normal', async function () {
                 playerObj.dispatcher = null;
-                let res = playerObj.connect(channel);
+                await playerObj.connect(channel);
                 expect(mockConn.subscribe).toBeCalledTimes(1);
             });
 
-            it('fail', async function() {
-                let res = playerObj.connect();
+            it('fail', async function () {
+                let res = playerObj.connect(channel);
+                mockAudioPlayer.emit('error');
+                await res;
+                expect(mockConn.subscribe).toBeCalledTimes(0);
+            });
+
+            it('idle', async function () {
+                let res = playerObj.connect(channel);
+                mockAudioPlayer.emit(AudioPlayerStatus.Idle);
+                await res;
+                expect(mockConn.subscribe).toBeCalledTimes(0);
+            });
+
+            it('conn error', async function () {
+                playerObj.dispatcher.state.status = AudioPlayerStatus.Paused;
+
+                let res = playerObj.connect(channel);
+                mockConn.emit('error');
+                await res;
                 expect(mockConn.subscribe).toBeCalledTimes(0);
             });
         });
@@ -149,14 +337,14 @@ describe('lib', function () {
         describe('getTotalRemainingPlaybackTime', function () {
             it('normal', async function () {
                 let remainingPlaybackTime = await playerObj.getTotalRemainingPlaybackTime();
-                expect(remainingPlaybackTime.toString()).toEqual('PT0.48S');
+                expect(remainingPlaybackTime.toString()).toEqual('PT59.88S');
             });
         });
 
         describe('getTotalQueueTime', function () {
             it('normal', async function () {
                 let queueTime = await playerObj.getTotalQueueTime();
-                expect(queueTime.toString()).toEqual('PT0.3S');
+                expect(queueTime.toString()).toEqual('PT30S');
             });
         });
 

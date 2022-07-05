@@ -261,11 +261,6 @@ class Player {
                 return 1;
             }
             logger.debug('Seek_time=' + time);
-            // this.dispatcher.streamOptions.seek = time;
-            // var opts = {
-            //     ...playback_opts
-            // };
-            // opts.seek = time;
             this.lastSeekTime = time * 1000;
             this.oldStream = this.stream;
             this.stream = await this.createStream(this.nowPlaying.url, time);
@@ -278,7 +273,6 @@ class Player {
 
     async connect(channel) {
         if (channel) {
-            // this.conn = await channel.join();
             this.conn = joinVoiceChannel({
                 channelId: channel.id,
                 guildId: channel.guild.id,
@@ -287,7 +281,8 @@ class Player {
             var context = this;
             this.conn.on('error', error => {
                 logger.error(error);
-                if (context.dispatcher.state.status === AudioPlayerStatus.Paused) {
+                if (context.dispatcher.state.status === AudioPlayerStatus.Paused ||
+                    context.dispatcher.state.status === AudioPlayerStatus.AutoPaused) {
                     context.connect();
                 }
             });
