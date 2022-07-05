@@ -50,7 +50,7 @@ client.on('ready', async () => {
     // Push command to Discord application
     const rest = new REST({ version: '9' }).setToken(token);
 
-    // await rest.put(Routes.applicationGuildCommands(client.user.id, '246328943299264513'), { body: commandJSONs })
+    // await rest.put(Routes.applicationGuildCommands(client.user.id, '374283832901500928'), { body: commandJSONs })
     //     .then(() => logger.info('Successfully registered application commands.'))
     //     .catch(logger.error);
 
