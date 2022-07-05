@@ -3,7 +3,7 @@ import * as queue from '../../src/lib/queue.js';
 global.console.log = jest.fn();
 
 describe('lib', function () {
-    describe('limitedDict', function () {
+    describe('queue', function () {
         var queueObj = new queue.Queue();
 
         const index1 = 0;
@@ -58,6 +58,12 @@ describe('lib', function () {
         it('peek normal', function() {
             let el = queueObj.peek();
             expect(el).toBe(item1);
+        });
+
+        it('dequeue normal', function() {
+            let el = queueObj.dequeue();
+            expect(el).toBe(item1);
+            queueObj.enqueue(item1);
         });
 
         it('shuffle normal', function() {
