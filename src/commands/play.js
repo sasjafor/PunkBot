@@ -97,7 +97,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
                 return;
             }
         } else {
-            let playlistIdRegex = /(?:youtube(?:-nocookie)?\.com\/(?:[^/\n\s]+\/\S+\/|(?:playlist|e(?:mbed)?\/videoseries)\/|\S*?\?list=)|youtu\.be\/)([a-zA-Z0-9_-]{34})/;
+            let playlistIdRegex = /(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:playlist|e(?:mbed)?\/videoseries)\/|\S*?\?list=)|youtu\.be\/)([a-zA-Z0-9_-]{34})/;
             if (playlistIdRegex.test(url)) {
                 playlist = true;
                 let playlistId = url.match(playlistIdRegex)[1];
@@ -148,9 +148,9 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
                         url = 'https://www.youtube.com/watch?v=' + id;
                         title = playlistRes.results[0].title;
                     }
-                    handlePlaylist(player, playlistId, interaction.member, true, playlistCallback, interaction.channel, interaction.member?.displayAvatarURL());
+                    handlePlaylist(player, playlistId, interaction.member, true, playlistCallback, interaction.channel, interaction.member?.displayAvatarURL(), youtubeAPIKey);
                 } else {
-                    handlePlaylist(player, playlistId, interaction.member, false, playlistCallback, interaction.channel, interaction.member?.displayAvatarURL());
+                    handlePlaylist(player, playlistId, interaction.member, false, playlistCallback, interaction.channel, interaction.member?.displayAvatarURL(), youtubeAPIKey);
                     return;
                 }
             }
