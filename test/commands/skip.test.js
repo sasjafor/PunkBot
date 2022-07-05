@@ -11,9 +11,14 @@ describe('commands', function () {
             reply: jest.fn(),
         };
 
+        const nowPlaying = {
+            title: '',
+        };
+
         const player = {
             conn: 'Legit Connection',
             skip: jest.fn(() => { return true; }),
+            getNowPlaying: jest.fn(() => { return nowPlaying; }),
         };
 
         const players = { };
