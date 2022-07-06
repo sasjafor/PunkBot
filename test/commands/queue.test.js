@@ -1,3 +1,4 @@
+import { AudioPlayerStatus } from '@discordjs/voice';
 import moment from 'moment';
 
 import * as queue from '../../src/commands/queue.js';
@@ -37,7 +38,11 @@ describe('commands', function () {
 
         const player = {
             conn: 'Legit Connection',
-            playing: true,
+            dispatcher: {
+                state: {
+                    status: AudioPlayerStatus.Playing,
+                },
+            },
             getNowPlaying: jest.fn(() => { return np; }),
             getQueueLength: jest.fn(() => { return 12; }),
             getQueue: jest.fn(() => { return queueObject; }),
@@ -75,7 +80,7 @@ describe('commands', function () {
         });
 
         it('!player.playing', async function() {
-            player.playing = false;
+            player.dispatcher.state.status = AudioPlayerStatus.Idle;
             await queue.execute(interaction, players);
             expect(player.getQueueLength).toHaveBeenCalledTimes(0);
         });

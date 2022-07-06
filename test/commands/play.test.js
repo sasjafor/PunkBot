@@ -1,3 +1,4 @@
+import { AudioPlayerStatus } from '@discordjs/voice';
 import moment from 'moment';
 
 import * as play from '../../src/commands/play.js';
@@ -163,7 +164,11 @@ describe('commands', function () {
         var playRes = undefined;
         const player = {
             conn: 'Legit Connection',
-            playing: false,
+            dispatcher: {
+                state: {
+                    status: AudioPlayerStatus.Playing,
+                },
+            },
             connect: jest.fn(),
             play: jest.fn(() => { return playRes; }),
             enqueue: jest.fn(),
@@ -187,7 +192,7 @@ describe('commands', function () {
             jest.clearAllMocks();
 
             searchQuery = searchVideoURL;
-            player.playing = false;
+            player.dispatcher.state.status = AudioPlayerStatus.Idle;
             pbRes = undefined;
             mockFastSearchRes = fastSearchElem;
             mockFastSearchError = false;
@@ -223,7 +228,7 @@ describe('commands', function () {
         });
 
         it('second play with url, nothing cached, pb none', async function() {
-            player.playing = true;
+            player.dispatcher.state.status = AudioPlayerStatus.Playing;
             mockHandleVideoRes = undefined;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(0);
@@ -240,7 +245,7 @@ describe('commands', function () {
         });
 
         it('normal second play with url, nothing cached', async function() {
-            player.playing = true;
+            player.dispatcher.state.status = AudioPlayerStatus.Playing;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(0);
             expect(player.enqueue).toHaveBeenCalledTimes(1);
@@ -248,7 +253,7 @@ describe('commands', function () {
         });
 
         it('normal second play with url, cached', async function() {
-            player.playing = true;
+            player.dispatcher.state.status = AudioPlayerStatus.Playing;
             pbRes = pb;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(0);
@@ -301,7 +306,7 @@ describe('commands', function () {
 
         it('playlist second play, nothing cached', async function() {
             searchQuery = searchPlaylistURL;
-            player.playing = true;
+            player.dispatcher.state.status = AudioPlayerStatus.Playing;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(0);
             expect(player.enqueue).toHaveBeenCalledTimes(0);

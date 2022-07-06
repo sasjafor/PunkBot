@@ -213,7 +213,7 @@ describe('lib', function () {
             it('playStream error', async function () {
                 mockPlayThrowErr = true;
                 let res = await playerObj.createStream(videoURL);
-                expect(res).toBeFalsy();
+                expect(res).toStrictEqual({'errorCode': 1});
             });
         });
 
