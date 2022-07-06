@@ -1,6 +1,11 @@
 // @ts-nocheck
 import * as player from '../../src/lib/player.js';
+
+import { Queue } from '../../src/lib/queue.js';
+
+import { _resolveMx } from 'dns';
 import { EventEmitter } from 'events';
+import moment from 'moment';
 
 jest.mock('winston', () => ({
     format: {
@@ -44,7 +49,7 @@ import {
     _joinVoiceChannel,
     _NoSubscriberBehavior,
     _StreamType,
-    AudioPlayerStatus
+    AudioPlayerStatus,
 } from '@discordjs/voice';
 jest.mock('@discordjs/voice', () => {
     return {
@@ -77,7 +82,7 @@ const mockPlayStream = {
 var mockPlayThrowErr = false;
 const mockPlayErr = new Error();
 
-import playdl from 'play-dl';
+import _playdl from 'play-dl';
 jest.mock('play-dl', () => {
     return {
         stream: jest.fn(() => {
@@ -90,9 +95,7 @@ jest.mock('play-dl', () => {
     };
 });
 
-import got from 'got';
-import moment from 'moment';
-import { resolveMx } from 'dns';
+import _got from 'got';
 jest.mock('got', () => {
     return {
         stream: jest.fn(() => {
@@ -105,8 +108,7 @@ jest.mock('got', () => {
     };
 });
 
-import prism from 'prism-media';
-import { Queue } from '../../src/lib/queue.js';
+import _prism from 'prism-media';
 jest.mock('prism-media');
 
 global.console.log = jest.fn();
