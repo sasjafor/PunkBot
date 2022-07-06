@@ -8,4 +8,4 @@ client_secret.json
 .nyc_output
 coverage
 test_videos.txt
-player-dl_authorize.js
+play-dl_authorize.js
