@@ -211,8 +211,16 @@ describe('commands', function () {
             expect(player.play).toHaveBeenCalledTimes(1);
         });
 
-        it('first play with url, nothing cached, playRes == -1', async function() {
-            playRes = -1;
+        it('first play with url, nothing cached, playRes == 1', async function() {
+            playRes = 1;
+            await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
+            expect(player.connect).toHaveBeenCalledTimes(1);
+            expect(player.enqueue).toHaveBeenCalledTimes(1);
+            expect(player.play).toHaveBeenCalledTimes(1);
+        });
+
+        it('first play with url, nothing cached, playRes == 2', async function() {
+            playRes = 2;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(1);
             expect(player.enqueue).toHaveBeenCalledTimes(1);
