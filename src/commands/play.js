@@ -1,6 +1,7 @@
 import decode from 'unescape';
 import moment from 'moment';
 
+import { AudioPlayerStatus } from '@discordjs/voice';
 import { MessageEmbed } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
@@ -12,7 +13,7 @@ import { fastSearch,
 import { logger } from './../lib/log.js';
 import { PlaybackItem } from '../lib/playbackItem.js';
 import { strings } from '../lib/strings.js';
-import { AudioPlayerStatus } from '@discordjs/voice';
+
 
 var playlistInfoOpts = {
     part: 'contentDetails,snippet',

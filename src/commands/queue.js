@@ -1,9 +1,10 @@
+import { AudioPlayerStatus } from '@discordjs/voice';
 import { MessageEmbed } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
 import { prettifyTime } from '../lib/util.js';
 import { strings } from '../lib/strings.js';
-import { AudioPlayerStatus } from '@discordjs/voice';
+
 
 const data = new SlashCommandBuilder()
     .setName('queue')
