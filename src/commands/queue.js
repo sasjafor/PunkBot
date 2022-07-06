@@ -3,6 +3,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 
 import { prettifyTime } from '../lib/util.js';
 import { strings } from '../lib/strings.js';
+import { AudioPlayerStatus } from '@discordjs/voice';
 
 const data = new SlashCommandBuilder()
     .setName('queue')
@@ -26,7 +27,7 @@ async function execute(interaction, players) {
         return;
     }
 
-    if (!player.playing) {
+    if (player?.dispatcher?.state?.status !== AudioPlayerStatus.Playing) {
         interaction.reply({ content: strings.nothingPlaying, ephemeral: true });
         return;
     }

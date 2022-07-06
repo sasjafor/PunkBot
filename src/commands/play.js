@@ -12,6 +12,7 @@ import { fastSearch,
 import { logger } from './../lib/log.js';
 import { PlaybackItem } from '../lib/playbackItem.js';
 import { strings } from '../lib/strings.js';
+import { AudioPlayerStatus } from '@discordjs/voice';
 
 var playlistInfoOpts = {
     part: 'contentDetails,snippet',
@@ -35,7 +36,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
     let guildId = interaction.guild.id;
     let player = players[guildId];
     let connecting = null;
-    if (!player.playing) {
+    if (player?.dispatcher?.state?.status !== AudioPlayerStatus.Playing) {
         connecting = player.connect(interaction.member?.voice?.channel);
     }
 
@@ -68,7 +69,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
         pb.requesterId = interaction.user.id;
         pb.requesterIconURL = interaction.member?.displayAvatarURL();
 
-        if (!player.playing) {
+        if (player?.dispatcher?.state?.status !== AudioPlayerStatus.Playing) {
             player.enqueue(pb);
 
             logger.debug('Added ' + pb.url);
@@ -123,7 +124,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
                         .addField('Enqueued Items', successCount + '/' + pi.itemCount);
                     interaction.channel?.send({ embeds: [playlistEmbed] });
                 };
-                if (!player.playing) {
+                if (player?.dispatcher?.state?.status !== AudioPlayerStatus.Playing) {
                     let playlistOpts = {
                         key: youtubeAPIKey,
                         part: 'contentDetails,snippet',
@@ -179,7 +180,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
                 errorReply(interaction, searchString, error.response?.data?.error?.message, url);
                 return;
             });
-        if (!player.playing) {
+        if (player?.dispatcher?.state?.status !== AudioPlayerStatus.Playing) {
             let pbShort = new PlaybackItem(url, interaction.member?.displayName, interaction.user.id, interaction.member?.displayAvatarURL(), title);
             player.enqueue(pbShort);
 
@@ -211,10 +212,15 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
     }
 
     playResult = await playResult;
-    if (playResult === -1) {
-        await searchReply;
-        errorReply(interaction, searchString, 'Failed to create stream for your request, try again!', url);
-        return;
+    switch (playResult) {
+        case 1:
+            await searchReply;
+            errorReply(interaction, decode(pb.title), 'Failed to create stream for your request, try again!', url);
+            return;
+        case 2:
+            await searchReply;
+            errorReply(interaction, decode(pb.title), 'Can\'t play age restricted video', url);
+            return;
     }
 
     var prettyDuration = prettifyTime(pb.duration);
