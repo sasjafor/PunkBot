@@ -53,7 +53,7 @@ class Player {
         }
 
         let dispatchResult = null;
-        if (this.stream) {
+        if (!this.stream.errorCode) {
             if (this.conn) {
                 logger.debug('Playing: ' + url);
                 dispatchResult = this.dispatch();
@@ -104,8 +104,8 @@ class Player {
 
     async dispatch() {
         this.stream = await this.stream;
-        if (!this.stream) {
-            return -1;
+        if (this.stream.errorCode) {
+            return this.stream.errorCode;
         }
 
         if (this.stream.started) {
@@ -124,7 +124,7 @@ class Player {
      */
     setVolume(value) {
         this.volume = value;
-        if (this.stream) {
+        if (!this.stream.errorCode) {
             this.stream.volume.setVolume(value);
             logger.debug('Set volume to ' + value);
         }
@@ -211,9 +211,18 @@ class Player {
             try {
                 playStream = await playdl.stream(url, { seek: seektime });
             } catch (error) {
-                logger.error(error);
+                let errorCode = 1;
+                if (error.message.includes('Sign in to confirm your age')) {
+                    errorCode = 2;
+                    error.stack = null;
+                    logger.warn(error);
+                } else {
+                    logger.error(error);
+                }
                 this.skip();
-                return false;
+                return {
+                    errorCode: errorCode,
+                };
             }
             type = playStream.type;
             stream = playStream.stream;
