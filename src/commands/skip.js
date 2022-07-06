@@ -18,7 +18,11 @@ async function execute(interaction, players) {
     let skip = player.skip();
     let nowPlaying = player.getNowPlaying();
     if (skip) {
-        interaction.reply({ content: strings.skipped + '`' + skip + '`' + '\n:arrow_forward: **Playing**  ' + '`' + nowPlaying.title + '`'});
+        let resString = strings.skipped + '`' + skip + '`';
+        if (nowPlaying) {
+            resString += '\n:arrow_forward: **Playing**  ' + '`' + nowPlaying.title + '`';
+        }
+        interaction.reply({ content: resString });
     } else {
         interaction.reply({ content: strings.nothingPlaying, ephemeral: true });
     }
