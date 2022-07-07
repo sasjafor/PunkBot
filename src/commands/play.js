@@ -6,9 +6,10 @@ import { MessageEmbed } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
 import { errorReply, getAudioDurationInSeconds, getYTid, handlePlaylist, handleVideo, prettifyTime } from '../lib/util.js';
-import { fastSearch,
-         playlistInfo,
-         playlistItems,
+import {
+    fastSearch,
+    playlistInfo,
+    playlistItems,
 } from '../lib/youtubeAPI.js';
 import { logger } from './../lib/log.js';
 import { PlaybackItem } from '../lib/playbackItem.js';
@@ -27,7 +28,7 @@ const data = new SlashCommandBuilder()
             .setDescription('YouTube link or search term.')
             .setRequired(true));
 
-async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
+async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYoutubeCookies) {
     let searchQuery = interaction.options.getString('search');
     if (!interaction.member?.voice?.channel?.joinable) {
         errorReply(interaction, strings.noPermissionToConnect + interaction.member?.voice?.channel?.name);
@@ -55,7 +56,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
 
     let searchEmbed = new MessageEmbed()
         .setTitle(searchString)
-        .setAuthor({ name: 'Searching', iconURL: interaction.member?.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
+        .setAuthor({ name: 'Searching', iconURL: interaction.member?.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot' })
         .setURL(url);
     let searchReply = interaction.reply({ embeds: [searchEmbed] });
 
@@ -71,14 +72,22 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
         pb.requesterIconURL = interaction.member?.displayAvatarURL();
 
         if (player?.dispatcher?.state?.status !== AudioPlayerStatus.Playing) {
-            player.enqueue(pb);
+            if (pb.isAgeRestricted && !hasYoutubeCookies) {
+                playResult = 2;
+            } else {
+                player.enqueue(pb);
 
-            logger.debug('Added ' + pb.url);
-            await connecting;
-            player.play();
+                logger.debug('Added ' + pb.url);
+                await connecting;
+                player.play();
+            }
         } else {
-            queued = true;
-            player.enqueue(pb);
+            if (pb.isAgeRestricted && !hasYoutubeCookies) {
+                playResult = 2;
+            } else {
+                queued = true;
+                player.enqueue(pb);
+            }
         }
     } else {
         if (!isURL) {
@@ -93,7 +102,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
                     errorReply(interaction, strings.noMatches);
                     return;
                 }
-            } catch(error) {
+            } catch (error) {
                 logger.error(error);
                 errorReply(interaction, searchString, error.response?.message);
                 return;
@@ -103,12 +112,12 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
             if (playlistIdRegex.test(url)) {
                 playlist = true;
                 let playlistId = url.match(playlistIdRegex)[1];
-                let playlistCallback = async function(successCount, _failCount) {
+                let playlistCallback = async function (successCount, _failCount) {
                     let playlistInfoRes;
                     try {
                         playlistInfoOpts.key = youtubeAPIKey;
                         playlistInfoRes = await playlistInfo(playlistId, playlistInfoOpts);
-                    } catch(error) {
+                    } catch (error) {
                         logger.error(error);
                         await searchReply;
                         errorReply(interaction, searchString, error.response?.data?.error?.message, url);
@@ -139,7 +148,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
                     let playlistRes = null;
                     try {
                         playlistRes = await playlistItems(playlistId, customOpts, null, null);
-                    } catch(error) {
+                    } catch (error) {
                         logger.error(error);
                         await searchReply;
                         errorReply(interaction, searchString, error.response?.data?.error?.message, url);
@@ -203,7 +212,11 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
             if (!pb) {
                 return;
             }
-            player.enqueue(pb);
+            if (pb.isAgeRestricted && !hasYoutubeCookies) {
+                playResult = 2;
+            } else {
+                player.enqueue(pb);
+            }
         }
         pb.isYT = isYT;
 
@@ -227,7 +240,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
     var prettyDuration = prettifyTime(pb.duration);
     let embed = new MessageEmbed()
         .setTitle(decode(pb.title))
-        .setAuthor({ name: 'Playing', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
+        .setAuthor({ name: 'Playing', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot' })
         .setURL(pb.url);
 
     if (pb.isYT) {
@@ -240,7 +253,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache) {
         let timeUntilPlaying = await player.getTotalRemainingPlaybackTime();
         timeUntilPlaying.subtract(pb.duration);
         let prettyTut = prettifyTime(timeUntilPlaying);
-        embed = embed.setAuthor({ name: 'Added to queue', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'})
+        embed = embed.setAuthor({ name: 'Added to queue', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot' })
             .addField('Estimated time until playing', prettyTut)
             .addField('Position in queue', String(player.queue.getLength()));
     }
