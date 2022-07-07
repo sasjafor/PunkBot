@@ -33,6 +33,7 @@ class Player {
 
     play() {
         clearTimeout(this.timeout);
+        this.lastSeekTime = 0;
         let url = '';
         if (!this.loop || !this.nowPlaying) {
             this.nowPlaying = this.dequeue();
@@ -53,11 +54,9 @@ class Player {
         }
 
         let dispatchResult = null;
-        if (!this.stream.errorCode) {
-            if (this.conn) {
-                logger.debug('Playing: ' + url);
-                dispatchResult = this.dispatch();
-            }
+        if (this.conn) {
+            logger.debug('Playing: ' + url);
+            dispatchResult = this.dispatch();
         }
 
         return dispatchResult;
@@ -136,6 +135,7 @@ class Player {
             if (this.loop) {
                 this.nowPlaying = this.queue.dequeue();
             }
+            this.stream?.playStream?.destroy();
             this.next();
             return title;
         } else {
@@ -216,12 +216,17 @@ class Player {
                     errorCode = 2;
                     error.stack = null;
                     logger.warn(error);
+                } else if (error.message.includes('Seeking beyond limit')) {
+                    errorCode = 3;
+                    error.stack = null;
+                    logger.warn(error);
                 } else {
                     logger.error(error);
+                    this.skip();
                 }
-                this.skip();
                 return {
                     errorCode: errorCode,
+                    error: error,
                 };
             }
             type = playStream.type;
@@ -229,11 +234,10 @@ class Player {
         }
 
         stream.on('error', error => {
-            logger.error('Stream error for: ' + url);
             if (error.message.includes('This video is not available.')) {
                 this.skip();
             } else if (error.message.includes('Premature close')) {
-                logger.error('Known error "premature close occured"');
+                logger.debug('Known error "premature close occured"');
             } else {
                 logger.error(error);
             }
@@ -267,12 +271,30 @@ class Player {
     async seek(time) {
         if (this.dispatcher.state.status === AudioPlayerStatus.Playing) {
             if (time > this.nowPlaying.duration.asSeconds()) {
-                return 1;
+                return 3;
             }
             logger.debug('Seek_time=' + time);
-            this.lastSeekTime = time * 1000;
             this.oldStream = this.stream;
             this.stream = await this.createStream(this.nowPlaying.url, time);
+            if (this.stream.errorCode) {
+                let retErr = true;
+                if (this.stream.errorCode === 3) {
+                    let maxTimeRegex = /Seeking beyond limit. \[ [0-9]+ - ([0-9]+)]/;
+                    let errorMsg = this.stream.error.message;
+                    let match = errorMsg.match(maxTimeRegex);
+                    if (match && match.length > 1) {
+                        time = match[1];
+                        this.stream = await this.createStream(this.nowPlaying.url, time);
+                        if (!this.stream.errorCode) {
+                            retErr = false;
+                        }
+                    }
+                }
+                if (retErr) {
+                    return this.stream.errorCode;
+                }
+            }
+            this.lastSeekTime = time * 1000;
             await this.dispatch();
             return 0;
         } else {

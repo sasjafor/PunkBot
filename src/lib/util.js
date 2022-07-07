@@ -116,7 +116,8 @@ async function handleVideo(id, requester, url, title, youtubeAPIKey, duration) {
             }
             let ytDuration = moment.duration(res.duration);
             let ytChannelTitle = res.channelTitle;
-            return new PlaybackItem(ytUrl, requester.displayName, requester.user.id, requester.displayAvatarURL(), ytTitle, ytThumbnailURL, ytDuration, ytChannelTitle);
+            let isAgeRestricted = res.contentRating?.ytRating === 'ytAgeRestricted';
+            return new PlaybackItem(ytUrl, requester.displayName, requester.user.id, requester.displayAvatarURL(), ytTitle, ytThumbnailURL, ytDuration, ytChannelTitle, isAgeRestricted);
         } else {
             throw new Error('Failed to get video info');
         }

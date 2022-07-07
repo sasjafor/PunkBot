@@ -225,6 +225,7 @@ function videoInfo(id, opts, cb) {
                     title: item.snippet.title,
                     description: item.snippet.description,
                     duration: item.contentDetails.duration,
+                    contentRating: item.contentDetails.contentRating,
                     thumbnails: item.snippet.thumbnails,
                 };
             });

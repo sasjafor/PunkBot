@@ -50,7 +50,7 @@ async function execute(interaction, players) {
             var prettyTime = prettifyTime(duration);
             interaction.reply({ content: strings.seeked + '`' + prettyTime + '`' });
             break;
-        case 1:
+        case 3:
             interaction.reply({ content: strings.seekTooLong, ephemeral: true });
             break;
         case 2:

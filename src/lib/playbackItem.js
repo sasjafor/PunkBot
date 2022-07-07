@@ -1,7 +1,7 @@
 import moment from 'moment';
 
 class PlaybackItem {
-    constructor(url, requesterName, requesterId, requesterIconURL, title, thumbnailURL = null, duration = moment.duration('0'), channelTitle = null) {
+    constructor(url, requesterName, requesterId, requesterIconURL, title, thumbnailURL = null, duration = moment.duration('0'), channelTitle = null, isAgeRestricted = false) {
         this.url = url;
         this.duration = duration;
         this.requesterName = requesterName;
@@ -12,6 +12,7 @@ class PlaybackItem {
         this.channelTitle = channelTitle;
         this.stream = null;
         this.isYT = false;
+        this.isAgeRestricted = isAgeRestricted;
     }
 }
 
