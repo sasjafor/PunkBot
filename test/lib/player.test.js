@@ -434,14 +434,14 @@ describe('lib', function () {
             it('playStream error', async function () {
                 mockPlayThrowErr = true;
                 let res = await playerObj.createStream(videoURL);
-                expect(res).toStrictEqual({ 'errorCode': 1 });
+                expect(res.errorCode).toBe(1);
             });
 
             it('playStream error, age verification', async function () {
                 mockPlayThrowErr = true;
                 mockPlayErr.message = 'Sign in to confirm your age';
                 let res = await playerObj.createStream(videoURL);
-                expect(res).toStrictEqual({ 'errorCode': 2 });
+                expect(res.errorCode).toBe(2);
             });
         });
 
@@ -470,7 +470,9 @@ describe('lib', function () {
                 playerObj.dispatcher.state.status = AudioPlayerStatus.Playing;
 
                 playerObj.dispatch = jest.fn();
-                playerObj.createStream = jest.fn();
+                playerObj.createStream = jest.fn(() => {
+                    return playerObj.stream;
+                });
             });
 
             it('normal', async function () {
@@ -487,7 +489,7 @@ describe('lib', function () {
 
             it('seek time too long', async function () {
                 let res = await playerObj.seek(50);
-                expect(res).toBe(1);
+                expect(res).toBe(3);
             });
         });
 
