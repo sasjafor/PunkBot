@@ -9,3 +9,4 @@ client_secret.json
 coverage
 test_videos.txt
 play-dl_authorize.js
+.data
