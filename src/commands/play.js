@@ -253,6 +253,9 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYou
         let timeUntilPlaying = await player.getTotalRemainingPlaybackTime();
         timeUntilPlaying.subtract(pb.duration);
         let prettyTut = prettifyTime(timeUntilPlaying);
+        if (player.loop) {
+            prettyTut = '∞';
+        }
         embed = embed.setAuthor({ name: 'Added to queue', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot' })
             .addField('Estimated time until playing', prettyTut)
             .addField('Position in queue', String(player.queue.getLength()));
