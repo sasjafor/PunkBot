@@ -62,6 +62,32 @@ class Player {
         return dispatchResult;
     }
 
+    async playLoop() {
+        clearTimeout(this.timeout);
+        this.lastSeekTime = 0;
+        if (this.nowPlaying.stream) {
+            logger.debug('Using already prepared stream');
+
+            this.stream = this.nowPlaying.stream;
+        } else {
+            this.stream = this.prepareStream(this.nowPlaying);
+        }
+        this.nowPlaying.stream = this.prepareStream(this.nowPlaying);
+
+        this.stream = await this.stream;
+        this.stream.started = false;
+        if (this.stream.errorCode) {
+            return this.stream.errorCode;
+        }
+
+        if (this.stream.ended) {
+            this.stream = this.prepareStream(this.nowPlaying);
+            this.stream = await this.stream;
+        }
+
+        this.dispatcher.play(this.stream);
+    }
+
     next() {
         if (!this.queue.isEmpty() || (this.loop && this.nowPlaying)) {
             this.play();
@@ -107,7 +133,7 @@ class Player {
             return this.stream.errorCode;
         }
 
-        if (this.stream.started) {
+        if (this.stream.ended) {
             this.stream = this.prepareStream(this.nowPlaying);
             this.stream = await this.stream;
         }
@@ -135,7 +161,6 @@ class Player {
             if (this.loop) {
                 this.nowPlaying = this.queue.dequeue();
             }
-            this.stream?.playStream?.destroy();
             this.next();
             return title;
         } else {
@@ -330,8 +355,10 @@ class Player {
                     logger.debug('Finished playing');
                     if (!this.loop) {
                         this.nowPlaying = null;
+                        this.next();
+                    } else {
+                        this.playLoop();
                     }
-                    this.next();
                 });
                 this.dispatcher.on('error', error => {
                     logger.error(error);
