@@ -50,7 +50,7 @@ const mockVideoInfo = {
             channelTitle: '',
             contentRating: {
                 ytRating: 'ytAgeRestricted',
-            }
+            },
         },
     ],
 };

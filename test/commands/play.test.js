@@ -37,6 +37,7 @@ const pb = {
     thumbnailURL: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
     requesterIconURL: '',
     requesterId: '',
+    isAgeRestricted: false,
 };
 var mockHandleVideoRes = pb;
 
@@ -202,6 +203,7 @@ describe('commands', function () {
             mockGetYTidRes = ytIdVal;
             mockHandleVideoRes = pb;
             playRes = undefined;
+            pb.isAgeRestricted = false;
         });
 
         it('normal first play with url, nothing cached', async function() {
@@ -252,6 +254,24 @@ describe('commands', function () {
             expect(player.play).toHaveBeenCalledTimes(1);
         });
 
+        it('age-restricted first play with url, cached', async function() {
+            pbRes = pb;
+            pb.isAgeRestricted = true;
+            await play.execute(interaction, players, youtubeAPIKey, youtubeCache, false);
+            expect(player.connect).toHaveBeenCalledTimes(1);
+            expect(player.enqueue).toHaveBeenCalledTimes(0);
+            expect(player.play).toHaveBeenCalledTimes(0);
+        });
+
+        it('age-restricted second play with url, nothing cached', async function() {
+            player.dispatcher.state.status = AudioPlayerStatus.Playing;
+            pb.isAgeRestricted = true;
+            await play.execute(interaction, players, youtubeAPIKey, youtubeCache, false);
+            expect(player.connect).toHaveBeenCalledTimes(0);
+            expect(player.enqueue).toHaveBeenCalledTimes(0);
+            expect(player.play).toHaveBeenCalledTimes(0);
+        });
+
         it('normal second play with url, nothing cached', async function() {
             player.dispatcher.state.status = AudioPlayerStatus.Playing;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
@@ -268,6 +288,17 @@ describe('commands', function () {
             expect(player.enqueue).toHaveBeenCalledTimes(1);
             expect(player.play).toHaveBeenCalledTimes(0);
         });
+
+        it('age-restricted second play with url, cached', async function() {
+            player.dispatcher.state.status = AudioPlayerStatus.Playing;
+            pbRes = pb;
+            pb.isAgeRestricted = true;
+            await play.execute(interaction, players, youtubeAPIKey, youtubeCache, false);
+            expect(player.connect).toHaveBeenCalledTimes(0);
+            expect(player.enqueue).toHaveBeenCalledTimes(0);
+            expect(player.play).toHaveBeenCalledTimes(0);
+        });
+
 
         it('normal first play with string, nothing cached', async function() {
             searchQuery = searchString;

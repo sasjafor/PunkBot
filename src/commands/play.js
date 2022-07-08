@@ -28,7 +28,7 @@ const data = new SlashCommandBuilder()
             .setDescription('YouTube link or search term.')
             .setRequired(true));
 
-async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYoutubeCookies) {
+async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYoutubeCookies = false) {
     let searchQuery = interaction.options.getString('search');
     if (!interaction.member?.voice?.channel?.joinable) {
         errorReply(interaction, strings.noPermissionToConnect + interaction.member?.voice?.channel?.name);
