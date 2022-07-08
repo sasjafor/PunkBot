@@ -14,7 +14,7 @@ import { strings } from './lib/strings.js';
 const token = process.env.DISCORD_APP_AUTH_TOKEN;
 const youtubeAPIKey = process.env.YOUTUBE_API_KEY;
 const client = new Client({ intents: [Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS] });
-const hasYoutubeCookies = fs.existsSync('./data/youtube.data');
+const hasYoutubeCookies = fs.existsSync('./.data/youtube.data');
 
 const players = {};
 const youtubeCache = new LimitedDict(100);
