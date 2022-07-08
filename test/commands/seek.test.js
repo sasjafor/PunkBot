@@ -40,7 +40,7 @@ describe('commands', function () {
         });
 
         it('normal', async function() {
-            player.seek.mockResolvedValue(1);
+            player.seek.mockResolvedValue(3);
             await seek.execute(interaction, players);
             expect(player.seek).toHaveBeenCalledTimes(1);
             expect(prettifyTime).toHaveBeenCalledTimes(0);

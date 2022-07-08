@@ -48,6 +48,9 @@ const mockVideoInfo = {
             },
             duration: '',
             channelTitle: '',
+            contentRating: {
+                ytRating: 'ytAgeRestricted',
+            }
         },
     ],
 };

@@ -168,6 +168,9 @@ describe('lib', function () {
                     setVolume: jest.fn(),
                 },
                 started: true,
+                playStream: {
+                    destroy: jest.fn(),
+                },
             };
             playerObj.loop = false;
             playerObj.nowPlaying = np;
@@ -443,6 +446,13 @@ describe('lib', function () {
                 let res = await playerObj.createStream(videoURL);
                 expect(res.errorCode).toBe(2);
             });
+
+            it('playStream error, seek too long', async function () {
+                mockPlayThrowErr = true;
+                mockPlayErr.message = 'Seeking beyond limit';
+                let res = await playerObj.createStream(videoURL);
+                expect(res.errorCode).toBe(3);
+            });
         });
 
         describe('clear', function () {
@@ -490,6 +500,37 @@ describe('lib', function () {
             it('seek time too long', async function () {
                 let res = await playerObj.seek(50);
                 expect(res).toBe(3);
+            });
+
+            it('seek edge case near track length', async function () {
+                var once = true;
+                playerObj.createStream = jest.fn(() => {
+                    if (once) {
+                        once = false;
+                        return {
+                            errorCode: 3,
+                            error: {
+                                message: 'Seeking beyond limit. [ 0 - 30]',
+                            },
+                        };
+                    } else {
+                        return {};
+                    }
+                });
+
+                let res = await playerObj.seek(seekTime);
+                expect(res).toBe(0);
+            });
+
+            it('seek error', async function () {
+                playerObj.createStream = jest.fn(() => {
+                    return {
+                        errorCode: 1,
+                    };
+                });
+
+                let res = await playerObj.seek(seekTime);
+                expect(res).toBe(1);
             });
         });
 
