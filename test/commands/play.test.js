@@ -177,6 +177,7 @@ describe('commands', function () {
             queue: {
                 getLength: jest.fn(() => { return 4; }),
             },
+            loop: false,
         };
 
         var pbRes = undefined;
@@ -194,6 +195,7 @@ describe('commands', function () {
 
             searchQuery = searchVideoURL;
             player.dispatcher.state.status = AudioPlayerStatus.Idle;
+            player.loop = false;
             pbRes = undefined;
             mockFastSearchRes = fastSearchElem;
             mockFastSearchError = false;
@@ -274,6 +276,15 @@ describe('commands', function () {
 
         it('normal second play with url, nothing cached', async function() {
             player.dispatcher.state.status = AudioPlayerStatus.Playing;
+            await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
+            expect(player.connect).toHaveBeenCalledTimes(0);
+            expect(player.enqueue).toHaveBeenCalledTimes(1);
+            expect(player.play).toHaveBeenCalledTimes(0);
+        });
+
+        it('normal second play with url, nothing cached, loop', async function() {
+            player.dispatcher.state.status = AudioPlayerStatus.Playing;
+            player.loop = true;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(0);
             expect(player.enqueue).toHaveBeenCalledTimes(1);

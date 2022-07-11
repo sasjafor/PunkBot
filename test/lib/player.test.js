@@ -68,7 +68,11 @@ jest.mock('@discordjs/voice', () => {
             return mockAudioPlayer;
         }),
         createAudioResource: jest.fn(() => {
-            return {};
+            return {
+                volume: {
+                    setVolume: jest.fn(),
+                },
+            };
         }),
         NoSubscriberBehavior: '',
         StreamType: '',
@@ -131,7 +135,11 @@ describe('lib', function () {
             title: 'test',
             duration: moment.duration(30000),
             url: videoURL,
-            stream: {},
+            stream: {
+                volume: {
+                    setVolume: jest.fn(),
+                },
+            },
         };
         const playbackDurationVal = 120;
         const next = playerObj.next;
@@ -145,6 +153,7 @@ describe('lib', function () {
         const play = playerObj.play;
         const stop = playerObj.stop;
         const peek = playerObj.peek;
+        const playLoop = playerObj.playLoop;
 
         const seekTime = 21;
 
@@ -172,6 +181,7 @@ describe('lib', function () {
                     destroy: jest.fn(),
                 },
             };
+            np.stream = playerObj.stream;
             playerObj.loop = false;
             playerObj.nowPlaying = np;
             playerObj.next = next;
@@ -185,6 +195,7 @@ describe('lib', function () {
             playerObj.play = play;
             playerObj.stop = stop;
             playerObj.peek = peek;
+            playerObj.playLoop = playLoop;
             playerObj.queue = new Queue();
             playerObj.queue.enqueue(np);
 
@@ -197,33 +208,60 @@ describe('lib', function () {
         });
 
         describe('play', function () {
-            it('normal', function () {
+            beforeEach(() => {
                 playerObj.dequeue = jest.fn(() => { return np; });
                 playerObj.prepareStream = jest.fn(() => { return playerObj.stream; });
                 playerObj.dispatch = jest.fn(() => { return true; });
                 playerObj.peek = jest.fn(() => { return {}; });
+            });
+
+            it('normal', function () {
                 let res = playerObj.play();
                 expect(res).toBeTruthy();
             });
 
             it('no nowPlaying stream', function () {
                 playerObj.nowPlaying.stream = undefined;
-                playerObj.dequeue = jest.fn(() => { return np; });
-                playerObj.prepareStream = jest.fn(() => { return playerObj.stream; });
-                playerObj.dispatch = jest.fn(() => { return true; });
-                playerObj.peek = jest.fn(() => { return {}; });
                 let res = playerObj.play();
                 expect(res).toBeTruthy();
             });
 
             it('with loop', function () {
                 playerObj.loop = true;
+                let res = playerObj.play();
+                expect(res).toBeTruthy();
+            });
+        });
+
+        describe('playLoop', function () {
+            beforeEach(() => {
                 playerObj.dequeue = jest.fn(() => { return np; });
                 playerObj.prepareStream = jest.fn(() => { return playerObj.stream; });
                 playerObj.dispatch = jest.fn(() => { return true; });
                 playerObj.peek = jest.fn(() => { return {}; });
-                let res = playerObj.play();
-                expect(res).toBeTruthy();
+            });
+
+            it('normal', async function () {
+                let res = await playerObj.playLoop();
+                expect(res).toBeUndefined();
+            });
+
+            it('no nowPlaying stream', async function () {
+                playerObj.nowPlaying.stream = undefined;
+                let res = await playerObj.playLoop();
+                expect(res).toBeUndefined();
+            });
+
+            it('stream error', async function () {
+                playerObj.nowPlaying.stream = { errorCode: 3 };
+                let res = await playerObj.playLoop();
+                expect(res).toBe(3);
+            });
+
+            it('stream ended', async function () {
+                playerObj.nowPlaying.stream.ended = true;
+                let res = await playerObj.playLoop();
+                expect(res).toBeUndefined();
             });
         });
 
@@ -296,13 +334,19 @@ describe('lib', function () {
                     return playerObj.stream;
                 });
                 let res = await playerObj.dispatch();
-                expect(res).toBeFalsy();
+                expect(res).toBeUndefined();
             });
 
             it('stream error', async function () {
                 playerObj.stream.errorCode = 1;
                 let res = await playerObj.dispatch();
                 expect(res).toBe(1);
+            });
+
+            it('stream ended', async function () {
+                playerObj.stream.ended = true;
+                let res = await playerObj.dispatch();
+                expect(res).toBeUndefined();
             });
         });
 
@@ -537,6 +581,8 @@ describe('lib', function () {
         describe('connect', function () {
             beforeEach(() => {
                 playerObj.next = jest.fn();
+                playerObj.stop = jest.fn();
+                playerObj.playLoop = jest.fn();
             });
 
             it('normal', async function () {
@@ -553,6 +599,14 @@ describe('lib', function () {
             });
 
             it('idle', async function () {
+                let res = playerObj.connect(channel);
+                mockAudioPlayer.emit(AudioPlayerStatus.Idle);
+                await res;
+                expect(mockConn.subscribe).toBeCalledTimes(0);
+            });
+
+            it('idle with loop', async function () {
+                playerObj.loop = true;
                 let res = playerObj.connect(channel);
                 mockAudioPlayer.emit(AudioPlayerStatus.Idle);
                 await res;
