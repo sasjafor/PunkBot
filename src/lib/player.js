@@ -75,7 +75,7 @@ class Player {
         this.nowPlaying.stream = this.prepareStream(this.nowPlaying);
 
         this.stream = await this.stream;
-        this.stream.started = false;
+        // this.stream.started = false;
         if (this.stream.errorCode) {
             return this.stream.errorCode;
         }
@@ -85,6 +85,8 @@ class Player {
             this.stream = await this.stream;
         }
 
+        // set volume before playing
+        this.stream.volume.setVolume(this.volume);
         this.dispatcher.play(this.stream);
     }
 
@@ -149,9 +151,9 @@ class Player {
      */
     setVolume(value) {
         this.volume = value;
-        if (!this.stream.errorCode) {
+        if (this.stream && !this.stream?.errorCode) {
             this.stream.volume.setVolume(value);
-            logger.debug('Set volume to ' + value);
+            logger.debug('Set stream volume to ' + value);
         }
     }
 
@@ -270,6 +272,7 @@ class Player {
 
         if (stream.readable) {
             let resource = createAudioResource(stream, { inlineVolume: true, inputType: type });
+            resource.volume.setVolume(this.volume);
             return resource;
         } else {
             logger.error('Encountered error with stream');
