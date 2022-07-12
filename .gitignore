@@ -3,6 +3,7 @@ test_run.sh
 test_run_debug.sh
 test_run_container.sh
 debug_test_run.sh
+run_real_bot.sh
 client_secret.json
 .vscode
 .nyc_output
