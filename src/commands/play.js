@@ -243,7 +243,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYou
     var prettyDuration = prettifyTime(pb.duration);
     let embed = new EmbedBuilder()
         .setTitle(decode(pb.title))
-        .setAuthor({ name: 'Playing', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot' })
+        .setAuthor({ name: 'Playing', iconURL: interaction.member?.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot' })
         .setURL(pb.url);
 
     if (pb.isYT) {

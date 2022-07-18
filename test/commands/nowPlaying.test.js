@@ -6,7 +6,7 @@ import { buildProgressBar, prettifyTime } from '../../src/lib/util.js';
 jest.mock('../../src/lib/util.js');
 
 describe('commands', function () {
-    describe('loop', function () {
+    describe('nowPlaying', function () {
         const guildId = 1234;
 
         const interaction = {
@@ -21,13 +21,14 @@ describe('commands', function () {
             title: 'Test',
             url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
             thumbnailURL: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
-            requesterIconURL: '',
-            requesterId: '',
+            requesterIconURL: 'https://cdn.discordapp.com/avatars/180995420196044809/5a5056a3d287b0f30f5add9a48b6be41.webp',
+            requesterId: '180995420196044809',
         };
 
         const progress = moment.duration(10);
 
         const player = {
+
             conn: 'Legit Connection',
             getNowPlaying: jest.fn(() => { return np; }),
             getProgress: jest.fn(() => { return progress; }),
@@ -48,7 +49,7 @@ describe('commands', function () {
             expect(prettifyTime).toHaveBeenCalledTimes(2);
         });
 
-        it('normal', async function() {
+        it('nothing playing', async function() {
             player.getNowPlaying = jest.fn(() => { return null; });
 
             await nowPlaying.execute(interaction, players);

@@ -35,8 +35,8 @@ const pb = {
     title: 'Test',
     url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
     thumbnailURL: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
-    requesterIconURL: '',
-    requesterId: '',
+    requesterIconURL: 'https://cdn.discordapp.com/avatars/180995420196044809/5a5056a3d287b0f30f5add9a48b6be41.webp',
+    requesterId: '180995420196044809',
     isAgeRestricted: false,
 };
 var mockHandleVideoRes = pb;
@@ -74,11 +74,11 @@ const mockPlaylistInfoRes = {
         title: 'Last Christmas',
         thumbnails: {
             maxres: {
-                url: '',
+                url: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
             },
         },
         channelTitle: 'Wham Vevo',
-        itemCount: '',
+        itemCount: '4',
     }],
 };
 const mockAxiosErr = {
@@ -147,7 +147,7 @@ describe('commands', function () {
                 getString: jest.fn(() => { return searchQuery; }),
             },
             member: {
-                displayAvatarURL: jest.fn(),
+                displayAvatarURL: jest.fn(() => { return 'https://cdn.discordapp.com/avatars/180995420196044809/5a5056a3d287b0f30f5add9a48b6be41.webp'; }),
                 voice: {
                     channel: {
                         joinable: true,

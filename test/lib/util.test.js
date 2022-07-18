@@ -23,12 +23,12 @@ jest.mock('winston', () => ({
 }));
 
 const mockAxiosErr = {
-    name: '',
-    message: '',
+    name: 'AxiosError',
+    message: 'There was an error',
     response: {
         data: {
             error: {
-                message: '',
+                message: 'erreur',
             },
         },
     },
@@ -113,7 +113,7 @@ describe('lib', function () {
 
             const interaction = {
                 member: {
-                    displayAvatarURL: jest.fn(),
+                    displayAvatarURL: jest.fn(() => { return 'https://cdn.discordapp.com/avatars/180995420196044809/5a5056a3d287b0f30f5add9a48b6be41.webp'; }),
                 },
                 replied: false,
                 reply: jest.fn(() => {
@@ -300,14 +300,14 @@ describe('lib', function () {
                 user: {
                     id: '1',
                 },
-                displayAvatarURL: jest.fn(),
+                displayAvatarURL: jest.fn(() => { return 'https://cdn.discordapp.com/avatars/180995420196044809/5a5056a3d287b0f30f5add9a48b6be41.webp'; }),
             };
             var skipFirst = false;
             const callback = jest.fn();
             const channel = {
                 send: jest.fn(),
             };
-            const avatarURL = '';
+            const avatarURL = 'https://media.wired.com/photos/5a15e608801bd64d76805764/4:3/w_408,h_306,c_limit/rickastley.jpg';
             const youtubeAPIKey = '1245';
 
             beforeEach(() => {
@@ -320,13 +320,15 @@ describe('lib', function () {
             });
 
             it('normal', async function() {
-                let _res = await util.handlePlaylist(player, id, requester, skipFirst, callback, channel, avatarURL, youtubeAPIKey);
+                let res = await util.handlePlaylist(player, id, requester, skipFirst, callback, channel, avatarURL, youtubeAPIKey);
+                expect(res).toBeUndefined();
                 expect(playlistItems).toBeCalledTimes(1);
             });
 
             it('skip first', async function() {
                 skipFirst = true;
-                let _res = await util.handlePlaylist(player, id, requester, skipFirst, callback, channel, avatarURL, youtubeAPIKey);
+                let res = await util.handlePlaylist(player, id, requester, skipFirst, callback, channel, avatarURL, youtubeAPIKey);
+                expect(res).toBeUndefined();
                 expect(playlistItems).toBeCalledTimes(1);
             });
 

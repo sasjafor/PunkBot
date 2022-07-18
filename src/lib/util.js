@@ -8,7 +8,7 @@ import { logger } from './log.js';
 import { PlaybackItem } from './playbackItem.js';
 import { strings } from './strings.js';
 
-async function errorReply(interaction, msgContent, errorMessage = strings.commandFailed, url = null, channel = null, avatarURL = null) {
+async function errorReply(interaction, msgContent, errorMessage = strings.commandFailed, url = null, channel = null, avatarURL = 'https://media.wired.com/photos/5a15e608801bd64d76805764/4:3/w_408,h_306,c_limit/rickastley.jpg') {
     if (!msgContent) {
         msgContent = strings.errorMsgNotAvailable;
     }
