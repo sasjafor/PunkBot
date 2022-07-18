@@ -11,7 +11,8 @@ RUN apt-get update && \
 COPY package.json /usr/src/app/
 
 # Install node dependencies
-RUN npm ci --only=production --ignore-scripts
+RUN npm set-script prepare "" && \
+    npm ci --omit=dev
 
 FROM node:17
 
