@@ -9,6 +9,7 @@ RUN apt-get update && \
 
 # Copy package.json
 COPY package.json /usr/src/app/
+COPY package-lock.json /usr/src/app/
 
 # Install node dependencies
 RUN npm set-script prepare "" && \
