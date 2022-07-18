@@ -1,5 +1,5 @@
 import { AudioPlayerStatus } from '@discordjs/voice';
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
 import { prettifyTime } from '../lib/util.js';
@@ -37,7 +37,7 @@ async function execute(interaction, players) {
         return;
     }
 
-    let embed = new MessageEmbed()
+    let embed = new EmbedBuilder()
         .setTitle('Queue for ' + interaction.guild.name + '\n\u200b')
         .setURL('https://github.com/sasjafor/PunkBot')
         .setColor('#0000e5');

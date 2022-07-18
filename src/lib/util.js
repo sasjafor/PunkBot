@@ -2,7 +2,7 @@ import { execa } from 'execa';
 import moment from 'moment';
 
 import { DiscordAPIError,
-         MessageEmbed } from 'discord.js';
+         EmbedBuilder } from 'discord.js';
 import { playlistItems, videoInfo } from './youtubeAPI.js';
 import { logger } from './log.js';
 import { PlaybackItem } from './playbackItem.js';
@@ -12,7 +12,7 @@ async function errorReply(interaction, msgContent, errorMessage = strings.comman
     if (!msgContent) {
         msgContent = strings.errorMsgNotAvailable;
     }
-    let embed = new MessageEmbed()
+    let embed = new EmbedBuilder()
         .setColor('#FF0000')
         .setTitle(msgContent);
 
@@ -86,7 +86,7 @@ function buildProgressBar(progress, totalTime) {
  * @param {string} url
  */
 function getYTid(url) {
-    let idRegex = /(?:youtube(?:-nocookie)?\.com\/(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    let idRegex = /(?:youtube(?:-nocookie)?\.com\/(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/;
     let match = url.match(idRegex);
 
     if (match && match.length > 1) {

@@ -11,7 +11,7 @@ RUN apt-get update && \
 COPY package.json /usr/src/app/
 
 # Install node dependencies
-RUN npm i --production
+RUN npm i --omit=dev
 
 FROM node:17
 
@@ -43,10 +43,6 @@ COPY src/commands ./commands
 
 # Copy bot script file
 COPY src/bot.js .
-
-# Install youtube-dl
-ADD https://yt-dl.org/downloads/latest/youtube-dl /usr/local/bin/
-RUN chmod a+rx /usr/local/bin/youtube-dl
 
 # Copy run script
 COPY src/run.sh ..

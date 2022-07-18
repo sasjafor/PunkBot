@@ -1,6 +1,12 @@
 import fs from 'fs';
 
-import { Client, Collection, GuildMember, Intents, TextChannel } from 'discord.js';
+import { Client,
+         Collection,
+         GatewayIntentBits,
+         GuildMember,
+         InteractionType,
+         PermissionFlagsBits,
+         TextChannel } from 'discord.js';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 import { URL } from 'url';
@@ -13,7 +19,7 @@ import { strings } from './lib/strings.js';
 
 const token = process.env.DISCORD_APP_AUTH_TOKEN;
 const youtubeAPIKey = process.env.YOUTUBE_API_KEY;
-const client = new Client({ intents: [Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS] });
+const client = new Client({ intents: [GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessages, GatewayIntentBits.Guilds] });
 const hasYoutubeCookies = fs.existsSync('./.data/youtube.data');
 
 const players = {};
@@ -61,7 +67,7 @@ client.on('ready', async () => {
 });
 
 client.on('interactionCreate', async interaction => {
-    if (!interaction.isCommand()) {
+    if (interaction.type !== InteractionType.ApplicationCommand) {
         return;
     }
 
@@ -101,7 +107,7 @@ client.on('messageCreate', async message => {
     }
 
     if (message.content[0] === '!') {
-        if (!(message.channel instanceof TextChannel) || !message.channel.permissionsFor(message.guild.me).has('SEND_MESSAGES')) {
+        if (!(message.channel instanceof TextChannel) || !message.channel.permissionsFor(message.guild.members.me).has(PermissionFlagsBits.SendMessages)) {
             return;
         }
 

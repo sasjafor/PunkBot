@@ -2,15 +2,18 @@ import decode from 'unescape';
 import moment from 'moment';
 
 import { AudioPlayerStatus } from '@discordjs/voice';
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
-import { errorReply, getAudioDurationInSeconds, getYTid, handlePlaylist, handleVideo, prettifyTime } from '../lib/util.js';
-import {
-    fastSearch,
-    playlistInfo,
-    playlistItems,
-} from '../lib/youtubeAPI.js';
+import { errorReply,
+         getAudioDurationInSeconds,
+         getYTid,
+         handlePlaylist,
+         handleVideo,
+         prettifyTime } from '../lib/util.js';
+import { fastSearch,
+         playlistInfo,
+         playlistItems } from '../lib/youtubeAPI.js';
 import { logger } from './../lib/log.js';
 import { PlaybackItem } from '../lib/playbackItem.js';
 import { strings } from '../lib/strings.js';
@@ -54,7 +57,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYou
         url = searchQuery;
     }
 
-    let searchEmbed = new MessageEmbed()
+    let searchEmbed = new EmbedBuilder()
         .setTitle(searchString)
         .setAuthor({ name: 'Searching', iconURL: interaction.member?.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot' })
         .setURL(url);
@@ -125,13 +128,13 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYou
                     }
                     let pi = playlistInfoRes.results[0];
 
-                    let playlistEmbed = new MessageEmbed()
+                    let playlistEmbed = new EmbedBuilder()
                         .setTitle(pi.title)
                         .setAuthor({ name: 'Enqueued playlist', iconURL: interaction.member?.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot' })
                         .setURL(url)
                         .setThumbnail(pi.thumbnails?.maxres?.url)
-                        .addField('Channel', pi.channelTitle)
-                        .addField('Enqueued Items', successCount + '/' + pi.itemCount);
+                        .addFields([{ name: 'Channel', value: pi.channelTitle },
+                                    { name: 'Enqueued Items', value: successCount + '/' + pi.itemCount }]);
                     interaction.channel?.send({ embeds: [playlistEmbed] });
                 };
                 if (player?.dispatcher?.state?.status !== AudioPlayerStatus.Playing) {
@@ -238,15 +241,15 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYou
     }
 
     var prettyDuration = prettifyTime(pb.duration);
-    let embed = new MessageEmbed()
+    let embed = new EmbedBuilder()
         .setTitle(decode(pb.title))
         .setAuthor({ name: 'Playing', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot' })
         .setURL(pb.url);
 
     if (pb.isYT) {
         embed = embed.setThumbnail(pb.thumbnailURL)
-            .addField('Channel', pb.channelTitle)
-            .addField('Song Duration', prettyDuration);
+            .addFields([{ name: 'Channel', value: pb.channelTitle },
+                        { name: 'Song Duration', value: prettyDuration }]);
     }
 
     if (queued) {
@@ -257,8 +260,8 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYou
             prettyTut = '∞';
         }
         embed = embed.setAuthor({ name: 'Added to queue', iconURL: interaction.member.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot' })
-            .addField('Estimated time until playing', prettyTut)
-            .addField('Position in queue', String(player.queue.getLength()));
+            .addFields([{ name: 'Estimated time until playing', value: prettyTut },
+                        { name: 'Position in queue', value: String(player.queue.getLength()) }]);
     }
 
     await searchReply;

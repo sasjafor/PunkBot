@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
 import { buildProgressBar, prettifyTime } from '../lib/util.js';
@@ -22,7 +22,7 @@ async function execute(interaction, players) {
     if (np && progress) {
         let progressBar = buildProgressBar(progress, np.duration);
         let progressString = prettifyTime(progress) + ' / ' + prettifyTime(np.duration);
-        let embed = new MessageEmbed()
+        let embed = new EmbedBuilder()
             .setTitle(np.title)
             .setAuthor({ name: 'Now Playing ♪', iconURL: np.requesterIconURL, url: 'https://github.com/sasjafor/PunkBot' })
             .setURL(np.url)
