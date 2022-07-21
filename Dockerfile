@@ -1,21 +1,26 @@
-FROM node:17 AS BUILD_IMAGE
+FROM node:17-alpine AS BUILD_IMAGE
 
 WORKDIR /usr/src/app
 
 # Install dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends python3 \
-                                               python-is-python3
+RUN apk add --update --no-cache alpine-sdk \
+                                autoconf \
+                                automake \
+                                libtool \
+                                make \
+                                musl \
+                                python3 && \
+    ln -sf python3 /usr/bin/python
 
-# Copy package.json
+# Copy package info
 COPY package.json /usr/src/app/
 COPY package-lock.json /usr/src/app/
 
 # Install node dependencies
-RUN npm set-script prepare "" && \
+RUN npm pkg set scripts.prepare=" " && \
     npm ci --omit=dev
 
-FROM node:17
+FROM node:17-alpine
 
 WORKDIR /usr/src/app
 
@@ -26,10 +31,9 @@ ENV LC_ALL C.UTF-8
 RUN mkdir /config
 
 # Install dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends ffmpeg \
-                                               python3 \
-                                               python-is-python3
+RUN apk add --update --no-cache ffmpeg \
+    python3 && \
+    ln -sf python3 /usr/bin/python
 
 # Copy package.json
 COPY package.json .

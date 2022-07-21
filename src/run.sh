@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 rm -rf /config/node_modules
 rm -rf /config/lib
 rm -rf /config/commands
