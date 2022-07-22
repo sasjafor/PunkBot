@@ -9,7 +9,8 @@ const data = new SlashCommandBuilder()
         option.setName('value')
             .setDescription('Volume to set.')
             .setRequired(true)
-            .setMinValue(0));
+            .setMinValue(0))
+    .setDMPermission(false);
 
 async function execute(interaction, players) {
     let value = interaction.options.getNumber('value');

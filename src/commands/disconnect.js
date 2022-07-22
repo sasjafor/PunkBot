@@ -4,7 +4,8 @@ import { strings } from '../lib/strings.js';
 
 const data = new SlashCommandBuilder()
     .setName('disconnect')
-    .setDescription('Disconnects the bot from the channel.');
+    .setDescription('Disconnects the bot from the channel.')
+    .setDMPermission(false);
 
 async function execute(interaction, players) {
     let guildId = interaction.guild.id;

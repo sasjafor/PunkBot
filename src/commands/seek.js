@@ -10,7 +10,8 @@ const data = new SlashCommandBuilder()
     .addStringOption(option =>
         option.setName('time')
             .setDescription('Time to seek to.')
-            .setRequired(true));
+            .setRequired(true))
+    .setDMPermission(false);
 
 async function execute(interaction, players) {
     let time = interaction.options.getString('time');

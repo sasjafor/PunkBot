@@ -4,7 +4,8 @@ import { strings } from '../lib/strings.js';
 
 const data = new SlashCommandBuilder()
     .setName('summon')
-    .setDescription('Summons the bot to your voice channel.');
+    .setDescription('Summons the bot to your voice channel.')
+    .setDMPermission(false);
 
 async function execute(interaction, players) {
     if (!interaction?.member?.voice?.channel?.joinable) {

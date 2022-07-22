@@ -29,7 +29,8 @@ const data = new SlashCommandBuilder()
     .addStringOption(option =>
         option.setName('search')
             .setDescription('YouTube link or search term.')
-            .setRequired(true));
+            .setRequired(true))
+    .setDMPermission(false);
 
 async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYoutubeCookies = false) {
     let searchQuery = interaction.options.getString('search');

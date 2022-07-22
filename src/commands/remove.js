@@ -9,7 +9,8 @@ const data = new SlashCommandBuilder()
         option.setName('index')
             .setDescription('Index to remove from queue.')
             .setRequired(true)
-            .setMinValue(1));
+            .setMinValue(1))
+    .setDMPermission(false);
 
 async function execute(interaction, players) {
     let index = interaction.options.getInteger('index');

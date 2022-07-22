@@ -4,7 +4,8 @@ import { strings } from '../lib/strings.js';
 
 const data = new SlashCommandBuilder()
     .setName('stop')
-    .setDescription('Stops playback.');
+    .setDescription('Stops playback.')
+    .setDMPermission(false);
 
 async function execute(interaction, players) {
     let guildId = interaction.guild.id;

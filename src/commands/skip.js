@@ -4,7 +4,8 @@ import { strings } from '../lib/strings.js';
 
 const data = new SlashCommandBuilder()
     .setName('skip')
-    .setDescription('Skips the current song.');
+    .setDescription('Skips the current song.')
+    .setDMPermission(false);
 
 async function execute(interaction, players) {
     let guildId = interaction.guild.id;

@@ -6,7 +6,8 @@ import { strings } from '../lib/strings.js';
 
 const data = new SlashCommandBuilder()
     .setName('now-playing')
-    .setDescription('Shows the song that is currently playing.');
+    .setDescription('Shows the song that is currently playing.')
+    .setDMPermission(false);
 
 async function execute(interaction, players) {
     let guildId = interaction.guild.id;

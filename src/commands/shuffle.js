@@ -4,7 +4,8 @@ import { strings } from '../lib/strings.js';
 
 const data = new SlashCommandBuilder()
     .setName('shuffle')
-    .setDescription('Shuffles the queue.');
+    .setDescription('Shuffles the queue.')
+    .setDMPermission(false);
 
 async function execute(interaction, players) {
     let guildId = interaction.guild.id;

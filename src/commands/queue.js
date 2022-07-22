@@ -12,7 +12,8 @@ const data = new SlashCommandBuilder()
     .addIntegerOption(option =>
         option.setName('index')
             .setDescription('Index of page in the queue.')
-            .setMinValue(1));
+            .setMinValue(1))
+    .setDMPermission(false);
 
 async function execute(interaction, players) {
     let index = interaction.options.getInteger('index');
