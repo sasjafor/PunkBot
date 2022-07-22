@@ -5,6 +5,7 @@ import {
     joinVoiceChannel,
     NoSubscriberBehavior,
     StreamType,
+    VoiceConnectionStatus,
 } from '@discordjs/voice';
 import got from 'got';
 import moment from 'moment';
@@ -29,6 +30,7 @@ class Player {
         this.lastSeekTime = 0;
         this.subscription = null;
         this.volume = 1;
+        this.channel = null;
     }
 
     play() {
@@ -332,6 +334,7 @@ class Player {
 
     async connect(channel) {
         if (channel) {
+            this.channel = channel;
             this.conn = joinVoiceChannel({
                 channelId: channel.id,
                 guildId: channel.guild.id,
@@ -342,7 +345,13 @@ class Player {
                 logger.error(error);
                 if (context.dispatcher.state.status === AudioPlayerStatus.Paused ||
                     context.dispatcher.state.status === AudioPlayerStatus.AutoPaused) {
-                    context.connect();
+                    this.forceReconnect();
+                }
+            });
+            this.conn.on('stateChange', (oldState, newState) => {
+                logger.debug(oldState.status + '  ' + newState.status);
+                if (oldState.status === VoiceConnectionStatus.Ready && newState.status === VoiceConnectionStatus.Connecting) {
+                    this.forceReconnect();
                 }
             });
             logger.info('Joined Voice Channel');
@@ -370,6 +379,17 @@ class Player {
 
                 this.subscription = this.conn.subscribe(this.dispatcher);
             }
+        }
+    }
+
+    async forceReconnect() {
+        this.conn.removeAllListeners();
+        if (!this.conn.disconnect()) {
+            this.conn.destroy();
+        }
+        await this.connect(this.channel);
+        if (this.dispatcher) {
+            this.subscription = this.conn.subscribe(this.dispatcher);
         }
     }
 
