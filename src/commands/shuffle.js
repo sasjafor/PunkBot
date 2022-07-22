@@ -11,12 +11,12 @@ async function execute(interaction, players) {
     let player = players[guildId];
 
     if (!player.conn) {
-        interaction.reply({ content: strings.notConnected, ephemeral: true });
+        interaction.editReply({ content: strings.notConnected, ephemeral: true });
         return;
     }
 
     player.shuffle();
-    interaction.reply({ content: strings.shuffled });
+    interaction.editReply({ content: strings.shuffled });
 }
 
 export {

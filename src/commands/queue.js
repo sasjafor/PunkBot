@@ -24,12 +24,12 @@ async function execute(interaction, players) {
     let player = players[guildId];
 
     if (!player.conn) {
-        interaction.reply({ content: strings.notConnected, ephemeral: true });
+        interaction.editReply({ content: strings.notConnected, ephemeral: true });
         return;
     }
 
     if (player?.dispatcher?.state?.status !== AudioPlayerStatus.Playing) {
-        interaction.reply({ content: strings.nothingPlaying, ephemeral: true });
+        interaction.editReply({ content: strings.nothingPlaying, ephemeral: true });
         return;
     }
     let np = player.getNowPlaying();
@@ -50,7 +50,7 @@ async function execute(interaction, players) {
         let k = 0;
         if (index > 1) {
             if (index > numTabs) {
-                interaction.reply({ content: strings.invalidQueueTab + '**1-' + numTabs + '**', ephemeral: true });
+                interaction.editReply({ content: strings.invalidQueueTab + '**1-' + numTabs + '**', ephemeral: true });
                 return;
             } else {
                 k = (index - 1) * 10 + 1;
@@ -71,7 +71,7 @@ async function execute(interaction, players) {
     }
 
     embed.setDescription(desc);
-    interaction.reply({embeds: [embed]});
+    interaction.editReply({embeds: [embed]});
 }
 
 export {

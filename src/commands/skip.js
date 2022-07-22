@@ -11,7 +11,7 @@ async function execute(interaction, players) {
     let player = players[guildId];
 
     if (!player.conn) {
-        interaction.reply({ content: strings.notConnected, ephemeral: true });
+        interaction.editReply({ content: strings.notConnected, ephemeral: true });
         return;
     }
 
@@ -22,9 +22,9 @@ async function execute(interaction, players) {
         if (nowPlaying) {
             resString += '\n:arrow_forward: **Playing**  ' + '`' + nowPlaying.title + '`';
         }
-        interaction.reply({ content: resString });
+        interaction.editReply({ content: resString });
     } else {
-        interaction.reply({ content: strings.nothingPlaying, ephemeral: true });
+        interaction.editReply({ content: strings.nothingPlaying, ephemeral: true });
     }
 }
 

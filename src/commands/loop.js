@@ -12,9 +12,9 @@ async function execute(interaction, players) {
 
     player.loop = !player.loop;
     if (player.loop) {
-        interaction.reply({ content: strings.loopEnabled });
+        interaction.editReply({ content: strings.loopEnabled });
     } else {
-        interaction.reply({ content: strings.loopDisabled });
+        interaction.editReply({ content: strings.loopDisabled });
     }
 }
 

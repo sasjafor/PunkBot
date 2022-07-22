@@ -13,7 +13,7 @@ async function execute(interaction, players) {
     let player = players[guildId];
 
     if (!player.conn) {
-        interaction.reply({ content: strings.notConnected, ephemeral: true });
+        interaction.editReply({ content: strings.notConnected, ephemeral: true });
         return;
     }
 
@@ -29,9 +29,9 @@ async function execute(interaction, players) {
             .setThumbnail(np.thumbnailURL)
             .setColor('#0056bf')
             .setDescription('\u200B\n`' + progressBar + '`\n\n`' + progressString + '`\n\n`Requested by:` <@' + np.requesterId + '>');
-        interaction.reply({ embeds: [embed] });
+        interaction.editReply({ embeds: [embed] });
     } else {
-        interaction.reply({ content: strings.nothingPlaying, ephemeral: true });
+        interaction.editReply({ content: strings.nothingPlaying, ephemeral: true });
     }
 }
 

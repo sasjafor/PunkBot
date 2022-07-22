@@ -18,7 +18,7 @@ async function execute(interaction, players) {
     let player = players[guildId];
 
     player.setVolume(value);
-    interaction.reply({ content: strings.volumeSet + value });
+    interaction.editReply({ content: strings.volumeSet + value });
 }
 
 export {

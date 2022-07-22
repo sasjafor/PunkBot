@@ -57,12 +57,6 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYou
         url = searchQuery;
     }
 
-    let searchEmbed = new EmbedBuilder()
-        .setTitle(searchString)
-        .setAuthor({ name: 'Searching', iconURL: interaction.member?.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot' })
-        .setURL(url);
-    let searchReply = interaction.reply({ embeds: [searchEmbed] });
-
     let playResult = 0;
     let pb = null;
     let queued = false;
@@ -101,7 +95,6 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYou
                     id = searchRes.id;
                     title = searchRes.title;
                 } else {
-                    await searchReply;
                     errorReply(interaction, strings.noMatches);
                     return;
                 }
@@ -122,7 +115,6 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYou
                         playlistInfoRes = await playlistInfo(playlistId, playlistInfoOpts);
                     } catch (error) {
                         logger.error(error);
-                        await searchReply;
                         errorReply(interaction, searchString, error.response?.data?.error?.message, url);
                         return;
                     }
@@ -153,7 +145,6 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYou
                         playlistRes = await playlistItems(playlistId, customOpts, null, null);
                     } catch (error) {
                         logger.error(error);
-                        await searchReply;
                         errorReply(interaction, searchString, error.response?.data?.error?.message, url);
                         return;
                     }
@@ -189,7 +180,6 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYou
         let pbP = handleVideo(id, interaction.member, url, title, youtubeAPIKey, duration)
             .catch(async (error) => {
                 logger.error(error);
-                await searchReply;
                 errorReply(interaction, searchString, error.response?.data?.error?.message, url);
                 return;
             });
@@ -231,11 +221,9 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYou
     playResult = await playResult;
     switch (playResult) {
         case 1:
-            await searchReply;
             errorReply(interaction, decode(pb.title), 'Failed to create stream for your request, try again!', url);
             return;
         case 2:
-            await searchReply;
             errorReply(interaction, decode(pb.title), 'Can\'t play age restricted video', url);
             return;
     }
@@ -264,7 +252,6 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYou
                         { name: 'Position in queue', value: String(player.queue.getLength()) }]);
     }
 
-    await searchReply;
     interaction.editReply({ content: null, embeds: [embed] });
 }
 

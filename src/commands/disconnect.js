@@ -11,16 +11,16 @@ async function execute(interaction, players) {
     let player = players[guildId];
 
     if (!player.conn) {
-        interaction.reply({ content: strings.notConnected, ephemeral: true });
+        interaction.editReply({ content: strings.notConnected, ephemeral: true });
         return;
     }
 
     let disconnectRes = player.disconnect();
     if (disconnectRes) {
-        interaction.reply({ content: strings.disconnected });
+        interaction.editReply({ content: strings.disconnected });
     } else {
         // TODO: this shouldn't happen, right?
-        interaction.reply({ content: strings.notConnected, ephemeral: true });
+        interaction.editReply({ content: strings.notConnected, ephemeral: true });
     }
 }
 

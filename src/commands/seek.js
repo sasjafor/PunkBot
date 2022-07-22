@@ -19,13 +19,13 @@ async function execute(interaction, players) {
     let player = players[guildId];
 
     if (!player.conn) {
-        interaction.reply({ content: strings.notConnected, ephemeral: true });
+        interaction.editReply({ content: strings.notConnected, ephemeral: true });
         return;
     }
 
     let seekTimeRegex = /(([0-9]+:)?([0-9]+:)?)?[0-9]+$/;
     if (!seekTimeRegex.test(time) || (time.match(seekTimeRegex)).index !== 0) {
-        interaction.reply({ content: strings.invalidSeekFormat, ephemeral: true });
+        interaction.editReply({ content: strings.invalidSeekFormat, ephemeral: true });
         return;
     }
     let minHourRegex = /([0-9]+)(?::)/g;
@@ -48,13 +48,13 @@ async function execute(interaction, players) {
     switch (resCode) {
         case 0:
             var prettyTime = prettifyTime(duration);
-            interaction.reply({ content: strings.seeked + '`' + prettyTime + '`' });
+            interaction.editReply({ content: strings.seeked + '`' + prettyTime + '`' });
             break;
         case 3:
-            interaction.reply({ content: strings.seekTooLong, ephemeral: true });
+            interaction.editReply({ content: strings.seekTooLong, ephemeral: true });
             break;
         case 2:
-            interaction.reply({ content: strings.nothingPlaying, ephemeral: true });
+            interaction.editReply({ content: strings.nothingPlaying, ephemeral: true });
             break;
     }
 }

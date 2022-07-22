@@ -18,15 +18,15 @@ async function execute(interaction, players) {
     let player = players[guildId];
 
     if (!player.conn) {
-        interaction.reply({ content: strings.notConnected, ephemeral: true });
+        interaction.editReply({ content: strings.notConnected, ephemeral: true });
         return;
     }
 
     let removeRes = player.remove(index);
     if (removeRes) {
-        interaction.reply({ content: strings.removed + removeRes.title });
+        interaction.editReply({ content: strings.removed + removeRes.title });
     } else {
-        interaction.reply({ content: strings.outOfRange, ephemeral: true });
+        interaction.editReply({ content: strings.outOfRange, ephemeral: true });
     }
 }
 
