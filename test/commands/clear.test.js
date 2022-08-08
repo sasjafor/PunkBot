@@ -1,25 +1,9 @@
+import { interaction, player, players } from '../discord-js.mocks.js';
+
 import * as clear from '../../src/commands/clear.js';
 
 describe('commands', function () {
     describe('clear', function () {
-        const guildId = 1234;
-
-        const interaction = {
-            guild: {
-                id: guildId,
-            },
-            reply: jest.fn(),
-            editReply: jest.fn(),
-        };
-
-        const player = {
-            conn: 'Legit Connection',
-            clear: jest.fn(),
-        };
-
-        const players = { };
-        players[guildId] = player;
-
         beforeEach(() => {
             jest.clearAllMocks();
         });

@@ -1,30 +1,13 @@
+import { interaction, player, players } from '../discord-js.mocks.js';
+
 import * as pause from '../../src/commands/pause.js';
 
 describe('commands', function () {
     describe('pause', function () {
-        const guildId = 1234;
-
-        const interaction = {
-            guild: {
-                id: guildId,
-            },
-            reply: jest.fn(),
-            editReply: jest.fn(),
-        };
-
-        var pauseRetVal = 0;
-        const player = {
-            conn: 'Legit Connection',
-            pause: jest.fn(() => { return pauseRetVal; }),
-        };
-
-        const players = { };
-        players[guildId] = player;
-
         beforeEach(() => {
             jest.clearAllMocks();
 
-            pauseRetVal = 0;
+            player.pauseRetVal = 0;
         });
 
         it('normal', async function() {
@@ -33,13 +16,13 @@ describe('commands', function () {
         });
 
         it('nothing playing', async function() {
-            pauseRetVal = 1;
+            player.pauseRetVal = 1;
             await pause.execute(interaction, players);
             expect(player.pause).toHaveBeenCalledTimes(1);
         });
 
         it('already paused', async function() {
-            pauseRetVal = 2;
+            player.pauseRetVal = 2;
             await pause.execute(interaction, players);
             expect(player.pause).toHaveBeenCalledTimes(1);
         });

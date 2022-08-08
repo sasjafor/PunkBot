@@ -1,25 +1,9 @@
+import { interaction, player, players } from '../discord-js.mocks.js';
+
 import * as shuffle from '../../src/commands/shuffle.js';
 
 describe('commands', function () {
     describe('shuffle', function () {
-        const guildId = 1234;
-
-        const interaction = {
-            guild: {
-                id: guildId,
-            },
-            reply: jest.fn(),
-            editReply: jest.fn(),
-        };
-
-        const player = {
-            conn: 'Legit Connection',
-            shuffle: jest.fn(),
-        };
-
-        const players = { };
-        players[guildId] = player;
-
         beforeEach(() => {
             jest.clearAllMocks();
         });

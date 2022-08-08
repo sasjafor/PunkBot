@@ -1,30 +1,9 @@
+import { interaction, player, players } from '../discord-js.mocks.js';
+
 import * as skip from '../../src/commands/skip.js';
 
 describe('commands', function () {
     describe('skip', function () {
-        const guildId = 1234;
-
-        const interaction = {
-            guild: {
-                id: guildId,
-            },
-            reply: jest.fn(),
-            editReply: jest.fn(),
-        };
-
-        const nowPlaying = {
-            title: '',
-        };
-
-        const player = {
-            conn: 'Legit Connection',
-            skip: jest.fn(() => { return true; }),
-            getNowPlaying: jest.fn(() => { return nowPlaying; }),
-        };
-
-        const players = { };
-        players[guildId] = player;
-
         beforeEach(() => {
             jest.clearAllMocks();
         });

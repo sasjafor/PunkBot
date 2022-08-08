@@ -1,25 +1,9 @@
+import { interaction, player, players } from '../discord-js.mocks.js';
+
 import * as loop from '../../src/commands/loop.js';
 
 describe('commands', function () {
     describe('loop', function () {
-        const guildId = 1234;
-
-        const interaction = {
-            guild: {
-                id: guildId,
-            },
-            reply: jest.fn(),
-            editReply: jest.fn(),
-        };
-
-        const player = {
-            conn: 'Legit Connection',
-            loop: false,
-        };
-
-        const players = { };
-        players[guildId] = player;
-
         beforeEach(() => {
             jest.clearAllMocks();
         });

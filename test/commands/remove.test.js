@@ -1,30 +1,13 @@
+import { interaction, player, players } from '../discord-js.mocks.js';
+
 import * as remove from '../../src/commands/remove.js';
 
 describe('commands', function () {
     describe('remove', function () {
-        const guildId = 1234;
-
-        const interaction = {
-            guild: {
-                id: guildId,
-            },
-            reply: jest.fn(),
-            editReply: jest.fn(),
-            options: {
-                getInteger: jest.fn(() => { return 2; }),
-            },
-        };
-
-        const player = {
-            conn: 'Legit Connection',
-            remove: jest.fn(() => { return true; }),
-        };
-
-        const players = { };
-        players[guildId] = player;
-
         beforeEach(() => {
             jest.clearAllMocks();
+
+            interaction.integerOption = 2;
         });
 
         it('normal', async function() {
