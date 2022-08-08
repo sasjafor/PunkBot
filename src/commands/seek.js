@@ -2,7 +2,7 @@ import moment from 'moment';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
 import { prettifyTime } from '../lib/util.js';
-import { strings } from '../lib/strings.js';
+import { strings } from '../lib/messageStrings.js';
 
 const data = new SlashCommandBuilder()
     .setName('seek')

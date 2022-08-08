@@ -1,10 +1,12 @@
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { AudioPlayerStatus } from '@discordjs/voice';
-import { EmbedBuilder } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
+import { buttons } from '../lib/buttonIDs.js';
 import { prettifyTime } from '../lib/util.js';
-import { strings } from '../lib/strings.js';
+import { strings } from '../lib/messageStrings.js';
 
+const BUTTON_TIMEOUT = 300000;
 
 const data = new SlashCommandBuilder()
     .setName('queue')
@@ -33,9 +35,43 @@ async function execute(interaction, players) {
         interaction.editReply({ content: strings.nothingPlaying, ephemeral: true });
         return;
     }
+
+    let embed = await createList(interaction, player, index);
+    if (!embed) {
+        return;
+    }
+
+    let queueLength = player.getQueueLength();
+    let numTabs = Math.ceil(queueLength / 10);
+    let components = undefined;
+    if (numTabs > 1) {
+        components = createComponents(index, numTabs);
+    }
+    let message = await interaction.editReply({embeds: [embed], components: components });
+
+    const collector = message.createMessageComponentCollector({ time: BUTTON_TIMEOUT });
+
+    collector.on('collect', async i => {
+        switch (i.customId) {
+            case buttons.queuePrev:
+                index--;
+                break;
+            case buttons.queueNext:
+                index++;
+                break;
+        }
+        let embed = await createList(interaction, player, index);
+        let components = createComponents(index, numTabs);
+        await i.update({ embeds: [embed], components: components });
+    });
+
+    collector.on('end', _collected => message.delete());
+}
+
+async function createList(interaction, player, index) {
     let np = player.getNowPlaying();
     if (!np) {
-        return;
+        return false;
     }
 
     let embed = new EmbedBuilder()
@@ -52,7 +88,7 @@ async function execute(interaction, players) {
         if (index > 1) {
             if (index > numTabs) {
                 interaction.editReply({ content: strings.invalidQueueTab + '**1-' + numTabs + '**', ephemeral: true });
-                return;
+                return false;
             } else {
                 k = (index - 1) * 10 + 1;
                 desc = '';
@@ -72,7 +108,31 @@ async function execute(interaction, players) {
     }
 
     embed.setDescription(desc);
-    interaction.editReply({embeds: [embed]});
+
+    return embed;
+}
+
+function createComponents(index, numTabs) {
+    const prevButton = new ButtonBuilder()
+        .setCustomId(buttons.queuePrev)
+        .setLabel('Prev')
+        .setStyle(ButtonStyle.Secondary);
+    if (index === 1) {
+        prevButton.setDisabled(true);
+    }
+    const nextButton = new ButtonBuilder()
+        .setCustomId(buttons.queueNext)
+        .setLabel('Next')
+        .setStyle(ButtonStyle.Secondary);
+    if (index === numTabs) {
+        nextButton.setDisabled(true);
+    }
+    const actionRow = new ActionRowBuilder()
+        .addComponents(
+            prevButton,
+            nextButton,
+        );
+    return [actionRow];
 }
 
 export {

@@ -16,7 +16,7 @@ import { fastSearch,
          playlistItems } from '../lib/youtubeAPI.js';
 import { logger } from './../lib/log.js';
 import { PlaybackItem } from '../lib/playbackItem.js';
-import { strings } from '../lib/strings.js';
+import { strings } from '../lib/messageStrings.js';
 
 
 var playlistInfoOpts = {
@@ -128,7 +128,11 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYou
                         .setThumbnail(pi.thumbnails?.maxres?.url)
                         .addFields([{ name: 'Channel', value: pi.channelTitle },
                                     { name: 'Enqueued Items', value: successCount + '/' + pi.itemCount }]);
-                    interaction.channel?.send({ embeds: [playlistEmbed] });
+                    if (interaction.isRepliable() && !interaction.replied) {
+                        interaction.editReply({ embeds: [playlistEmbed] });
+                    } else {
+                        interaction.channel?.send({ embeds: [playlistEmbed] });
+                    }
                 };
                 if (player?.dispatcher?.state?.status !== AudioPlayerStatus.Playing) {
                     let playlistOpts = {
@@ -253,7 +257,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYou
                         { name: 'Position in queue', value: String(player.queue.getLength()) }]);
     }
 
-    interaction.editReply({ content: null, embeds: [embed] });
+    await interaction.editReply({ content: null, embeds: [embed] });
 }
 
 export {

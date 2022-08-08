@@ -15,7 +15,7 @@ import { errorReply } from './lib/util.js';
 import { LimitedDict } from './lib/limitedDict.js';
 import { logger } from './lib/log.js';
 import { Player } from './lib/player.js';
-import { strings } from './lib/strings.js';
+import { strings } from './lib/messageStrings.js';
 
 const token = process.env.DISCORD_APP_AUTH_TOKEN;
 const youtubeAPIKey = process.env.YOUTUBE_API_KEY;

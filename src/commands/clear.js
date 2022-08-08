@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 
-import { strings } from '../lib/strings.js';
+import { strings } from '../lib/messageStrings.js';
 
 const data = new SlashCommandBuilder()
     .setName('clear')

@@ -6,7 +6,7 @@ import { DiscordAPIError,
 import { playlistItems, videoInfo } from './youtubeAPI.js';
 import { logger } from './log.js';
 import { PlaybackItem } from './playbackItem.js';
-import { strings } from './strings.js';
+import { strings } from './messageStrings.js';
 
 async function errorReply(interaction, msgContent, errorMessage = strings.commandFailed, url = null, channel = null, avatarURL = 'https://media.wired.com/photos/5a15e608801bd64d76805764/4:3/w_408,h_306,c_limit/rickastley.jpg') {
     if (!msgContent) {
@@ -24,17 +24,13 @@ async function errorReply(interaction, msgContent, errorMessage = strings.comman
         embed = embed.setAuthor({ name: errorMessage, iconURL: interaction.member?.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot'});
 
         let message = { embeds: [embed], ephemeral: true };
-        if (interaction.replied) {
+        try {
             await interaction.editReply(message);
-        } else {
-            try {
-                await interaction.reply(message);
-            } catch(error) {
-                if (error instanceof DiscordAPIError && error.message.includes('Interaction has already been acknowledged.')) {
-                    await interaction.editReply(message);
-                } else {
-                    logger.error(error);
-                }
+        } catch(error) {
+            if (error instanceof DiscordAPIError && error.message.includes('Interaction has already been acknowledged.')) {
+                await interaction.editReply(message);
+            } else {
+                logger.error(error);
             }
         }
     } else {

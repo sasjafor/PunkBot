@@ -2,7 +2,7 @@ import { EmbedBuilder } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
 import { buildProgressBar, prettifyTime } from '../lib/util.js';
-import { strings } from '../lib/strings.js';
+import { strings } from '../lib/messageStrings.js';
 
 const data = new SlashCommandBuilder()
     .setName('now-playing')
