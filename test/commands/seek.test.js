@@ -13,6 +13,7 @@ describe('commands', function () {
                 id: guildId,
             },
             reply: jest.fn(),
+            editReply: jest.fn(),
             options: {
                 getString: jest.fn(() => { return seekTime; }),
             },

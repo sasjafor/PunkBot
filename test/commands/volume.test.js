@@ -10,6 +10,7 @@ describe('commands', function () {
                 id: guildId,
             },
             reply: jest.fn(),
+            editReply: jest.fn(),
             options: {
                 getNumber: jest.fn(() => { return volumeVal; }),
             },

@@ -145,42 +145,36 @@ describe('lib', function () {
 
             it('normal', async function() {
                 await util.errorReply(interactionVal, msgContentVal, errorMessage, url);
-                expect(interaction.reply).toBeCalledTimes(1);
-                expect(interaction.editReply).toBeCalledTimes(0);
+                expect(interaction.editReply).toBeCalledTimes(1);
             });
 
             it('interaction.replied == true', async function() {
                 interaction.replied = true;
                 await util.errorReply(interactionVal, msgContentVal, errorMessage, url);
-                expect(interaction.reply).toBeCalledTimes(0);
                 expect(interaction.editReply).toBeCalledTimes(1);
             });
 
             it('reply normal error', async function() {
                 replyErr = 1;
                 await util.errorReply(interactionVal, msgContentVal, errorMessage, url);
-                expect(interaction.reply).toBeCalledTimes(1);
-                expect(interaction.editReply).toBeCalledTimes(0);
+                expect(interaction.editReply).toBeCalledTimes(1);
             });
 
             it('reply api error', async function() {
                 replyErr = 2;
                 await util.errorReply(interactionVal, msgContentVal, errorMessage, url);
-                expect(interaction.reply).toBeCalledTimes(1);
                 expect(interaction.editReply).toBeCalledTimes(1);
             });
 
             it('msgContent == null', async function() {
                 msgContentVal = undefined;
                 await util.errorReply(interactionVal, msgContentVal, errorMessage, url);
-                expect(interaction.reply).toBeCalledTimes(1);
-                expect(interaction.editReply).toBeCalledTimes(0);
+                expect(interaction.editReply).toBeCalledTimes(1);
             });
 
             it('interaction == null', async function() {
                 interactionVal = undefined;
                 await util.errorReply(interactionVal, msgContentVal, errorMessage, url, channel, avatarURL);
-                expect(interaction.reply).toBeCalledTimes(0);
                 expect(interaction.editReply).toBeCalledTimes(0);
                 expect(channel.send).toBeCalledTimes(1);
             });

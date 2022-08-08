@@ -30,6 +30,7 @@ jest.mock('winston', () => ({
 const mockConn = new EventEmitter();
 mockConn.destroy = jest.fn();
 mockConn.subscribe = jest.fn();
+mockConn.disconnect = jest.fn();
 
 const mockAudioPlayer = new EventEmitter();
 var mockUnpauseRet = true;
@@ -619,7 +620,7 @@ describe('lib', function () {
                 let res = playerObj.connect(channel);
                 mockConn.emit('error');
                 await res;
-                expect(mockConn.subscribe).toBeCalledTimes(0);
+                expect(mockConn.subscribe).toBeCalled();
             });
 
             it('conn error autopaused', async function () {
@@ -628,7 +629,7 @@ describe('lib', function () {
                 let res = playerObj.connect(channel);
                 mockConn.emit('error');
                 await res;
-                expect(mockConn.subscribe).toBeCalledTimes(0);
+                expect(mockConn.subscribe).toBeCalled();
             });
         });
 

@@ -9,6 +9,7 @@ describe('commands', function () {
                 id: guildId,
             },
             reply: jest.fn(),
+            editReply: jest.fn(),
             options: {
                 getInteger: jest.fn(() => { return 2; }),
             },

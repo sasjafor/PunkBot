@@ -160,6 +160,7 @@ describe('commands', function () {
             channel: {
                 send: jest.fn(),
             },
+            isRepliable: jest.fn(),
         };
 
         var playRes = undefined;
