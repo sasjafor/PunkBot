@@ -49,6 +49,15 @@ jest.mock('../../src/lib/util.js', () => {
     };
 });
 
+// eslint-disable-next-line no-unused-vars
+import { createPlayEmbed, playItem } from '../../src/lib/playbackHelpers.js';
+jest.mock('../../src/lib/playbackHelpers.js', () => {
+    return {
+        createPlayEmbed: jest.fn(),
+        playItem: jest.fn(),
+    };
+});
+
 const fastSearchElem = {
     url: '',
     id: '',
@@ -152,32 +161,28 @@ describe('commands', function () {
         it('normal first play with url, nothing cached', async function() {
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(1);
-            expect(player.enqueue).toHaveBeenCalledTimes(1);
-            expect(player.play).toHaveBeenCalledTimes(1);
+            expect(playItem).toHaveBeenCalledTimes(1);
         });
 
         it('first play with url, nothing cached, playRes == 1', async function() {
             player.playRes = 1;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(1);
-            expect(player.enqueue).toHaveBeenCalledTimes(1);
-            expect(player.play).toHaveBeenCalledTimes(1);
+            expect(playItem).toHaveBeenCalledTimes(1);
         });
 
         it('first play with url, nothing cached, playRes == 2', async function() {
             player.playRes = 2;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(1);
-            expect(player.enqueue).toHaveBeenCalledTimes(1);
-            expect(player.play).toHaveBeenCalledTimes(1);
+            expect(playItem).toHaveBeenCalledTimes(1);
         });
 
         it('first play with url, nothing cached, pb none', async function() {
             mockHandleVideoRes = undefined;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(1);
-            expect(player.enqueue).toHaveBeenCalledTimes(1);
-            expect(player.play).toHaveBeenCalledTimes(1);
+            expect(playItem).toHaveBeenCalledTimes(1);
         });
 
         it('second play with url, nothing cached, pb none', async function() {
@@ -185,16 +190,14 @@ describe('commands', function () {
             mockHandleVideoRes = undefined;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(0);
-            expect(player.enqueue).toHaveBeenCalledTimes(0);
-            expect(player.play).toHaveBeenCalledTimes(0);
+            expect(playItem).toHaveBeenCalledTimes(1);
         });
 
         it('normal first play with url, cached', async function() {
             pbRes = pbItem;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(1);
-            expect(player.enqueue).toHaveBeenCalledTimes(1);
-            expect(player.play).toHaveBeenCalledTimes(1);
+            expect(playItem).toHaveBeenCalledTimes(1);
         });
 
         it('age-restricted first play with url, cached', async function() {
@@ -202,8 +205,7 @@ describe('commands', function () {
             pbItem.isAgeRestricted = true;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache, false);
             expect(player.connect).toHaveBeenCalledTimes(1);
-            expect(player.enqueue).toHaveBeenCalledTimes(0);
-            expect(player.play).toHaveBeenCalledTimes(0);
+            expect(playItem).toHaveBeenCalledTimes(1);
         });
 
         it('age-restricted second play with url, nothing cached', async function() {
@@ -211,16 +213,14 @@ describe('commands', function () {
             pbItem.isAgeRestricted = true;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache, false);
             expect(player.connect).toHaveBeenCalledTimes(0);
-            expect(player.enqueue).toHaveBeenCalledTimes(0);
-            expect(player.play).toHaveBeenCalledTimes(0);
+            expect(playItem).toHaveBeenCalledTimes(1);
         });
 
         it('normal second play with url, nothing cached', async function() {
             player.dispatcher.state.status = AudioPlayerStatus.Playing;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(0);
-            expect(player.enqueue).toHaveBeenCalledTimes(1);
-            expect(player.play).toHaveBeenCalledTimes(0);
+            expect(playItem).toHaveBeenCalledTimes(1);
         });
 
         it('normal second play with url, nothing cached, loop', async function() {
@@ -228,8 +228,7 @@ describe('commands', function () {
             player.loop = true;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(0);
-            expect(player.enqueue).toHaveBeenCalledTimes(1);
-            expect(player.play).toHaveBeenCalledTimes(0);
+            expect(playItem).toHaveBeenCalledTimes(1);
         });
 
         it('normal second play with url, cached', async function() {
@@ -237,8 +236,7 @@ describe('commands', function () {
             pbRes = pbItem;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(0);
-            expect(player.enqueue).toHaveBeenCalledTimes(1);
-            expect(player.play).toHaveBeenCalledTimes(0);
+            expect(playItem).toHaveBeenCalledTimes(1);
         });
 
         it('age-restricted second play with url, cached', async function() {
@@ -247,8 +245,7 @@ describe('commands', function () {
             pbItem.isAgeRestricted = true;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache, false);
             expect(player.connect).toHaveBeenCalledTimes(0);
-            expect(player.enqueue).toHaveBeenCalledTimes(0);
-            expect(player.play).toHaveBeenCalledTimes(0);
+            expect(playItem).toHaveBeenCalledTimes(1);
         });
 
 
@@ -256,8 +253,7 @@ describe('commands', function () {
             interaction.stringOption = searchString;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(1);
-            expect(player.enqueue).toHaveBeenCalledTimes(1);
-            expect(player.play).toHaveBeenCalledTimes(1);
+            expect(playItem).toHaveBeenCalledTimes(1);
         });
 
         it('normal first play with string, nothing cached, fastSearch fail', async function() {
@@ -265,8 +261,7 @@ describe('commands', function () {
             mockFastSearchRes = undefined;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(1);
-            expect(player.enqueue).toHaveBeenCalledTimes(0);
-            expect(player.play).toHaveBeenCalledTimes(0);
+            expect(playItem).toHaveBeenCalledTimes(0);
         });
 
         it('normal first play with string, nothing cached, fastSearch error', async function() {
@@ -274,16 +269,14 @@ describe('commands', function () {
             mockFastSearchError = true;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(1);
-            expect(player.enqueue).toHaveBeenCalledTimes(0);
-            expect(player.play).toHaveBeenCalledTimes(0);
+            expect(playItem).toHaveBeenCalledTimes(0);
         });
 
         it('playlist first play, nothing cached', async function() {
             interaction.stringOption = searchPlaylistURL;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(1);
-            expect(player.enqueue).toHaveBeenCalledTimes(1);
-            expect(player.play).toHaveBeenCalledTimes(1);
+            expect(playItem).toHaveBeenCalledTimes(1);
         });
 
         it('playlist first play, nothing cached, playlistItems error', async function() {
@@ -291,8 +284,7 @@ describe('commands', function () {
             mockPlaylistItemsError = true;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(1);
-            expect(player.enqueue).toHaveBeenCalledTimes(0);
-            expect(player.play).toHaveBeenCalledTimes(0);
+            expect(playItem).toHaveBeenCalledTimes(0);
             expect(handlePlaylist).toHaveBeenCalledTimes(0);
         });
 
@@ -309,8 +301,7 @@ describe('commands', function () {
             mockPlaylistInfoError = true;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(1);
-            expect(player.enqueue).toHaveBeenCalledTimes(1);
-            expect(player.play).toHaveBeenCalledTimes(1);
+            expect(playItem).toHaveBeenCalledTimes(1);
         });
 
         it('file first play', async function() {
@@ -318,24 +309,21 @@ describe('commands', function () {
             mockGetYTidRes = undefined;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(1);
-            expect(player.enqueue).toHaveBeenCalledTimes(1);
-            expect(player.play).toHaveBeenCalledTimes(1);
+            expect(playItem).toHaveBeenCalledTimes(1);
         });
 
         it('file first play, handleVideo error', async function() {
             mockHandleVideoError = true;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(1);
-            expect(player.enqueue).toHaveBeenCalledTimes(1);
-            expect(player.play).toHaveBeenCalledTimes(1);
+            expect(playItem).toHaveBeenCalledTimes(1);
         });
 
         it('not joinable', async function() {
             interaction.member.voice.channel.joinable = false;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(0);
-            expect(player.enqueue).toHaveBeenCalledTimes(0);
-            expect(player.play).toHaveBeenCalledTimes(0);
+            expect(playItem).toHaveBeenCalledTimes(0);
         });
     });
 });
