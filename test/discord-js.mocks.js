@@ -4,17 +4,19 @@ import moment from 'moment';
 
 const guildId = 1234;
 
-const np = {
+const pbItem = {
     duration: moment.duration('2:30'),
+    channelTitle: 'BestChannel',
     title: 'Test',
     url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
     thumbnailURL: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
     requesterIconURL: 'https://cdn.discordapp.com/avatars/180995420196044809/5a5056a3d287b0f30f5add9a48b6be41.webp',
     requesterId: '180995420196044809',
+    isAgeRestricted: false,
 };
 
 const queueObject = {
-    get: jest.fn(() => { return np; }),
+    get: jest.fn(() => { return pbItem; }),
 };
 
 const player = {
@@ -28,13 +30,20 @@ const player = {
             status: AudioPlayerStatus.Playing,
         },
     },
-    getNowPlaying: jest.fn(() => { return np; }),
+    enqueue: jest.fn(),
+    getNowPlaying: jest.fn(() => { return pbItem; }),
     getProgress: jest.fn(() => { return moment.duration(10); }),
     getQueueLength: jest.fn(() => { return 12; }),
     getQueue: jest.fn(() => { return queueObject; }),
     getTotalQueueTime: jest.fn(() => { return moment.duration('13:37'); }),
+    getTotalRemainingPlaybackTime: jest.fn(() => { return moment.duration(0); }),
     pauseRetVal: 0,
     pause: jest.fn(() => { return player.pauseRetVal; }),
+    playRes: undefined,
+    play: jest.fn(() => { return player.playRes; }),
+    queue: {
+        getLength: jest.fn(() => { return 4; }),
+    },
     remove: jest.fn(() => { return true; }),
     resumeRetVal: 0,
     resume: jest.fn(() => { return player.resumeRetVal; }),
@@ -73,18 +82,26 @@ const interaction = {
         getString: jest.fn(() => { return interaction.stringOption; }),
     },
     member: {
-        displayAvatarURL: jest.fn(),
+        displayAvatarURL: jest.fn(() => { return 'https://cdn.discordapp.com/avatars/180995420196044809/5a5056a3d287b0f30f5add9a48b6be41.webp'; }),
         voice: {
             channel: {
                 joinable: true,
             },
         },
     },
+    user: {
+        id: '180995420196044809',
+    },
+    channel: {
+        send: jest.fn(),
+    },
+    isRepliable: jest.fn(),
 };
 
 export {
     eventCollector,
     interaction,
+    pbItem,
     player,
     players,
 };

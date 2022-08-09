@@ -1,10 +1,9 @@
+import { interaction, pbItem, player, players } from '../discord-js.mocks.js';
+
 import { AudioPlayerStatus } from '@discordjs/voice';
-import moment from 'moment';
 
 import * as play from '../../src/commands/play.js';
 import { HTTPError } from '../../src/lib/errors.js';
-
-global.console.trace = jest.fn();
 
 jest.mock('winston', () => ({
     format: {
@@ -29,17 +28,7 @@ var mockHandleVideoError = false;
 const ytIdVal = 'E8gmARGvPlI';
 var mockGetYTidRes = ytIdVal;
 
-const pb = {
-    duration: moment.duration('2:30'),
-    channelTitle: 'Vevo',
-    title: 'Test',
-    url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    thumbnailURL: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
-    requesterIconURL: 'https://cdn.discordapp.com/avatars/180995420196044809/5a5056a3d287b0f30f5add9a48b6be41.webp',
-    requesterId: '180995420196044809',
-    isAgeRestricted: false,
-};
-var mockHandleVideoRes = pb;
+var mockHandleVideoRes = pbItem;
 
 // eslint-disable-next-line no-unused-vars
 import { errorReply, getYTid, handlePlaylist, handleVideo, prettifyTime } from '../../src/lib/util.js';
@@ -129,62 +118,12 @@ jest.mock('../../src/lib/youtubeAPI.js', () => {
 
 describe('commands', function () {
     describe('play', function () {
-        const guildId = 1234;
         const youtubeAPIKey = null;
         const searchVideoURL = 'https://www.youtube.com/watch?v=E8gmARGvPlI';
         const searchPlaylistURL = 'https://www.youtube.com/playlist?list=PLe8jmEHFkvsaAg_ghHeW8euGDwAKHfzJb';
         const searchFileURL = 'https://static.wikia.nocookie.net/smite_gamepedia/images/d/db/ClassyFenrir_Ability_2a.ogg';
         const searchString = 'last christmas';
-        var searchQuery = searchVideoURL;
-
-        const interaction = {
-            guild: {
-                id: guildId,
-            },
-            reply: jest.fn(),
-            editReply: jest.fn(),
-            options: {
-                getString: jest.fn(() => { return searchQuery; }),
-            },
-            member: {
-                displayAvatarURL: jest.fn(() => { return 'https://cdn.discordapp.com/avatars/180995420196044809/5a5056a3d287b0f30f5add9a48b6be41.webp'; }),
-                voice: {
-                    channel: {
-                        joinable: true,
-                    },
-                },
-            },
-            user: {
-                id: '',
-            },
-            channel: {
-                send: jest.fn(),
-            },
-            isRepliable: jest.fn(),
-        };
-
-        var playRes = undefined;
-        const player = {
-            conn: 'Legit Connection',
-            dispatcher: {
-                state: {
-                    status: AudioPlayerStatus.Playing,
-                },
-            },
-            connect: jest.fn(),
-            play: jest.fn(() => { return playRes; }),
-            enqueue: jest.fn(),
-            getTotalRemainingPlaybackTime: jest.fn(() => { return moment.duration(0); }),
-            queue: {
-                getLength: jest.fn(() => { return 4; }),
-            },
-            loop: false,
-        };
-
         var pbRes = undefined;
-
-        const players = { };
-        players[guildId] = player;
 
         const youtubeCache = {
             get: jest.fn(() => { return pbRes; }),
@@ -194,7 +133,6 @@ describe('commands', function () {
         beforeEach(() => {
             jest.clearAllMocks();
 
-            searchQuery = searchVideoURL;
             player.dispatcher.state.status = AudioPlayerStatus.Idle;
             player.loop = false;
             pbRes = undefined;
@@ -204,9 +142,11 @@ describe('commands', function () {
             mockHandleVideoError = false;
             mockPlaylistInfoError = false;
             mockGetYTidRes = ytIdVal;
-            mockHandleVideoRes = pb;
-            playRes = undefined;
-            pb.isAgeRestricted = false;
+            mockHandleVideoRes = pbItem;
+            player.playRes = undefined;
+            pbItem.isAgeRestricted = false;
+
+            interaction.stringOption = searchVideoURL;
         });
 
         it('normal first play with url, nothing cached', async function() {
@@ -217,7 +157,7 @@ describe('commands', function () {
         });
 
         it('first play with url, nothing cached, playRes == 1', async function() {
-            playRes = 1;
+            player.playRes = 1;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(1);
             expect(player.enqueue).toHaveBeenCalledTimes(1);
@@ -225,7 +165,7 @@ describe('commands', function () {
         });
 
         it('first play with url, nothing cached, playRes == 2', async function() {
-            playRes = 2;
+            player.playRes = 2;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(1);
             expect(player.enqueue).toHaveBeenCalledTimes(1);
@@ -250,7 +190,7 @@ describe('commands', function () {
         });
 
         it('normal first play with url, cached', async function() {
-            pbRes = pb;
+            pbRes = pbItem;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(1);
             expect(player.enqueue).toHaveBeenCalledTimes(1);
@@ -258,8 +198,8 @@ describe('commands', function () {
         });
 
         it('age-restricted first play with url, cached', async function() {
-            pbRes = pb;
-            pb.isAgeRestricted = true;
+            pbRes = pbItem;
+            pbItem.isAgeRestricted = true;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache, false);
             expect(player.connect).toHaveBeenCalledTimes(1);
             expect(player.enqueue).toHaveBeenCalledTimes(0);
@@ -268,7 +208,7 @@ describe('commands', function () {
 
         it('age-restricted second play with url, nothing cached', async function() {
             player.dispatcher.state.status = AudioPlayerStatus.Playing;
-            pb.isAgeRestricted = true;
+            pbItem.isAgeRestricted = true;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache, false);
             expect(player.connect).toHaveBeenCalledTimes(0);
             expect(player.enqueue).toHaveBeenCalledTimes(0);
@@ -294,7 +234,7 @@ describe('commands', function () {
 
         it('normal second play with url, cached', async function() {
             player.dispatcher.state.status = AudioPlayerStatus.Playing;
-            pbRes = pb;
+            pbRes = pbItem;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(0);
             expect(player.enqueue).toHaveBeenCalledTimes(1);
@@ -303,8 +243,8 @@ describe('commands', function () {
 
         it('age-restricted second play with url, cached', async function() {
             player.dispatcher.state.status = AudioPlayerStatus.Playing;
-            pbRes = pb;
-            pb.isAgeRestricted = true;
+            pbRes = pbItem;
+            pbItem.isAgeRestricted = true;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache, false);
             expect(player.connect).toHaveBeenCalledTimes(0);
             expect(player.enqueue).toHaveBeenCalledTimes(0);
@@ -313,7 +253,7 @@ describe('commands', function () {
 
 
         it('normal first play with string, nothing cached', async function() {
-            searchQuery = searchString;
+            interaction.stringOption = searchString;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(1);
             expect(player.enqueue).toHaveBeenCalledTimes(1);
@@ -321,7 +261,7 @@ describe('commands', function () {
         });
 
         it('normal first play with string, nothing cached, fastSearch fail', async function() {
-            searchQuery = searchString;
+            interaction.stringOption = searchString;
             mockFastSearchRes = undefined;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(1);
@@ -330,7 +270,7 @@ describe('commands', function () {
         });
 
         it('normal first play with string, nothing cached, fastSearch error', async function() {
-            searchQuery = searchString;
+            interaction.stringOption = searchString;
             mockFastSearchError = true;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(1);
@@ -339,7 +279,7 @@ describe('commands', function () {
         });
 
         it('playlist first play, nothing cached', async function() {
-            searchQuery = searchPlaylistURL;
+            interaction.stringOption = searchPlaylistURL;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(1);
             expect(player.enqueue).toHaveBeenCalledTimes(1);
@@ -347,25 +287,25 @@ describe('commands', function () {
         });
 
         it('playlist first play, nothing cached, playlistItems error', async function() {
-            searchQuery = searchPlaylistURL;
+            interaction.stringOption = searchPlaylistURL;
             mockPlaylistItemsError = true;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(1);
             expect(player.enqueue).toHaveBeenCalledTimes(0);
             expect(player.play).toHaveBeenCalledTimes(0);
+            expect(handlePlaylist).toHaveBeenCalledTimes(0);
         });
 
         it('playlist second play, nothing cached', async function() {
-            searchQuery = searchPlaylistURL;
+            interaction.stringOption = searchPlaylistURL;
             player.dispatcher.state.status = AudioPlayerStatus.Playing;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(0);
-            expect(player.enqueue).toHaveBeenCalledTimes(0);
-            expect(player.play).toHaveBeenCalledTimes(0);
+            expect(handlePlaylist).toHaveBeenCalledTimes(1);
         });
 
         it('playlist callback, playlistInfo error', async function() {
-            searchQuery = searchPlaylistURL;
+            interaction.stringOption = searchPlaylistURL;
             mockPlaylistInfoError = true;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(1);
@@ -374,7 +314,7 @@ describe('commands', function () {
         });
 
         it('file first play', async function() {
-            searchQuery = searchFileURL;
+            interaction.stringOption = searchFileURL;
             mockGetYTidRes = undefined;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(1);
