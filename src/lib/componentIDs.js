@@ -3,6 +3,11 @@ const buttons = {
     queueNext: 'queue_button_1',
 };
 
+const selectMenus = {
+    searchMenu: 'search_select_menu_0',
+};
+
 export {
     buttons,
+    selectMenus,
 };

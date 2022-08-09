@@ -4,7 +4,7 @@ import { AudioPlayerStatus } from '@discordjs/voice';
 
 import * as queue from '../../src/commands/queue.js';
 
-import { buttons } from '../../src/lib/buttonIDs.js';
+import { buttons } from '../../src/lib/componentIDs.js';
 import { prettifyTime } from '../../src/lib/util.js';
 jest.mock('../../src/lib/util.js');
 

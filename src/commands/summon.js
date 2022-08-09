@@ -15,7 +15,7 @@ async function execute(interaction, players) {
 
     let guildId = interaction.guild.id;
     let player = players[guildId];
-    await player.connect(interaction.member?.voice?.channel);
+    player.connect(interaction.member?.voice?.channel);
     interaction.editReply({ content: strings.joined + '`' + interaction.member?.voice?.channel?.name + '`' });
 }
 

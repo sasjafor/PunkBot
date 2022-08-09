@@ -2,7 +2,7 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'disc
 import { AudioPlayerStatus } from '@discordjs/voice';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
-import { buttons } from '../lib/buttonIDs.js';
+import { buttons } from '../lib/componentIDs.js';
 import { prettifyTime } from '../lib/util.js';
 import { strings } from '../lib/messageStrings.js';
 

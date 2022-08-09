@@ -132,18 +132,22 @@ class Player {
     }
 
     async dispatch() {
+        if (!this.stream) {
+            return 1;
+        }
+
         this.stream = await this.stream;
-        if (this.stream.errorCode) {
+        if (this.stream?.errorCode) {
             return this.stream.errorCode;
         }
 
-        if (this.stream.ended) {
+        if (this.stream?.ended) {
             this.stream = this.prepareStream(this.nowPlaying);
             this.stream = await this.stream;
         }
 
         // set volume before playing
-        this.stream.volume.setVolume(this.volume);
+        this.stream?.volume.setVolume(this.volume);
         this.oldStream?.playStream?.destroy();
         this.dispatcher.play(this.stream);
     }
@@ -332,7 +336,7 @@ class Player {
         }
     }
 
-    async connect(channel) {
+    connect(channel) {
         if (channel) {
             this.channel = channel;
             this.conn = joinVoiceChannel({
@@ -382,12 +386,12 @@ class Player {
         }
     }
 
-    async forceReconnect() {
+    forceReconnect() {
         this.conn.removeAllListeners();
         if (!this.conn.disconnect()) {
             this.conn.destroy();
         }
-        await this.connect(this.channel);
+        this.connect(this.channel);
         if (this.dispatcher) {
             this.subscription = this.conn.subscribe(this.dispatcher);
         }
