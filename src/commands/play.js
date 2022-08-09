@@ -13,7 +13,6 @@ import { errorReply,
 import { fastSearch,
          playlistInfo,
          playlistItems } from '../lib/youtubeAPI.js';
-
 import { logger } from './../lib/log.js';
 import { strings } from '../lib/messageStrings.js';
 

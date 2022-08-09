@@ -1,9 +1,9 @@
 import { AudioPlayerStatus } from '@discordjs/voice';
 import decode from 'unescape';
 import { EmbedBuilder } from 'discord.js';
-import { logger } from './log.js';
-import { errorReply, prettifyTime } from './util.js';
 
+import { errorReply, prettifyTime } from './util.js';
+import { logger } from './log.js';
 
 async function playItem(interaction, player, pb, youtubeCache, hasYoutubeCookies, searchQuery, playlist) {
     let playResult = null;
