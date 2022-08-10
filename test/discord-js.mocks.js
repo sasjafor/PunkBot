@@ -65,6 +65,8 @@ const message = {
     createMessageComponentCollector: jest.fn(() => {
         return eventCollector;
     }),
+    edit: jest.fn(),
+    delete: jest.fn(),
 };
 
 const discordAPIError = Object.create(DiscordAPIError.prototype);
