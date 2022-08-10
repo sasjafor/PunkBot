@@ -2,7 +2,6 @@ import { AudioPlayerStatus } from '@discordjs/voice';
 import { DiscordAPIError } from 'discord.js';
 import { EventEmitter } from 'events';
 import moment from 'moment';
-import { LimitedDict } from '../src/lib/limitedDict';
 
 const guildId = 1234;
 
@@ -124,7 +123,7 @@ const interaction = {
     replied: false,
 };
 
-const youtubeCache = new LimitedDict(10);
+const youtubeCache = [];
 
 export {
     eventCollector,

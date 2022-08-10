@@ -7,13 +7,13 @@ import { logger } from './log.js';
 
 async function playItem(interaction, player, pb, youtubeCache, hasYoutubeCookies, searchQuery, playlist) {
     let playResult = null;
-    let queued = false;
+    let queued = 0;
     if (player?.dispatcher?.state?.status !== AudioPlayerStatus.Playing) {
         player.enqueue(pb);
         logger.debug('Added ' + pb.url);
         playResult = player.play();
     } else {
-        queued = true;
+        queued = 1;
         if (pb.isAgeRestricted && !hasYoutubeCookies) {
             playResult = 2;
         } else {
@@ -29,10 +29,10 @@ async function playItem(interaction, player, pb, youtubeCache, hasYoutubeCookies
     switch (playResult) {
         case 1:
             errorReply(interaction, decode(pb.title), 'Failed to create stream for your request, try again!', pb.url);
-            return;
+            return -1;
         case 2:
             errorReply(interaction, decode(pb.title), 'Can\'t play age restricted video', pb.url);
-            return;
+            return -1;
     }
 
     return queued;

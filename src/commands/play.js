@@ -107,6 +107,9 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYou
     }
 
     let queued = await playItem(interaction, player, pb, youtubeCache, hasYoutubeCookies, searchQuery, playlist);
+    if (queued === -1) {
+        return;
+    }
     let embed = await createPlayEmbed(pb, interaction.member?.displayAvatarURL(), queued, player);
 
     await interaction.editReply({ content: null, embeds: [embed] });

@@ -49,12 +49,16 @@ jest.mock('../../src/lib/util.js', () => {
     };
 });
 
+var mockPlayItemRes = 0;
+
 // eslint-disable-next-line no-unused-vars
 import { createPlayEmbed, playItem } from '../../src/lib/playbackHelpers.js';
 jest.mock('../../src/lib/playbackHelpers.js', () => {
     return {
         createPlayEmbed: jest.fn(),
-        playItem: jest.fn(),
+        playItem: jest.fn(() => {
+            return mockPlayItemRes;
+        }),
     };
 });
 
@@ -152,6 +156,7 @@ describe('commands', function () {
             mockPlaylistInfoError = false;
             mockGetYTidRes = ytIdVal;
             mockHandleVideoRes = pbItem;
+            mockPlayItemRes = 0;
             player.playRes = undefined;
             pbItem.isAgeRestricted = false;
 
@@ -165,6 +170,12 @@ describe('commands', function () {
             expect(playItem).toHaveBeenCalledTimes(1);
         });
 
+        it('playItem fail, first play with url, nothing cached', async function() {
+            mockPlayItemRes = -1;
+            await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
+            expect(player.connect).toHaveBeenCalledTimes(1);
+            expect(playItem).toHaveBeenCalledTimes(1);
+        });
 
         it('first play with url, nothing cached, playRes == 1', async function() {
             player.playRes = 1;
