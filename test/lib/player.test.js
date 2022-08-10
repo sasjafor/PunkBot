@@ -51,6 +51,7 @@ import {
     _NoSubscriberBehavior,
     _StreamType,
     AudioPlayerStatus,
+    VoiceConnectionStatus,
 } from '@discordjs/voice';
 jest.mock('@discordjs/voice', () => {
     return {
@@ -60,6 +61,10 @@ jest.mock('@discordjs/voice', () => {
             Paused: 'paused',
             Playing: 'playing',
             AutoPaused: 'autopaused',
+        },
+        VoiceConnectionStatus: {
+            Ready: 'ready',
+            Connecting: 'connecting',
         },
         AudioPlayer: jest.fn(),
         joinVoiceChannel: jest.fn(() => {
@@ -349,6 +354,12 @@ describe('lib', function () {
                 let res = await playerObj.dispatch();
                 expect(res).toBeUndefined();
             });
+
+            it('no stream', async function () {
+                playerObj.stream = null;
+                let res = await playerObj.dispatch();
+                expect(res).toBe(1);
+            });
         });
 
         describe('setVolume', function () {
@@ -628,6 +639,15 @@ describe('lib', function () {
 
                 let res = playerObj.connect(channel);
                 mockConn.emit('error');
+                await res;
+                expect(mockConn.subscribe).toBeCalled();
+            });
+
+            it('conn stateChange', async function () {
+                playerObj.dispatcher.state.status = AudioPlayerStatus.AutoPaused;
+
+                let res = playerObj.connect(channel);
+                mockConn.emit('stateChange', {status:VoiceConnectionStatus.Ready}, {status:VoiceConnectionStatus.Connecting});
                 await res;
                 expect(mockConn.subscribe).toBeCalled();
             });
