@@ -1,6 +1,8 @@
 import { AudioPlayerStatus } from '@discordjs/voice';
+import { DiscordAPIError } from 'discord.js';
 import { EventEmitter } from 'events';
 import moment from 'moment';
+import { LimitedDict } from '../src/lib/limitedDict';
 
 const guildId = 1234;
 
@@ -13,6 +15,7 @@ const pbItem = {
     requesterIconURL: 'https://cdn.discordapp.com/avatars/180995420196044809/5a5056a3d287b0f30f5add9a48b6be41.webp',
     requesterId: '180995420196044809',
     isAgeRestricted: false,
+    isYT: true,
 };
 
 const queueObject = {
@@ -65,13 +68,33 @@ const message = {
     }),
 };
 
+const discordAPIError = Object.create(DiscordAPIError.prototype);
+discordAPIError.message = 'Interaction has already been acknowledged.';
+
 const interaction = {
     guild: {
         id: guildId,
     },
-    reply: jest.fn(),
+    replyErr: 0,
+    reply: jest.fn(() => {
+        if (interaction.replyErr === 1) {
+            throw new Error();
+        } else if(interaction.replyErr === 2) {
+            interaction.replyErr = 0;
+            throw discordAPIError;
+        } else {
+            return message;
+        }
+    }),
     editReply: jest.fn(() => {
-        return message;
+        if (interaction.replyErr === 1) {
+            throw new Error();
+        } else if(interaction.replyErr === 2) {
+            interaction.replyErr = 0;
+            throw discordAPIError;
+        } else {
+            return message;
+        }
     }),
     integerOption: 2,
     stringOption: '1:25',
@@ -95,8 +118,13 @@ const interaction = {
     channel: {
         send: jest.fn(),
     },
-    isRepliable: jest.fn(),
+    isRepliable: jest.fn(() => {
+        return true;
+    }),
+    replied: false,
 };
+
+const youtubeCache = new LimitedDict(10);
 
 export {
     eventCollector,
@@ -104,4 +132,5 @@ export {
     pbItem,
     player,
     players,
+    youtubeCache,
 };

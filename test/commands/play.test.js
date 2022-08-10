@@ -156,6 +156,7 @@ describe('commands', function () {
             pbItem.isAgeRestricted = false;
 
             interaction.stringOption = searchVideoURL;
+            interaction.replied = false;
         });
 
         it('normal first play with url, nothing cached', async function() {
@@ -163,6 +164,7 @@ describe('commands', function () {
             expect(player.connect).toHaveBeenCalledTimes(1);
             expect(playItem).toHaveBeenCalledTimes(1);
         });
+
 
         it('first play with url, nothing cached, playRes == 1', async function() {
             player.playRes = 1;
@@ -290,6 +292,7 @@ describe('commands', function () {
 
         it('playlist second play, nothing cached', async function() {
             interaction.stringOption = searchPlaylistURL;
+            interaction.replied = true;
             player.dispatcher.state.status = AudioPlayerStatus.Playing;
             await play.execute(interaction, players, youtubeAPIKey, youtubeCache);
             expect(player.connect).toHaveBeenCalledTimes(0);

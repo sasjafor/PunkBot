@@ -1,6 +1,6 @@
-import moment from 'moment';
+import { interaction } from '../discord-js.mocks.js';
 
-import { DiscordAPIError } from 'discord.js';
+import moment from 'moment';
 
 import * as util from '../../src/lib/util.js';
 
@@ -108,30 +108,11 @@ describe('lib', function () {
             const url = 'https://www.youtube.com/watch?v=E8gmARGvPlI';
             const avatarURL = 'https://media.wired.com/photos/5a15e608801bd64d76805764/4:3/w_408,h_306,c_limit/rickastley.jpg';
 
-            const discordAPIError = Object.create(DiscordAPIError.prototype);
-            discordAPIError.message = 'Interaction has already been acknowledged.';
-
-            const interaction = {
-                member: {
-                    displayAvatarURL: jest.fn(() => { return 'https://cdn.discordapp.com/avatars/180995420196044809/5a5056a3d287b0f30f5add9a48b6be41.webp'; }),
-                },
-                replied: false,
-                reply: jest.fn(() => {
-                    if (replyErr === 1) {
-                        throw new Error();
-                    } else if(replyErr === 2) {
-                        throw discordAPIError;
-                    }
-                }),
-                editReply: jest.fn(),
-            };
-
             const channel = {
                 send: jest.fn(),
             };
 
             var msgContentVal = msgContent;
-            var replyErr = 0;
             var interactionVal = interaction;
 
             beforeEach(() => {
@@ -139,7 +120,7 @@ describe('lib', function () {
 
                 interaction.replied = false;
                 msgContentVal = msgContent;
-                replyErr = 0;
+                interaction.replyErr = 0;
                 interactionVal = interaction;
             });
 
@@ -155,15 +136,15 @@ describe('lib', function () {
             });
 
             it('reply normal error', async function() {
-                replyErr = 1;
+                interaction.replyErr = 1;
                 await util.errorReply(interactionVal, msgContentVal, errorMessage, url);
                 expect(interaction.editReply).toBeCalledTimes(1);
             });
 
             it('reply api error', async function() {
-                replyErr = 2;
+                interaction.replyErr = 2;
                 await util.errorReply(interactionVal, msgContentVal, errorMessage, url);
-                expect(interaction.editReply).toBeCalledTimes(1);
+                expect(interaction.editReply).toBeCalledTimes(2);
             });
 
             it('msgContent == null', async function() {
