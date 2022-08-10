@@ -50,7 +50,18 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYou
         maxResults: searchCount || 5,
     };
 
-    let res = await search(searchQuery, videoOpts, null);
+    let res;
+    try {
+        res = await search(searchQuery, videoOpts, null);
+        if (!res) {
+            errorReply(interaction, strings.noMatches);
+            return;
+        }
+    } catch (error) {
+        logger.error(error);
+        errorReply(interaction, searchQuery, error.response?.message);
+        return;
+    }
     let results = res?.results;
 
     if (results) {
