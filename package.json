@@ -29,7 +29,7 @@
     "@sapphire/shapeshift": "~3.5.1",
     "axios": "^0.27.2",
     "bufferutil": "^4.0.6",
-    "discord-api-types": "^0.37.1",
+    "discord-api-types": "^0.37.2",
     "discord.js": "^14.1.2",
     "erlpack": "^0.1.4",
     "execa": "^6.1.0",
