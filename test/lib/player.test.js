@@ -548,6 +548,7 @@ describe('lib', function () {
 
             it('not playing', async function () {
                 playerObj.dispatcher.state.status = AudioPlayerStatus.Idle;
+                playerObj.nowPlaying = null;
 
                 let res = await playerObj.seek(seekTime);
                 expect(res).toBe(2);
