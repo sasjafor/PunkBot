@@ -303,7 +303,7 @@ class Player {
     }
 
     async seek(time) {
-        if (this.dispatcher.state.status === AudioPlayerStatus.Playing) {
+        if (this.nowPlaying?.url) {
             if (time > this.nowPlaying.duration.asSeconds()) {
                 return 3;
             }

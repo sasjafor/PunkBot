@@ -51,11 +51,11 @@ async function execute(interaction, players) {
             var prettyTime = prettifyTime(duration);
             interaction.editReply({ content: strings.seeked + '`' + prettyTime + '`' });
             break;
-        case 3:
-            interaction.editReply({ content: strings.seekTooLong, ephemeral: true });
-            break;
         case 2:
             interaction.editReply({ content: strings.nothingPlaying, ephemeral: true });
+            break;
+        case 3:
+            interaction.editReply({ content: strings.seekTooLong, ephemeral: true });
             break;
     }
 }
