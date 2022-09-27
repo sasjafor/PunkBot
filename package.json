@@ -24,15 +24,15 @@
   },
   "dependencies": {
     "@discordjs/opus": "^0.8.0",
-    "@discordjs/rest": "^1.1.0",
+    "@discordjs/rest": "^1.2.0",
     "@discordjs/voice": "^0.11.0",
     "axios": "^0.27.2",
     "bufferutil": "^4.0.6",
-    "discord-api-types": "^0.37.8",
-    "discord.js": "^14.3.0",
+    "discord-api-types": "^0.37.11",
+    "discord.js": "^14.5.0",
     "erlpack": "^0.1.4",
     "execa": "^6.1.0",
-    "got": "^12.4.1",
+    "got": "^12.5.1",
     "moment": "^2.29.4",
     "play-dl": "^1.9.5",
     "prism-media": "^1.3.4",
@@ -43,12 +43,12 @@
     "zlib-sync": "^0.1.7"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.19.0",
-    "@types/jest": "^29.0.0",
-    "babel-jest": "^29.0.2",
-    "eslint": "^8.23.0",
+    "@babel/preset-env": "^7.19.1",
+    "@types/jest": "^29.0.3",
+    "babel-jest": "^29.0.3",
+    "eslint": "^8.24.0",
     "husky": "^8.0.1",
-    "jest": "^29.0.2"
+    "jest": "^29.0.3"
   },
   "scripts": {
     "lint:all": "npx eslint .",
