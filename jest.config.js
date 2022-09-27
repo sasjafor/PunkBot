@@ -1,6 +1,7 @@
 export default {
     'collectCoverageFrom': [
         'src/**/*.js',
+        '!src/bot.js',
     ],
     'coverageProvider': 'v8',
     'transform': {
