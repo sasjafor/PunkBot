@@ -315,7 +315,7 @@ describe('lib', function () {
 
                 playerObj.queue.dequeue();
                 let res = playerObj.enqueue(np);
-                expect(res).toBeFalsy();
+                expect(res).toBe(1);
             });
         });
 
@@ -711,6 +711,7 @@ describe('lib', function () {
 
         describe('getProgress', function () {
             it('normal', function () {
+                playerObj.dispatcher.state.status = AudioPlayerStatus.Playing;
                 let progress = playerObj.getProgress();
                 expect(progress.toString()).toEqual('PT0.12S');
             });

@@ -6,8 +6,6 @@ import { EmbedBuilder } from 'discord.js';
 
 describe('lib', function () {
     describe('playbackHelpers', function () {
-
-
         beforeEach(() => {
             jest.clearAllMocks();
 
@@ -23,7 +21,7 @@ describe('lib', function () {
             it('normal', async function() {
                 player.dispatcher.state.status = AudioPlayerStatus.Paused;
                 let res = await playbackHelpers.playItem(interaction, player, pbItem, youtubeCache, false, searchQuery, false);
-                expect(res).toBeFalsy();
+                expect(res).toBe(0);
             });
 
             it('already playing', async function() {
