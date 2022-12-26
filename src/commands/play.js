@@ -67,7 +67,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYou
         if (searchQuery.startsWith('http')) {
             url = searchQuery;
 
-            let playlistIdRegex = /(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:playlist|e(?:mbed)?\/videoseries)\/|\S*?\?list=)|youtu\.be\/)([a-zA-Z0-9_-]{34})/;
+            let playlistIdRegex = /(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:playlist|e(?:mbed)?\/videoseries)\/|\S*?[\?\&]list=)|youtu\.be\/)([a-zA-Z0-9_-]{18,34})/;
             if (playlistIdRegex.test(url)) {
                 playlist = true;
                 let playlistId = url.match(playlistIdRegex)[1];
