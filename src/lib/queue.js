@@ -39,7 +39,7 @@ class Queue {
      * @param {any} item
      */
     enqueue(item) {
-        this.queue.push(item);
+        return this.queue.push(item);
     }
 
     /* Dequeues an item and returns it. If the queue is empty, the value
@@ -62,6 +62,10 @@ class Queue {
 
         // return the dequeued item
         return item;
+    }
+
+    addFirst(item) {
+        this.queue.unshift(item);
     }
 
     /* Returns the item at the front of the queue (without dequeuing it). If the

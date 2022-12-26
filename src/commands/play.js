@@ -25,7 +25,10 @@ const data = new SlashCommandBuilder()
             .setRequired(true))
     .addBooleanOption(option =>
         option.setName('silent')
-            .setDescription('Execute command silently'))
+            .setDescription('Execute command silently.'))
+    .addBooleanOption(option =>
+        option.setName('next')
+            .setDescription('Play next, in front of queue.'))
     .setDMPermission(false);
 
 async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYoutubeCookies = false) {
@@ -33,6 +36,11 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYou
     if (!interaction.member?.voice?.channel?.joinable) {
         errorReply(interaction, strings.noPermissionToConnect + interaction.member?.voice?.channel?.name);
         return;
+    }
+
+    let doPlayNext = interaction.options.getBoolean('next');
+    if (doPlayNext === null) {
+        doPlayNext = false;
     }
 
     let guildId = interaction.guild.id;
@@ -109,7 +117,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYou
             });
     }
 
-    let queued = await playItem(interaction, player, pb, youtubeCache, hasYoutubeCookies, searchQuery, playlist);
+    let queued = await playItem(interaction, player, pb, youtubeCache, hasYoutubeCookies, searchQuery, playlist, doPlayNext);
     if (queued === -1) {
         return;
     }

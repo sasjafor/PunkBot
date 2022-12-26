@@ -5,19 +5,18 @@ import { EmbedBuilder } from 'discord.js';
 import { errorReply, prettifyTime } from './util.js';
 import { logger } from './log.js';
 
-async function playItem(interaction, player, pb, youtubeCache, hasYoutubeCookies, searchQuery, playlist) {
+async function playItem(interaction, player, pb, youtubeCache, hasYoutubeCookies, searchQuery, playlist, doPlayNext) {
     let playResult = null;
     let queued = 0;
     if (player?.dispatcher?.state?.status !== AudioPlayerStatus.Playing) {
-        player.enqueue(pb);
+        player.enqueue(pb, doPlayNext);
         logger.debug('Added ' + pb.url);
         playResult = player.play();
     } else {
-        queued = 1;
         if (pb.isAgeRestricted && !hasYoutubeCookies) {
             playResult = 2;
         } else {
-            player.enqueue(pb);
+            queued = player.enqueue(pb, doPlayNext);
         }
     }
 
@@ -52,16 +51,16 @@ async function createPlayEmbed(pb, iconURL, queued, player) {
 
     embed.addFields([{ name: 'Song Duration', value: prettyDuration }]);
 
-    if (queued) {
-        let timeUntilPlaying = await player.getTotalRemainingPlaybackTime();
-        timeUntilPlaying.subtract(pb.duration);
+    if (queued > 0) {
+        let timeUntilPlaying = await player.getTimeUntil(queued - 1);
+        // timeUntilPlaying.subtract(pb.duration);
         let prettyTut = prettifyTime(timeUntilPlaying);
         if (player.loop) {
             prettyTut = '∞';
         }
         embed.setAuthor({ name: 'Added to queue', iconURL: iconURL, url: 'https://github.com/sasjafor/PunkBot' })
             .addFields([{ name: 'Estimated time until playing', value: prettyTut },
-                        { name: 'Position in queue', value: String(player.queue.getLength()) }]);
+                        { name: 'Position in queue', value: String(queued) }]);
     }
 
     return embed;

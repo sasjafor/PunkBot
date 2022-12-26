@@ -116,11 +116,16 @@ class Player {
         }
     }
 
-    enqueue(item) {
+    enqueue(item, doPlayNext = false) {
         if (this.queue.isEmpty()) {
             item.stream = this.prepareStream(item);
         }
-        this.queue.enqueue(item);
+        if (doPlayNext) {
+            this.queue.addFirst(item);
+            return 1;
+        } else {
+            return this.queue.enqueue(item);
+        }
     }
 
     dequeue() {
@@ -447,6 +452,19 @@ class Player {
         for (let i of this.queue.queue) {
             i = await i;
             duration.add(i.duration);
+        }
+        return duration;
+    }
+
+    async getTimeUntil(index) {
+        let duration = moment.duration(0);
+        for (let k = 0; k < this.queue.getLength() && k < index; k++) {
+            let el = await this.queue.queue[k];
+            duration.add(el.duration);
+        }
+        if (this.nowPlaying && this.dispatcher) {
+            duration.add(this.nowPlaying.duration)
+                .subtract(this.currentPlaybackProgress(), 'ms');
         }
         return duration;
     }
