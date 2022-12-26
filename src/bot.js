@@ -93,8 +93,13 @@ client.on('interactionCreate', async interaction => {
         player = players[guildId] = new Player();
     }
 
+    let isSilent = interaction.options?.getBoolean('silent');
+    if (isSilent === null) {
+        isSilent = false;
+    }
+
     try {
-        await interaction.deferReply();
+        await interaction.deferReply({ ephemeral: isSilent });
         await command.execute(interaction, players, youtubeAPIKey, youtubeCache, hasYoutubeCookies);
     } catch (error) {
         logger.error(error);

@@ -23,6 +23,9 @@ const data = new SlashCommandBuilder()
         option.setName('query')
             .setDescription('YouTube link or search term.')
             .setRequired(true))
+    .addBooleanOption(option =>
+        option.setName('silent')
+            .setDescription('Execute command silently'))
     .setDMPermission(false);
 
 async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYoutubeCookies = false) {
