@@ -456,7 +456,7 @@ class Player {
     }
 
     getProgress() {
-        if (this.dispatcher) {
+        if (this.dispatcher && this.dispatcher.state.status !== AudioPlayerStatus.Idle) {
             return moment.duration(this.currentPlaybackProgress());
         } else {
             return false;
