@@ -154,6 +154,7 @@ class Player {
         // set volume before playing
         this.stream?.volume.setVolume(this.volume);
         this.oldStream?.playStream?.destroy();
+        this.lastSeekTime = 1000 * this.nowPlaying.seekTime;
         this.dispatcher.play(this.stream);
     }
 
@@ -207,11 +208,12 @@ class Player {
 
     async prepareStream(next) {
         let url = next.url;
+        let seektime = next.seekTime;
 
         if (!url) {
             return;
         }
-        let stream = await this.createStream(url);
+        let stream = await this.createStream(url, seektime);
 
         return stream;
     }
@@ -288,7 +290,7 @@ class Player {
         } else {
             logger.error('Encountered error with stream');
             setTimeout(function () { }, 1000);
-            return await this.createStream(url);
+            return await this.createStream(url, seektime);
         }
     }
 

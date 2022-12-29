@@ -7,6 +7,7 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { createPlayEmbed, playItem } from '../lib/playbackHelpers.js';
 import { errorReply,
          getAudioDurationInSeconds,
+         getSeekTime,
          getYTid,
          handlePlaylist,
          handleVideo } from '../lib/util.js';
@@ -63,6 +64,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYou
         let url = null;
         let title = null;
         let duration = null;
+        let seekTime = 0;
 
         if (searchQuery.startsWith('http')) {
             url = searchQuery;
@@ -89,6 +91,8 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYou
                     }
 
                     duration = moment.duration(await getAudioDurationInSeconds(url), 'seconds');
+                } else {
+                    seekTime = getSeekTime(url);
                 }
             }
         } else {
@@ -109,7 +113,7 @@ async function execute(interaction, players, youtubeAPIKey, youtubeCache, hasYou
             }
         }
 
-        pb = await handleVideo(id, interaction.member, url, title, youtubeAPIKey, duration)
+        pb = await handleVideo(id, interaction.member, url, title, youtubeAPIKey, duration, seekTime)
             .catch(async (error) => {
                 logger.error(error);
                 errorReply(interaction, searchQuery, error.response?.data?.error?.message, url);

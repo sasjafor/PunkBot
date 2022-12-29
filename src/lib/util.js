@@ -92,7 +92,18 @@ function getYTid(url) {
     }
 }
 
-async function handleVideo(id, requester, url, title, youtubeAPIKey, duration) {
+function getSeekTime(url) {
+    let seekTimeRegex = /(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?)|youtu\.be\/|youtube\.com\/shorts\/)(?:[a-zA-Z0-9_-]{11}[?&]t=)([0-9]+)/;
+    let match = url.match(seekTimeRegex);
+
+    if (match && match.length > 1) {
+        return match[1];
+    } else {
+        return 0;
+    }
+}
+
+async function handleVideo(id, requester, url, title, youtubeAPIKey, duration, seekTime = 0) {
     if (id) {
         let videoOpts = {
             key: youtubeAPIKey,
@@ -113,14 +124,14 @@ async function handleVideo(id, requester, url, title, youtubeAPIKey, duration) {
             let ytChannelTitle = res.channelTitle;
             let isAgeRestricted = res.contentRating?.ytRating === 'ytAgeRestricted';
 
-            let pb = new PlaybackItem(ytUrl, requester.displayName, requester.user.id, requester.displayAvatarURL(), ytTitle, ytThumbnailURL, ytDuration, ytChannelTitle, isAgeRestricted);
+            let pb = new PlaybackItem(ytUrl, requester.displayName, requester.user.id, requester.displayAvatarURL(), ytTitle, ytThumbnailURL, ytDuration, ytChannelTitle, isAgeRestricted, seekTime);
             pb.isYT = true;
             return pb;
         } else {
             throw new Error('Failed to get video info');
         }
     } else {
-        let pb = new PlaybackItem(url, requester.displayName, requester.user.id, requester.displayAvatarURL(), title, null, duration, null);
+        let pb = new PlaybackItem(url, requester.displayName, requester.user.id, requester.displayAvatarURL(), title, null, duration, null, false, seekTime);
         pb.isYT = false;
         return pb;
     }
@@ -202,6 +213,7 @@ export {
     buildProgressBar,
     errorReply,
     getAudioDurationInSeconds,
+    getSeekTime,
     getYTid,
     handlePlaylist,
     handleVideo,
