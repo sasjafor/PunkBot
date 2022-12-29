@@ -37,6 +37,7 @@ jest.mock('../../src/lib/util.js', () => {
         errorReply: jest.fn(),
         getAudioDurationInSeconds: jest.fn(),
         getYTid: jest.fn(() => { return mockGetYTidRes; }),
+        getSeekTime: jest.fn(),
         handlePlaylist: jest.fn((_player, _playlistId, _member, _skip, cb) => { cb(); }),
         handleVideo: jest.fn(async () => {
             if (mockHandleVideoError) {
