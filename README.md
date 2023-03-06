@@ -1,7 +1,7 @@
 # Punk Bot
 [![npm link](https://nodei.co/npm/punk-bot.png?downloads=true&downloadRank=true)](https://www.npmjs.com/package/punk-bot)
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/sasjafor/PunkBot/docker-image-ci.yml?branch=main?style=flat-square)](https://github.com/sasjafor/PunkBot/actions/workflows/docker-image-ci.yml)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/sasjafor/PunkBot/docker-image-ci.yml?branch=master&style=flat-square)](https://github.com/sasjafor/PunkBot/actions/workflows/docker-image-ci.yml)
 [![Total Downloads](https://img.shields.io/npm/dt/punk-bot.svg?style=flat-square)](https://www.npmjs.com/package/punk-bot)
 [![Latest Stable Version](https://img.shields.io/npm/v/punk-bot.svg?style=flat-square)](https://www.npmjs.com/package/punk-bot)
 [![codecov](https://img.shields.io/codecov/c/github/sasjafor/PunkBot?style=flat-square)](https://codecov.io/gh/sasjafor/PunkBot)
