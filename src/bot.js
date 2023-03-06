@@ -1,12 +1,14 @@
 import fs from 'fs';
 
-import { Client,
-         Collection,
-         GatewayIntentBits,
-         GuildMember,
-         InteractionType,
-         PermissionFlagsBits,
-         TextChannel } from 'discord.js';
+import {
+    Client,
+    Collection,
+    GatewayIntentBits,
+    GuildMember,
+    InteractionType,
+    PermissionFlagsBits,
+    TextChannel
+} from 'discord.js';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 import { URL } from 'url';
@@ -19,7 +21,7 @@ import { strings } from './lib/messageStrings.js';
 
 const token = process.env.DISCORD_APP_AUTH_TOKEN;
 const youtubeAPIKey = process.env.YOUTUBE_API_KEY;
-const client = new Client({ intents: [GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessages, GatewayIntentBits.Guilds] });
+const client = new Client({ intents: [GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessages, GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent] });
 const hasYoutubeCookies = fs.existsSync('./.data/youtube.data');
 
 const players = {};
@@ -45,7 +47,7 @@ importCommands();
 async function login() {
     try {
         await client.login(token);
-    } catch(error) {
+    } catch (error) {
         logger.error(error);
     }
 }
@@ -54,16 +56,7 @@ login();
 client.on('ready', async () => {
     logger.info('Connected as ' + client.user.username);
 
-    // Push command to Discord application
-    const rest = new REST({ version: '9' }).setToken(token);
-
-    // await rest.put(Routes.applicationGuildCommands(client.user.id, '374283832901500928'), { body: commandJSONs })
-    //     .then(() => logger.info('Successfully registered application commands.'))
-    //     .catch(logger.error);
-
-    await rest.put(Routes.applicationCommands(client.user.id), { body: commandJSONs })
-        .then(() => logger.info('Successfully registered application commands.'))
-        .catch(logger.error);
+    await registerCommands();
 });
 
 client.on('interactionCreate', async interaction => {
@@ -111,13 +104,18 @@ client.on('messageCreate', async message => {
     if (!message.guild || message.author.bot) {
         return;
     }
-
+    
     if (message.content[0] === '!') {
         if (!(message.channel instanceof TextChannel) || !message.channel.permissionsFor(message.guild.members.me).has(PermissionFlagsBits.SendMessages)) {
             return;
         }
 
-        message.channel.send({ content: strings.switchToSlashCommands });
+        if (message.content === '!register') {
+            await registerCommands();
+            message.channel.send({ content: strings.successfullyRegisteredCommands });
+        } else {
+            message.channel.send({ content: strings.switchToSlashCommands });
+        }
     }
 });
 
@@ -128,3 +126,19 @@ client.on('error', error => {
 client.on('warn', warning => {
     logger.warn(warning);
 });
+
+async function registerCommands() {
+    // Push command to Discord application
+    const rest = new REST({ version: '9' }).setToken(token);
+
+    // register guild specific commands
+    // const guild_id = '374283832901500928';
+    // await rest.put(Routes.applicationGuildCommands(client.user.id, guild_id), { body: commandJSONs })
+    //     .then(() => logger.info(strings.successfullyRegisteredCommands))
+    //     .catch(logger.error);
+
+    // register global commands
+    await rest.put(Routes.applicationCommands(client.user.id), { body: commandJSONs })
+        .then(() => logger.info(strings.successfullyRegisteredCommands))
+        .catch(logger.error);
+}

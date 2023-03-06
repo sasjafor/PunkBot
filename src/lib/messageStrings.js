@@ -19,6 +19,7 @@ const strings = {
     seekTooLong: ':x: **Time cannot be longer than the song**',
     invalidCommand: '**This command is invalid! Please use a valid one.**',
     switchToSlashCommands: ':x: **Please use the new slash (/) commands**',
+    successfullyRegisteredCommands: 'Successfully registered application commands.',
     removed: ':white_check_mark: **Removed** ',
     outOfRange: ':x: **Out of range**',
     shuffled: '**Shuffled queue** :ok_hand:',
