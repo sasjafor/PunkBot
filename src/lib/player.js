@@ -362,6 +362,7 @@ class Player {
             this.conn.on('stateChange', (oldState, newState) => {
                 // this shouldn't happen if the connection is stable
                 if (oldState.status === VoiceConnectionStatus.Ready && newState.status === VoiceConnectionStatus.Connecting) {
+                    logger.debug('Force Reconnect!!')
                     this.forceReconnect();
                 }
             });
