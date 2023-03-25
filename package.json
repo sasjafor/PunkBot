@@ -1,6 +1,6 @@
 {
   "name": "punk-bot",
-  "version": "0.5.6",
+  "version": "0.5.7",
   "description": "A discord music bot without limitations.",
   "author": "Sascha Forster <sascha.forster@hotmail.ch>",
   "type": "module",
