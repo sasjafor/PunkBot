@@ -1,4 +1,4 @@
-FROM node:17-alpine AS BUILD_IMAGE
+FROM node:18-alpine AS BUILD_IMAGE
 
 WORKDIR /usr/src/app
 
@@ -20,7 +20,7 @@ COPY package-lock.json /usr/src/app/
 RUN npm pkg set scripts.prepare=" " && \
     npm ci --omit=dev
 
-FROM node:17-alpine
+FROM node:18-alpine
 
 WORKDIR /usr/src/app
 
