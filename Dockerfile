@@ -1,11 +1,12 @@
 FROM node:18-alpine AS BUILD_IMAGE
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Install dependencies
 RUN apk add --update --no-cache alpine-sdk \
                                 autoconf \
                                 automake \
+                                bash \
                                 libtool \
                                 make \
                                 musl \
@@ -13,16 +14,27 @@ RUN apk add --update --no-cache alpine-sdk \
     ln -sf python3 /usr/bin/python
 
 # Copy package info
-COPY package.json /usr/src/app/
-COPY package-lock.json /usr/src/app/
+COPY package.json .
+COPY package-lock.json .
+
+# Install dependencies for production
+RUN npm pkg set scripts.prepare=" " && \
+    npm ci --omit-dev
+
+RUN cp -r node_modules node_modules_prod
+
+COPY tsconfig.json .
+COPY src ./src
 
 # Install node dependencies
 RUN npm pkg set scripts.prepare=" " && \
-    npm ci --omit=dev
+    npm ci
+
+RUN npm run build
 
 FROM node:18-alpine
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Set locale
 ENV LC_ALL C.UTF-8
@@ -39,20 +51,14 @@ RUN apk add --update --no-cache ffmpeg \
 COPY package.json .
 
 # Copy dependencies from build image
-COPY --from=BUILD_IMAGE /usr/src/app/node_modules ./node_modules
+COPY --from=BUILD_IMAGE /app/node_modules_prod ./node_modules
 
-# Copy lib folder
-COPY src/lib ./lib
-
-# Copy commands folder
-COPY src/commands ./commands
-
-# Copy bot script file
-COPY src/bot.js .
+# Copy built app from build image
+COPY --from=BUILD_IMAGE /app/build ./build
 
 # Copy run script
-COPY src/run.sh ..
+COPY src/run.sh .
 
 EXPOSE 8080
 VOLUME /config
-CMD ["/usr/src/run.sh"]
+CMD ["/app/run.sh"]

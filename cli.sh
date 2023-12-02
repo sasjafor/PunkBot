@@ -29,5 +29,5 @@ then
     exit 1
 fi
 while true; do
-    node ./src/bot.js
+    node ./src/bot.ts #TODO: fix
 done

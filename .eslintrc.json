@@ -5,11 +5,14 @@
         "node": true,
         "jest": true
     },
-    "extends": "eslint:recommended",
+    "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+    "parser": "@typescript-eslint/parser",
+    "plugins": ["@typescript-eslint"],
     "parserOptions": {
         "ecmaVersion": 2021,
         "sourceType": "module"
     },
+    "ignorePatterns": ["built/*"],
     "rules": {
         "brace-style": [
             "error",
@@ -26,6 +29,9 @@
         "curly": [
             "warn",
             "all"
+        ],
+        "default-case": [
+            "error"
         ],
         "eqeqeq": [
             "error",
@@ -88,6 +94,22 @@
         ],
         "sort-vars": [
             "warn"
+        ],
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "@typescript-eslint/no-unused-vars": [
+            "error", { 
+                "argsIgnorePattern": "^_",
+                "varsIgnorePattern": "^_"
+            }
         ]
-    }
+    },
+    "overrides": [
+        {
+          // enable the rule specifically for TypeScript files
+          "files": ["*.ts", "*.mts", "*.cts", "*.tsx"],
+          "rules": {
+            "@typescript-eslint/explicit-function-return-type": "error"
+          }
+        }
+      ]
 }
