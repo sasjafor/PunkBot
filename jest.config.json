@@ -1,7 +1,8 @@
 {
     "collectCoverageFrom": [
-        "src/**/*.js",
-        "!src/bot.js"
+        "src/**/**",
+        "!src/bot.ts",
+        "!src/types.ts"
     ],
     "coverageProvider": "v8",
     "transform": {
