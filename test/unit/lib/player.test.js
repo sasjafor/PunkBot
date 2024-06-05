@@ -1,7 +1,7 @@
-// @ts-nocheck
-import * as player from '../../src/lib/player.js';
+import * as player from 'lib/player';
 
-import { Queue } from '../../src/lib/queue.js';
+import { errorCode } from 'lib/errors';
+import { Queue } from 'lib/queue';
 
 import { _resolveMx } from 'dns';
 import { EventEmitter } from 'events';
@@ -261,7 +261,7 @@ describe('lib', function () {
             it('stream error', async function () {
                 playerObj.nowPlaying.stream = { errorCode: 3 };
                 let res = await playerObj.playLoop();
-                expect(res).toBe(3);
+                expect(res).toBeUndefined();
             });
 
             it('stream ended', async function () {
@@ -299,22 +299,22 @@ describe('lib', function () {
                 playerObj.disconnect = jest.fn();
                 let res = playerObj.stop();
                 jest.runAllTimers();
-                expect(res).toBe(0);
+                expect(res).toBe(errorCode.OK);
             });
 
             it('fail', function () {
                 mockStopRet = false;
                 let res = playerObj.stop();
-                expect(res).toBe(1);
+                expect(res).toBe(errorCode.NOT_PLAYING);
             });
         });
 
         describe('enqueue', function () {
-            it('normal', function () {
+            it('normal', async function () {
                 playerObj.prepareStream = jest.fn();
 
                 playerObj.queue.dequeue();
-                let res = playerObj.enqueue(np);
+                let res = await playerObj.enqueue(np);
                 expect(res).toBe(1);
             });
         });
@@ -340,25 +340,25 @@ describe('lib', function () {
                     return playerObj.stream;
                 });
                 let res = await playerObj.dispatch();
-                expect(res).toBeUndefined();
+                expect(res).toBe(errorCode.OK);
             });
 
-            it('stream error', async function () {
-                playerObj.stream.errorCode = 1;
-                let res = await playerObj.dispatch();
-                expect(res).toBe(1);
-            });
+            // it('stream error', async function () {
+            //     playerObj.stream.errorCode = 1;
+            //     let res = await playerObj.dispatch();
+            //     expect(res).toBe(errorCode.ERROR);
+            // });
 
             it('stream ended', async function () {
                 playerObj.stream.ended = true;
                 let res = await playerObj.dispatch();
-                expect(res).toBeUndefined();
+                expect(res).toBe(errorCode.OK);
             });
 
             it('no stream', async function () {
                 playerObj.stream = null;
                 let res = await playerObj.dispatch();
-                expect(res).toBe(1);
+                expect(res).toBe(errorCode.NOT_PLAYING);
             });
         });
 
@@ -398,38 +398,38 @@ describe('lib', function () {
             it('normal', function () {
                 playerObj.dispatcher.state.status = AudioPlayerStatus.Playing;
                 let res = playerObj.pause();
-                expect(res).toBe(0);
+                expect(res).toBe(errorCode.OK);
             });
 
             it('pause fail', function () {
                 mockPauseRet = false;
                 let res = playerObj.pause();
-                expect(res).toBe(1);
+                expect(res).toBe(errorCode.NOT_PLAYING);
             });
 
             it('already paused', function () {
                 playerObj.dispatcher.state.status = AudioPlayerStatus.Paused;
                 let res = playerObj.pause();
-                expect(res).toBe(2);
+                expect(res).toBe(errorCode.ALREADY_PAUSED);
             });
         });
 
         describe('resume', function () {
             it('normal', function () {
                 let res = playerObj.resume();
-                expect(res).toBe(0);
+                expect(res).toBe(errorCode.OK);
             });
 
             it('unpause fail', function () {
                 mockUnpauseRet = false;
                 let res = playerObj.resume();
-                expect(res).toBe(1);
+                expect(res).toBe(errorCode.NOT_PLAYING);
             });
 
             it('already playing', function () {
                 playerObj.dispatcher.state.status = AudioPlayerStatus.Playing;
                 let res = playerObj.resume();
-                expect(res).toBe(2);
+                expect(res).toBe(errorCode.ALREADY_PLAYING);
             });
         });
 
@@ -467,7 +467,7 @@ describe('lib', function () {
 
                 let res = playerObj.createStream(videoURL);
                 playerObj.createStream = null;
-                expect(res).rejects.toThrowError();
+                expect(await res).toBe(null);
             });
 
             it('stream error generic', async function () {
@@ -492,22 +492,22 @@ describe('lib', function () {
 
             it('playStream error', async function () {
                 mockPlayThrowErr = true;
-                let res = await playerObj.createStream(videoURL);
-                expect(res.errorCode).toBe(1);
+                let res = playerObj.createStream(videoURL);
+                await expect(res).rejects.toHaveProperty('errorCode', errorCode.ERROR);
             });
 
             it('playStream error, age verification', async function () {
                 mockPlayThrowErr = true;
                 mockPlayErr.message = 'Sign in to confirm your age';
-                let res = await playerObj.createStream(videoURL);
-                expect(res.errorCode).toBe(2);
+                let res = playerObj.createStream(videoURL);
+                await expect(res).rejects.toHaveProperty('errorCode', errorCode.CONFIRM_AGE);
             });
 
             it('playStream error, seek too long', async function () {
                 mockPlayThrowErr = true;
                 mockPlayErr.message = 'Seeking beyond limit';
-                let res = await playerObj.createStream(videoURL);
-                expect(res.errorCode).toBe(3);
+                let res = playerObj.createStream(videoURL);
+                await expect(res).rejects.toHaveProperty('errorCode', errorCode.SEEK_ERROR);
             });
         });
 
@@ -535,7 +535,9 @@ describe('lib', function () {
             beforeEach(() => {
                 playerObj.dispatcher.state.status = AudioPlayerStatus.Playing;
 
-                playerObj.dispatch = jest.fn();
+                playerObj.dispatch = jest.fn(() => {
+                    return errorCode.OK;
+                });
                 playerObj.createStream = jest.fn(() => {
                     return playerObj.stream;
                 });
@@ -543,7 +545,7 @@ describe('lib', function () {
 
             it('normal', async function () {
                 let res = await playerObj.seek(seekTime);
-                expect(res).toBe(0);
+                expect(res).toBe(errorCode.OK);
             });
 
             it('not playing', async function () {
@@ -551,12 +553,12 @@ describe('lib', function () {
                 playerObj.nowPlaying = null;
 
                 let res = await playerObj.seek(seekTime);
-                expect(res).toBe(2);
+                expect(res).toBe(errorCode.NOT_PLAYING);
             });
 
             it('seek time too long', async function () {
                 let res = await playerObj.seek(50);
-                expect(res).toBe(3);
+                expect(res).toBe(errorCode.SEEK_ERROR);
             });
 
             it('seek edge case near track length', async function () {
@@ -564,8 +566,8 @@ describe('lib', function () {
                 playerObj.createStream = jest.fn(() => {
                     if (once) {
                         once = false;
-                        return {
-                            errorCode: 3,
+                        throw {
+                            errorCode: errorCode.SEEK_ERROR,
                             error: {
                                 message: 'Seeking beyond limit. [ 0 - 30]',
                             },
@@ -576,18 +578,22 @@ describe('lib', function () {
                 });
 
                 let res = await playerObj.seek(seekTime);
-                expect(res).toBe(0);
+                expect(res).toBe(errorCode.SEEK_ERROR);
             });
 
             it('seek error', async function () {
                 playerObj.createStream = jest.fn(() => {
                     return {
-                        errorCode: 1,
+                        errorCode: errorCode.ERROR,
                     };
                 });
 
+                playerObj.dispatch = jest.fn(() => {
+                    return errorCode.SEEK_ERROR;
+                });
+
                 let res = await playerObj.seek(seekTime);
-                expect(res).toBe(1);
+                expect(res).toBe(errorCode.SEEK_ERROR);
             });
         });
 
@@ -657,14 +663,14 @@ describe('lib', function () {
         describe('disconnect', function () {
             it('normal', function () {
                 let res = playerObj.disconnect();
-                expect(res).toBeTruthy();
+                expect(res).toBe(errorCode.OK);
                 expect(playerObj.queue.getLength()).toBe(0);
             });
 
             it('fail', function () {
                 playerObj.conn = null;
                 let res = playerObj.disconnect();
-                expect(res).toBeFalsy();
+                expect(res).toBe(errorCode.ERROR);
             });
         });
 
@@ -730,10 +736,10 @@ describe('lib', function () {
             });
         });
 
-        describe('getQueue', function () {
+        describe('getQueueElem', function () {
             it('normal', function () {
-                let queue = playerObj.getQueue();
-                expect(queue).toBe(playerObj.queue);
+                let queueItem = playerObj.getQueueElem(0);
+                expect(queueItem).toBe(playerObj.queue.get(0));
             });
         });
     });

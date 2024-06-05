@@ -1,12 +1,12 @@
-import { eventCollector, interaction, player, players } from '../discord-js.mocks.js';
+import { eventCollector, interaction, player, players, resetMockObjects } from 'discord-js.mocks';
+
+import * as queue from 'commands/queue';
 
 import { AudioPlayerStatus } from '@discordjs/voice';
 
-import * as queue from '../../src/commands/queue.js';
-
-import { buttons } from '../../src/lib/componentIDs.js';
-import { prettifyTime } from '../../src/lib/util.js';
-jest.mock('../../src/lib/util.js');
+import { buttons } from 'lib/componentIDs';
+import { prettifyTime } from 'lib/util';
+jest.mock('lib/util');
 
 describe('commands', function () {
     describe('queue', function () {
@@ -22,25 +22,30 @@ describe('commands', function () {
 
         beforeEach(() => {
             jest.clearAllMocks();
-
-            interaction.integerOption = 1;
+            resetMockObjects();
         });
 
         it('normal', async function() {
+            player.connectedRetVal = true;
+            player.playingRetVal = true;
             await queue.execute(interaction, players);
             expect(player.getQueueLength).toHaveBeenCalledTimes(2);
         });
 
         it('index > 1', async function() {
+            player.connectedRetVal = true;
+            player.playingRetVal = true;
             interaction.integerOption = 2;
             await queue.execute(interaction, players);
             expect(player.getQueueLength).toHaveBeenCalledTimes(2);
         });
 
         it('index > numTabs', async function() {
+            player.connectedRetVal = true;
+            player.playingRetVal = true;
             interaction.integerOption = 3;
             await queue.execute(interaction, players);
-            expect(player.getQueueLength).toHaveBeenCalledTimes(1);
+            expect(player.getQueueLength).toHaveBeenCalledTimes(2);
         });
 
         it('getNowPlayingReturns nothing', async function() {
@@ -56,7 +61,6 @@ describe('commands', function () {
         });
 
         it('conn == null', async function() {
-            player.conn = null;
             await queue.execute(interaction, players);
             expect(player.getQueueLength).toHaveBeenCalledTimes(0);
         });
@@ -72,14 +76,14 @@ describe('commands', function () {
             let res = queue.execute(interaction, players);
             eventCollector.emit('collect', prevButton);
             await res;
-            expect(prevButton.update).toHaveBeenCalledTimes(2);
+            expect(prevButton.update).toHaveBeenCalledTimes(3);
         });
 
         it('collect next button', async function() {
             let res = queue.execute(interaction, players);
             eventCollector.emit('collect', nextButton);
             await res;
-            expect(nextButton.update).toHaveBeenCalledTimes(2);
+            expect(nextButton.update).toHaveBeenCalledTimes(3);
         });
     });
 });

@@ -1,29 +1,29 @@
-import { interaction, player, players } from '../discord-js.mocks.js';
+import { interaction, player, players, resetMockObjects } from 'discord-js.mocks';
 
-import * as remove from '../../src/commands/remove.js';
+import * as remove from 'commands/remove';
 
 describe('commands', function () {
     describe('remove', function () {
         beforeEach(() => {
             jest.clearAllMocks();
-
-            interaction.integerOption = 2;
+            resetMockObjects();
         });
 
         it('normal', async function() {
+            player.connectedRetVal = true;
             await remove.execute(interaction, players);
             expect(player.remove).toHaveBeenCalledTimes(1);
         });
 
         it('remove failed', async function() {
-            player.remove = jest.fn(() => { return false; });
+            player.connectedRetVal = true;
+            player.removeRetVal = null;
             await remove.execute(interaction, players);
             expect(player.remove).toHaveBeenCalledTimes(1);
         });
 
 
         it('conn == null', async function() {
-            player.conn = null;
             await remove.execute(interaction, players);
             expect(player.remove).toHaveBeenCalledTimes(0);
         });

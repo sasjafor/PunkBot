@@ -1,9 +1,9 @@
-import { eventCollector, interaction, player, players, youtubeCache } from '../discord-js.mocks.js';
+import { eventCollector, interaction, player, players, youtubeCache } from 'discord-js.mocks';
 
-import * as searchCmd from '../../src/commands/search.js';
+import * as searchCmd from 'commands/search';
 
-import { HTTPError } from '../../src/lib/errors.js';
-import { selectMenus } from '../../src/lib/componentIDs.js';
+import { HTTPError } from 'lib/errors';
+import { selectMenus } from 'lib/componentIDs';
 
 import { AudioPlayerStatus } from '@discordjs/voice';
 
@@ -30,8 +30,8 @@ var mockSearchRes = undefined;
 var mockSearchError = false;
 
 // eslint-disable-next-line no-unused-vars
-import { search } from '../../src/lib/youtubeAPI.js';
-jest.mock('../../src/lib/youtubeAPI.js', () => {
+import { search } from 'lib/youtubeAPI';
+jest.mock('lib/youtubeAPI', () => {
     return {
         search: jest.fn(() => {
             if (mockSearchError) {
@@ -44,8 +44,8 @@ jest.mock('../../src/lib/youtubeAPI.js', () => {
 });
 
 // eslint-disable-next-line no-unused-vars
-import { createPlayEmbed, playItem } from '../../src/lib/playbackHelpers.js';
-jest.mock('../../src/lib/playbackHelpers.js', () => {
+import { createPlayEmbed, playItem } from 'lib/playbackHelpers';
+jest.mock('lib/playbackHelpers', () => {
     return {
         playItem: jest.fn(),
         createPlayEmbed: jest.fn(),
@@ -68,8 +68,8 @@ const mockAxiosErr = {
 };
 
 // eslint-disable-next-line no-unused-vars
-import { errorReply, handleVideo } from '../../src/lib/util.js';
-jest.mock('../../src/lib/util.js', () => {
+import { errorReply, handleVideo } from 'lib/util';
+jest.mock('lib/util', () => {
     return {
         errorReply: jest.fn(),
         handleVideo: jest.fn(async () => {

@@ -1,4 +1,4 @@
-import * as limitedDict from '../../src/lib/limitedDict.js';
+import * as limitedDict from 'lib/limitedDict';
 
 global.console.log = jest.fn();
 

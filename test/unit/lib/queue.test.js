@@ -1,4 +1,4 @@
-import * as queue from '../../src/lib/queue.js';
+import * as queue from 'lib/queue';
 
 global.console.log = jest.fn();
 

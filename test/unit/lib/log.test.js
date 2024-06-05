@@ -1,4 +1,4 @@
-import * as logColor from '../../src/lib/log.js';
+import * as logColor from 'lib/log';
 
 describe('lib', function () {
     describe('log', function () {

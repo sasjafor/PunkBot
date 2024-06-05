@@ -1,5 +1,5 @@
 import './setLogNoColor.js';
-import * as logNoColor from '../../src/lib/log.js';
+import * as logNoColor from 'lib/log';
 
 describe('lib', function () {
     describe('log', function () {

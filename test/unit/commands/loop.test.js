@@ -1,11 +1,12 @@
-import { interaction, player, players } from '../discord-js.mocks.js';
+import { interaction, player, players, resetMockObjects } from 'discord-js.mocks';
 
-import * as loop from '../../src/commands/loop.js';
+import * as loop from 'commands/loop';
 
 describe('commands', function () {
     describe('loop', function () {
         beforeEach(() => {
             jest.clearAllMocks();
+            resetMockObjects();
         });
 
         it('false => true', async function() {

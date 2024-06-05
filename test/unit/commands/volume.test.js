@@ -1,11 +1,12 @@
-import { interaction, player, players } from '../discord-js.mocks.js';
+import { interaction, player, players, resetMockObjects } from 'discord-js.mocks';
 
-import * as volume from '../../src/commands/volume.js';
+import * as volume from 'commands/volume';
 
 describe('commands', function () {
     describe('volume', function () {
         beforeEach(() => {
             jest.clearAllMocks();
+            resetMockObjects();
         });
 
         it('normal', async function() {

@@ -1,6 +1,6 @@
-const { PassThrough } = require('stream');
+import * as youtubeAPI from 'lib/youtubeAPI';
 
-import * as youtubeAPI from '../../src/lib/youtubeAPI.js';
+const { PassThrough } = require('stream');
 
 import mockAxios from 'axios';
 jest.mock('axios');
@@ -215,7 +215,7 @@ describe('lib', function () {
             });
 
             it('fastSearch empty response', async function() {
-                let res = expect(youtubeAPI.fastSearch(query, youtubeAPIKey)).resolves.toBe(false);
+                let res = expect(youtubeAPI.fastSearch(query, youtubeAPIKey)).resolves.toBe(null);
                 mockStream.emit('response');
                 mockStream.emit('data', jsonStringEmpty);
                 mockStream.emit('end');

@@ -1,8 +1,8 @@
-import { interaction } from '../discord-js.mocks.js';
+import { interaction } from 'discord-js.mocks';
+
+import * as util from 'lib/util';
 
 import moment from 'moment';
-
-import * as util from '../../src/lib/util.js';
 
 jest.mock('winston', () => ({
     format: {
@@ -71,8 +71,8 @@ const mockPlaylistItemsRes = {
 var mockPlaylistItemsError = false;
 
 // eslint-disable-next-line no-unused-vars
-import { playlistItems, videoInfo } from '../../src/lib/youtubeAPI.js';
-jest.mock('../../src/lib/youtubeAPI.js', () => {
+import { playlistItems, videoInfo } from 'lib/youtubeAPI';
+jest.mock('lib/youtubeAPI', () => {
     return {
         videoInfo: jest.fn(() => {
             return mockVideoInfoRes;
@@ -229,7 +229,7 @@ describe('lib', function () {
             });
         });
 
-        describe('handleVideo', function() {
+        describe('handleYTVideo', function() {
             const id = 'E8gmARGvPlI';
             const requester = {
                 displayName: 'Tester',
@@ -249,23 +249,23 @@ describe('lib', function () {
             });
 
             it('normal', async function() {
-                let _res = await util.handleVideo(id, requester, url, title, youtubeAPIKey);
+                let _res = await util.handleYTVideo(id, requester, url, title, youtubeAPIKey);
                 expect(videoInfo).toBeCalledTimes(1);
             });
 
             it('videoInfo returns null', async function() {
                 mockVideoInfoRes = null;
-                expect(util.handleVideo(id, requester, url, title, youtubeAPIKey)).rejects.toThrow();
+                expect(util.handleYTVideo(id, requester, url, title, youtubeAPIKey)).rejects.toThrow();
                 expect(videoInfo).toBeCalledTimes(1);
             });
 
-            it('videoInfo returns null', async function() {
-                let _res = await util.handleVideo(null, requester, url, title, youtubeAPIKey);
-                expect(videoInfo).toBeCalledTimes(0);
+            it('videoInfo called with null', async function() {
+                let _res = await util.handleYTVideo(null, requester, url, title, youtubeAPIKey);
+                expect(videoInfo).toBeCalledTimes(1);
             });
         });
 
-        describe('handlePlaylist', function() {
+        describe('handleYTPlaylist', function() {
             const player = {
                 enqueue: jest.fn(),
             };
@@ -295,35 +295,35 @@ describe('lib', function () {
             });
 
             it('normal', async function() {
-                let res = await util.handlePlaylist(player, id, requester, skipFirst, callback, channel, avatarURL, youtubeAPIKey);
+                let res = await util.handleYTPlaylist(player, id, requester, skipFirst, callback, channel, avatarURL, youtubeAPIKey);
                 expect(res).toBeUndefined();
                 expect(playlistItems).toBeCalledTimes(1);
             });
 
             it('skip first', async function() {
                 skipFirst = true;
-                let res = await util.handlePlaylist(player, id, requester, skipFirst, callback, channel, avatarURL, youtubeAPIKey);
+                let res = await util.handleYTPlaylist(player, id, requester, skipFirst, callback, channel, avatarURL, youtubeAPIKey);
                 expect(res).toBeUndefined();
                 expect(playlistItems).toBeCalledTimes(1);
             });
 
             it('playlistItems error', async function() {
                 mockPlaylistItemsError = true;
-                let res = await util.handlePlaylist(player, id, requester, skipFirst, callback, channel, avatarURL, youtubeAPIKey);
+                let res = await util.handleYTPlaylist(player, id, requester, skipFirst, callback, channel, avatarURL, youtubeAPIKey);
                 expect(playlistItems).toBeCalledTimes(1);
                 expect(res).toBeFalsy();
             });
 
             it('handleVideo error', async function() {
                 mockVideoInfoRes = null;
-                let res = await util.handlePlaylist(player, id, requester, skipFirst, callback, channel, avatarURL, youtubeAPIKey);
+                let res = await util.handleYTPlaylist(player, id, requester, skipFirst, callback, channel, avatarURL, youtubeAPIKey);
                 expect(playlistItems).toBeCalledTimes(1);
                 expect(res).toBeFalsy();
             });
 
             it('pageInfo null', async function() {
                 delete mockPlaylistItemsRes.pageInfo;
-                let res = await util.handlePlaylist(player, id, requester, skipFirst, callback, channel, avatarURL, youtubeAPIKey);
+                let res = await util.handleYTPlaylist(player, id, requester, skipFirst, callback, channel, avatarURL, youtubeAPIKey);
                 expect(playlistItems).toBeCalledTimes(1);
                 expect(res).toBeFalsy();
             });

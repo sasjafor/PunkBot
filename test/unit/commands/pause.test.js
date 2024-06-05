@@ -1,34 +1,37 @@
-import { interaction, player, players } from '../discord-js.mocks.js';
+import { interaction, player, players, resetMockObjects } from 'discord-js.mocks';
 
-import * as pause from '../../src/commands/pause.js';
+import * as pause from 'commands/pause';
+
+import { errorCode } from 'lib/errors';
 
 describe('commands', function () {
     describe('pause', function () {
         beforeEach(() => {
             jest.clearAllMocks();
-
-            player.pauseRetVal = 0;
+            resetMockObjects();
         });
 
         it('normal', async function() {
+            player.connectedRetVal = true;
             await pause.execute(interaction, players);
             expect(player.pause).toHaveBeenCalledTimes(1);
         });
 
         it('nothing playing', async function() {
-            player.pauseRetVal = 1;
+            player.connectedRetVal = true;
+            player.pauseRetVal = errorCode.NOT_PLAYING;
             await pause.execute(interaction, players);
             expect(player.pause).toHaveBeenCalledTimes(1);
         });
 
         it('already paused', async function() {
-            player.pauseRetVal = 2;
+            player.connectedRetVal = true;
+            player.pauseRetVal = errorCode.ALREADY_PAUSED;
             await pause.execute(interaction, players);
             expect(player.pause).toHaveBeenCalledTimes(1);
         });
 
         it('conn == null', async function() {
-            player.conn = null;
             await pause.execute(interaction, players);
             expect(player.pause).toHaveBeenCalledTimes(0);
         });

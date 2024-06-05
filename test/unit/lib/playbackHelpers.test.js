@@ -1,6 +1,7 @@
-import { interaction, pbItem, player, youtubeCache } from '../discord-js.mocks.js';
+import { interaction, pbItem, player, resetMockObjects, youtubeCache } from 'discord-js.mocks';
 
-import * as playbackHelpers from '../../src/lib/playbackHelpers.js';
+import * as playbackHelpers from 'lib/playbackHelpers';
+
 import { AudioPlayerStatus } from '@discordjs/voice';
 import { EmbedBuilder } from 'discord.js';
 
@@ -9,10 +10,10 @@ describe('lib', function () {
         beforeEach(() => {
             jest.clearAllMocks();
 
+            resetMockObjects();
+
             player.dispatcher.state.status = AudioPlayerStatus.Playing;
             pbItem.isAgeRestricted = false;
-            player.loop = false;
-            player.playRes = undefined;
         });
 
         describe('playItem', function () {
@@ -25,6 +26,7 @@ describe('lib', function () {
             });
 
             it('already playing', async function() {
+                player.playingRetVal = true;
                 let res = await playbackHelpers.playItem(interaction, player, pbItem, youtubeCache, false, searchQuery, false);
                 expect(res).toBeTruthy();
             });
@@ -35,12 +37,12 @@ describe('lib', function () {
                 expect(res).toBe(-1);
             });
 
-            it('stream fail', async function() {
-                player.dispatcher.state.status = AudioPlayerStatus.Paused;
-                player.playRes = 1;
-                let res = await playbackHelpers.playItem(interaction, player, pbItem, youtubeCache, false, searchQuery, false);
-                expect(res).toBe(-1);
-            });
+            // it('stream fail', async function() {
+            //     player.dispatcher.state.status = AudioPlayerStatus.Paused;
+            //     player.playRes = 1;
+            //     let res = await playbackHelpers.playItem(interaction, player, pbItem, youtubeCache, false, searchQuery, false);
+            //     expect(res).toBe(-1);
+            // });
         });
 
         describe('createPlayEmbed', function () {

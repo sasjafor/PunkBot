@@ -1,11 +1,12 @@
-import { interaction, player, players } from '../discord-js.mocks.js';
+import { interaction, player, players, resetMockObjects } from 'discord-js.mocks';
 
-import * as summon from '../../src/commands/summon.js';
+import * as summon from 'commands/summon';
 
 describe('commands', function () {
     describe('summon', function () {
         beforeEach(() => {
             jest.clearAllMocks();
+            resetMockObjects();
         });
 
         it('normal', async function() {
