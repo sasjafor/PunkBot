@@ -16,7 +16,7 @@
     "noImplicitOverride": true,
     "strictFunctionTypes": true,
     "strictNullChecks": true,
-    "strictPropertyInitialization": true,
+    "strictPropertyInitialization": true
   },
   "include": [
     "src/**/*"

@@ -4,9 +4,10 @@
         "@babel/preset-env",
         {
           "targets": {
-            "node": true
+            "node": "current"
           }
         }
-      ]
+      ],
+      "@babel/preset-typescript"
     ]
   }
