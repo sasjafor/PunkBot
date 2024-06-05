@@ -122,20 +122,20 @@ describe('commands', function () {
         it('normal', async function() {
             player.dispatcher.state.status = AudioPlayerStatus.Paused;
             await searchCmd.execute(interaction, players, youtubeAPIKey, youtubeCache);
-            expect(search).toBeCalledTimes(1);
+            expect(search).toHaveBeenCalledTimes(1);
         });
 
         it('normal, no amount provided', async function() {
             player.dispatcher.state.status = AudioPlayerStatus.Paused;
             interaction.integerOption = 0;
             await searchCmd.execute(interaction, players, youtubeAPIKey, youtubeCache);
-            expect(search).toBeCalledTimes(1);
+            expect(search).toHaveBeenCalledTimes(1);
         });
 
         it('voice channel not joinable', async function() {
             interaction.member.voice.channel.joinable = false;
             await searchCmd.execute(interaction, players, youtubeAPIKey, youtubeCache);
-            expect(search).toBeCalledTimes(0);
+            expect(search).toHaveBeenCalledTimes(0);
         });
 
         it('no results', async function() {
@@ -147,20 +147,20 @@ describe('commands', function () {
         it('search exception', async function() {
             mockSearchError = true;
             await searchCmd.execute(interaction, players, youtubeAPIKey, youtubeCache);
-            expect(search).toBeCalledTimes(1);
+            expect(search).toHaveBeenCalledTimes(1);
         });
 
         it('search res null', async function() {
             mockSearchRes = null;
             await searchCmd.execute(interaction, players, youtubeAPIKey, youtubeCache);
-            expect(search).toBeCalledTimes(1);
+            expect(search).toHaveBeenCalledTimes(1);
         });
 
         it('test collect', async function() {
             let res = searchCmd.execute(interaction, players, youtubeAPIKey, youtubeCache);
             eventCollector.emit('collect', selectMenu);
             await res;
-            expect(search).toBeCalledTimes(1);
+            expect(search).toHaveBeenCalledTimes(1);
         });
 
         it('test collect, wrong id', async function() {
@@ -168,7 +168,7 @@ describe('commands', function () {
             let res = searchCmd.execute(interaction, players, youtubeAPIKey, youtubeCache);
             eventCollector.emit('collect', selectMenu);
             await res;
-            expect(search).toBeCalledTimes(1);
+            expect(search).toHaveBeenCalledTimes(1);
         });
 
         it('test collect, handle video err', async function() {
@@ -176,14 +176,14 @@ describe('commands', function () {
             let res = searchCmd.execute(interaction, players, youtubeAPIKey, youtubeCache);
             eventCollector.emit('collect', selectMenu);
             await res;
-            expect(search).toBeCalledTimes(1);
+            expect(search).toHaveBeenCalledTimes(1);
         });
 
         it('test end', async function() {
             let res = searchCmd.execute(interaction, players, youtubeAPIKey, youtubeCache);
             eventCollector.emit('end', '');
             await res;
-            expect(search).toBeCalledTimes(1);
+            expect(search).toHaveBeenCalledTimes(1);
         });
 
         it('test end selected', async function() {
@@ -191,7 +191,7 @@ describe('commands', function () {
             eventCollector.emit('collect', selectMenu);
             eventCollector.emit('end', '');
             await res;
-            expect(search).toBeCalledTimes(1);
+            expect(search).toHaveBeenCalledTimes(1);
         });
     });
 });

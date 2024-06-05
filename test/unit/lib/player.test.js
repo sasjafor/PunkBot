@@ -365,7 +365,7 @@ describe('lib', function () {
         describe('setVolume', function () {
             it('normal', function () {
                 playerObj.setVolume(1);
-                expect(playerObj.stream.volume.setVolume).toBeCalledTimes(1);
+                expect(playerObj.stream.volume.setVolume).toHaveBeenCalledTimes(1);
             });
         });
 
@@ -607,21 +607,21 @@ describe('lib', function () {
             it('normal', async function () {
                 playerObj.dispatcher = null;
                 await playerObj.connect(channel);
-                expect(mockConn.subscribe).toBeCalledTimes(1);
+                expect(mockConn.subscribe).toHaveBeenCalledTimes(1);
             });
 
             it('fail', async function () {
                 let res = playerObj.connect(channel);
                 mockAudioPlayer.emit('error');
                 await res;
-                expect(mockConn.subscribe).toBeCalledTimes(0);
+                expect(mockConn.subscribe).toHaveBeenCalledTimes(0);
             });
 
             it('idle', async function () {
                 let res = playerObj.connect(channel);
                 mockAudioPlayer.emit(AudioPlayerStatus.Idle);
                 await res;
-                expect(mockConn.subscribe).toBeCalledTimes(0);
+                expect(mockConn.subscribe).toHaveBeenCalledTimes(0);
             });
 
             it('idle with loop', async function () {
@@ -629,7 +629,7 @@ describe('lib', function () {
                 let res = playerObj.connect(channel);
                 mockAudioPlayer.emit(AudioPlayerStatus.Idle);
                 await res;
-                expect(mockConn.subscribe).toBeCalledTimes(0);
+                expect(mockConn.subscribe).toHaveBeenCalledTimes(0);
             });
 
             it('conn error', async function () {

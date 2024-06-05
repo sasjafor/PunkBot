@@ -126,38 +126,38 @@ describe('lib', function () {
 
             it('normal', async function() {
                 await util.errorReply(interactionVal, msgContentVal, errorMessage, url);
-                expect(interaction.editReply).toBeCalledTimes(1);
+                expect(interaction.editReply).toHaveBeenCalledTimes(1);
             });
 
             it('interaction.replied == true', async function() {
                 interaction.replied = true;
                 await util.errorReply(interactionVal, msgContentVal, errorMessage, url);
-                expect(interaction.editReply).toBeCalledTimes(1);
+                expect(interaction.editReply).toHaveBeenCalledTimes(1);
             });
 
             it('reply normal error', async function() {
                 interaction.replyErr = 1;
                 await util.errorReply(interactionVal, msgContentVal, errorMessage, url);
-                expect(interaction.editReply).toBeCalledTimes(1);
+                expect(interaction.editReply).toHaveBeenCalledTimes(1);
             });
 
             it('reply api error', async function() {
                 interaction.replyErr = 2;
                 await util.errorReply(interactionVal, msgContentVal, errorMessage, url);
-                expect(interaction.editReply).toBeCalledTimes(2);
+                expect(interaction.editReply).toHaveBeenCalledTimes(2);
             });
 
             it('msgContent == null', async function() {
                 msgContentVal = undefined;
                 await util.errorReply(interactionVal, msgContentVal, errorMessage, url);
-                expect(interaction.editReply).toBeCalledTimes(1);
+                expect(interaction.editReply).toHaveBeenCalledTimes(1);
             });
 
             it('interaction == null', async function() {
                 interactionVal = undefined;
                 await util.errorReply(interactionVal, msgContentVal, errorMessage, url, channel, avatarURL);
-                expect(interaction.editReply).toBeCalledTimes(0);
-                expect(channel.send).toBeCalledTimes(1);
+                expect(interaction.editReply).toHaveBeenCalledTimes(0);
+                expect(channel.send).toHaveBeenCalledTimes(1);
             });
         });
 
@@ -250,18 +250,18 @@ describe('lib', function () {
 
             it('normal', async function() {
                 let _res = await util.handleYTVideo(id, requester, url, title, youtubeAPIKey);
-                expect(videoInfo).toBeCalledTimes(1);
+                expect(videoInfo).toHaveBeenCalledTimes(1);
             });
 
             it('videoInfo returns null', async function() {
                 mockVideoInfoRes = null;
                 expect(util.handleYTVideo(id, requester, url, title, youtubeAPIKey)).rejects.toThrow();
-                expect(videoInfo).toBeCalledTimes(1);
+                expect(videoInfo).toHaveBeenCalledTimes(1);
             });
 
             it('videoInfo called with null', async function() {
                 let _res = await util.handleYTVideo(null, requester, url, title, youtubeAPIKey);
-                expect(videoInfo).toBeCalledTimes(1);
+                expect(videoInfo).toHaveBeenCalledTimes(1);
             });
         });
 
@@ -297,34 +297,34 @@ describe('lib', function () {
             it('normal', async function() {
                 let res = await util.handleYTPlaylist(player, id, requester, skipFirst, callback, channel, avatarURL, youtubeAPIKey);
                 expect(res).toBeUndefined();
-                expect(playlistItems).toBeCalledTimes(1);
+                expect(playlistItems).toHaveBeenCalledTimes(1);
             });
 
             it('skip first', async function() {
                 skipFirst = true;
                 let res = await util.handleYTPlaylist(player, id, requester, skipFirst, callback, channel, avatarURL, youtubeAPIKey);
                 expect(res).toBeUndefined();
-                expect(playlistItems).toBeCalledTimes(1);
+                expect(playlistItems).toHaveBeenCalledTimes(1);
             });
 
             it('playlistItems error', async function() {
                 mockPlaylistItemsError = true;
                 let res = await util.handleYTPlaylist(player, id, requester, skipFirst, callback, channel, avatarURL, youtubeAPIKey);
-                expect(playlistItems).toBeCalledTimes(1);
+                expect(playlistItems).toHaveBeenCalledTimes(1);
                 expect(res).toBeFalsy();
             });
 
             it('handleVideo error', async function() {
                 mockVideoInfoRes = null;
                 let res = await util.handleYTPlaylist(player, id, requester, skipFirst, callback, channel, avatarURL, youtubeAPIKey);
-                expect(playlistItems).toBeCalledTimes(1);
+                expect(playlistItems).toHaveBeenCalledTimes(1);
                 expect(res).toBeFalsy();
             });
 
             it('pageInfo null', async function() {
                 delete mockPlaylistItemsRes.pageInfo;
                 let res = await util.handleYTPlaylist(player, id, requester, skipFirst, callback, channel, avatarURL, youtubeAPIKey);
-                expect(playlistItems).toBeCalledTimes(1);
+                expect(playlistItems).toHaveBeenCalledTimes(1);
                 expect(res).toBeFalsy();
             });
         });
@@ -340,13 +340,13 @@ describe('lib', function () {
 
             it('normal', async function() {
                 let _res = await util.getAudioDurationInSeconds(url);
-                expect(execa).toBeCalledTimes(1);
+                expect(execa).toHaveBeenCalledTimes(1);
             });
 
             it('no match', async function() {
                 mockDurationStringRes = '';
                 let _res = await util.getAudioDurationInSeconds(url);
-                expect(execa).toBeCalledTimes(1);
+                expect(execa).toHaveBeenCalledTimes(1);
             });
         });
     });
