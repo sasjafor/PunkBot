@@ -29,7 +29,7 @@ async function errorReply(interaction: CommandInteraction | MessageComponentInte
         embed = embed.setURL(url);
     }
 
-    if (interaction !== null) {
+    if (interaction !== null && interaction !== undefined) {
         let iconURL: string | undefined = undefined;
         if (interaction.member instanceof GuildMember) {
             iconURL = interaction.member?.displayAvatarURL();

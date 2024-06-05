@@ -13,11 +13,11 @@ import { strings } from '../lib/messageStrings.js';
 const data = new SlashCommandBuilder()
     .setName('seek')
     .setDescription('Seek to the provided position in the track.')
+    .setDMPermission(false)
     .addStringOption(option =>
         option.setName('time')
             .setDescription('Time to seek to.')
-            .setRequired(true))
-    .setDMPermission(false);
+            .setRequired(true));
 
 async function execute(interaction: ChatInputCommandInteraction, players: PlayerDict, _youtubeAPIKey: string, _youtubeCache: LimitedDict<PlaybackItem>, _hasYoutubeCookies = false): Promise<void> {
     const time = interaction.options.getString('time');

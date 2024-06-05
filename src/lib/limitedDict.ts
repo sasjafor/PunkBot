@@ -65,7 +65,9 @@ class LimitedDict<TValue> {
             this.head = newElem;
             this.tail = newElem;
         }
-        this.size++;
+        if (!(key in this.dict)) {
+            this.size++;
+        }
         this.dict[key] = newElem;
     }
 

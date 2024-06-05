@@ -16,11 +16,11 @@ const BUTTON_TIMEOUT = 300000;
 const data = new SlashCommandBuilder()
     .setName('queue')
     .setDescription('Show the queued songs.')
+    .setDMPermission(false)
     .addIntegerOption(option =>
         option.setName('index')
             .setDescription('Index of page in the queue.')
-            .setMinValue(1))
-    .setDMPermission(false);
+            .setMinValue(1));
 
 async function execute(interaction: ChatInputCommandInteraction, players: PlayerDict, _youtubeAPIKey: string, _youtubeCache: LimitedDict<PlaybackItem>, _hasYoutubeCookies = false): Promise<void> {
     let index = interaction.options.getInteger('index') ?? 1;

@@ -10,12 +10,12 @@ import { strings } from '../lib/messageStrings.js';
 const data = new SlashCommandBuilder()
     .setName('volume')
     .setDescription('Set the playback volume.')
+    .setDMPermission(false)
     .addNumberOption(option =>
         option.setName('value')
             .setDescription('Volume to set.')
             .setRequired(true)
-            .setMinValue(0))
-    .setDMPermission(false);
+            .setMinValue(0));
 
 async function execute(interaction: ChatInputCommandInteraction, players: PlayerDict, _youtubeAPIKey: string, _youtubeCache: LimitedDict<PlaybackItem>, _hasYoutubeCookies = false): Promise<void> {
     const value = interaction.options.getNumber('value');

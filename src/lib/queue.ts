@@ -96,7 +96,7 @@ class Queue<T> implements Iterable<T> {
      */
     public remove(index: number): T | null {
         const removed: T[] = this.queue.splice(index + this.offset, 1);
-        if (removed.length === 0) {
+        if (removed.length === 1) {
             return removed[0];
         } else {
             return null;

@@ -24,6 +24,7 @@ import { strings } from '../lib/messageStrings.js';
 const data = new SlashCommandBuilder()
     .setName('play')
     .setDescription('Plays a YouTube video.')
+    .setDMPermission(false)
     .addStringOption(option =>
         option.setName('query')
             .setDescription('YouTube link or search term.')
@@ -33,8 +34,7 @@ const data = new SlashCommandBuilder()
             .setDescription('Execute command silently.'))
     .addBooleanOption(option =>
         option.setName('next')
-            .setDescription('Play next, in front of queue.'))
-    .setDMPermission(false);
+            .setDescription('Play next, in front of queue.'));
 
 async function execute(interaction: ChatInputCommandInteraction, players: PlayerDict, youtubeAPIKey: string, youtubeCache: LimitedDict<PlaybackItem>, hasYoutubeCookies = false): Promise<void> {
     if (interaction.guild === null) {

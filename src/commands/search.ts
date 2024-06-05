@@ -19,6 +19,7 @@ const MAX_ENTRY_LENGTH = 100; // discord limit
 const data = new SlashCommandBuilder()
     .setName('search')
     .setDescription('Search YouTube and show top 5 results.')
+    .setDMPermission(false)
     .addStringOption(option =>
         option.setName('query')
             .setDescription('YouTube link or search term.')
@@ -28,8 +29,7 @@ const data = new SlashCommandBuilder()
             .setDescription('How many results to show.')
             .setMinValue(0)
             .setMaxValue(25)
-            .setRequired(false))
-    .setDMPermission(false);
+            .setRequired(false));
 
 async function execute(interaction: ChatInputCommandInteraction, players: PlayerDict, youtubeAPIKey: string, youtubeCache: LimitedDict<PlaybackItem>, hasYoutubeCookies = false): Promise<void> {
     if (!interaction.inCachedGuild()) {

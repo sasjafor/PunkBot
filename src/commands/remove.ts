@@ -10,12 +10,12 @@ import { strings } from '../lib/messageStrings.js';
 const data = new SlashCommandBuilder()
     .setName('remove')
     .setDescription('Remove the indicated track.')
+    .setDMPermission(false)
     .addIntegerOption(option =>
         option.setName('index')
             .setDescription('Index to remove from queue.')
             .setRequired(true)
-            .setMinValue(1))
-    .setDMPermission(false);
+            .setMinValue(1));
 
 async function execute(interaction: ChatInputCommandInteraction, players: PlayerDict, _youtubeAPIKey: string, _youtubeCache: LimitedDict<PlaybackItem>, _hasYoutubeCookies = false): Promise<void> {
     const index = interaction.options.getInteger('index');

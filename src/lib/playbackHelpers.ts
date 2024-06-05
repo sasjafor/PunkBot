@@ -9,13 +9,14 @@ import { Player } from './player.js';
 async function playItem(interaction: CommandInteraction | MessageComponentInteraction, player: Player, pb: PlaybackItem, youtubeCache: LimitedDict<PlaybackItem>, hasYoutubeCookies: boolean, searchQuery: string, isPlaylist: boolean, doPlayNext: boolean = false): Promise<number> {
     let playResult = 0;
     let queueIndex = 0;
-    if (!player.isPlaying()) {
-        await player.enqueue(pb, doPlayNext);
-        logger.debug('Added ' + pb.url);
-        player.play();
+
+    if (pb.isAgeRestricted && !hasYoutubeCookies) {
+        playResult = 2;
     } else {
-        if (pb.isAgeRestricted && !hasYoutubeCookies) {
-            playResult = 2;
+        if (!player.isPlaying()) {
+            await player.enqueue(pb, doPlayNext);
+            logger.debug('Added ' + pb.url);
+            player.play();
         } else {
             queueIndex = await player.enqueue(pb, doPlayNext);
         }
