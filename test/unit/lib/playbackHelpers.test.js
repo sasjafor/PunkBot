@@ -26,7 +26,7 @@ describe('lib', function () {
             });
 
             it('already playing', async function() {
-                player.playingRetVal = true;
+                player.isIdleRetVal = true;
                 let res = await playbackHelpers.playItem(interaction, player, pbItem, youtubeCache, false, searchQuery, false);
                 expect(res).toBeTruthy();
             });

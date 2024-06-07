@@ -9,7 +9,7 @@
         "^.+\\.(ts|tsx|js|jsx)$": "babel-jest"
     },
     "transformIgnorePatterns": [
-        "/node_modules/(?!(execa|strip-final-newline|npm-run-path|path-key|onetime|mimic-fn|human-signals|is-stream|got|p-cancelable|@szmarczak|lowercase-keys|get-stream)/)"
+        "/node_modules/(?!(execa|strip-final-newline|npm-run-path|path-key|figures|is-unicode-supported|onetime|mimic-fn|human-signals|is-stream|is-plain-obj|got|p-cancelable|@szmarczak|lowercase-keys|get-stream|yoctocolors|@sec-ant|pretty-ms|parse-ms|@sindresorhus)/)"
     ],
     "moduleNameMapper": {
         "^(\\.\\.?\\/.+)\\.js$": "$1"

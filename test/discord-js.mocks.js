@@ -44,6 +44,7 @@ const player = {
     getTimeUntil: jest.fn(() => { return moment.duration('13:37'); }),
     isConnected: jest.fn(() => { return player.connectedRetVal; }),
     isPlaying: jest.fn(() => { return player.playingRetVal; }),
+    isIdle: jest.fn(() => { return player.isIdleRetVal; }),
     isLooping: jest.fn(() => { return false; }),
     pause: jest.fn(() => { return player.pauseRetVal; }),
     playRes: undefined,
@@ -151,6 +152,7 @@ function resetPlayer() {
     player.disconnectRetVal = errorCode.OK;
     player.connectedRetVal = false;
     player.playingRetVal = false;
+    player.isIdleRetVal = false;
     player.pbItem = pbItem;
     player.pauseRetVal = errorCode.OK;
     player.removeRetVal = player.pbItem;
