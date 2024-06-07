@@ -407,6 +407,10 @@ class Player {
         return this.dispatcher?.state?.status === AudioPlayerStatus.Playing;
     }
 
+    public isIdle(): boolean {
+        return this.dispatcher?.state?.status === AudioPlayerStatus.Idle;
+    }
+
     public isLooping(): boolean {
         return this.loop;
     }

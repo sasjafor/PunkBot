@@ -13,7 +13,7 @@ async function playItem(interaction: CommandInteraction | MessageComponentIntera
     if (pb.isAgeRestricted && !hasYoutubeCookies) {
         playResult = 2;
     } else {
-        if (!player.isPlaying()) {
+        if (player.isIdle()) {
             await player.enqueue(pb, doPlayNext);
             logger.debug('Added ' + pb.url);
             player.play();
