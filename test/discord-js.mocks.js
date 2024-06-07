@@ -152,7 +152,7 @@ function resetPlayer() {
     player.disconnectRetVal = errorCode.OK;
     player.connectedRetVal = false;
     player.playingRetVal = false;
-    player.isIdleRetVal = false;
+    player.isIdleRetVal = true;
     player.pbItem = pbItem;
     player.pauseRetVal = errorCode.OK;
     player.removeRetVal = player.pbItem;
