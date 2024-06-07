@@ -1,4 +1,4 @@
-FROM node:18-alpine AS BUILD_IMAGE
+FROM node:20-alpine AS BUILD_IMAGE
 
 WORKDIR /app
 
@@ -32,7 +32,7 @@ RUN npm pkg set scripts.prepare=" " && \
 
 RUN npm run build
 
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
