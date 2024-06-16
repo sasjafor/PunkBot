@@ -464,11 +464,8 @@ class Player {
             seektime = 0;
         }
         let stream = null;
-        // let type = null;
         const fileNameRegex = /\/([\w\-. ]+)\.[\w\- ]+$/;
         if (fileNameRegex.test(url)) {
-            // type = StreamType.OggOpus;
-
             const ffmpeg = new prism.FFmpeg({
                 args: [
                     '-i', '-',
