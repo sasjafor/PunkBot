@@ -41,6 +41,7 @@
     "type-fest": "^4.19.0",
     "utf-8-validate": "^6.0.4",
     "winston": "^3.13.0",
+    "ytdl-core": "^4.11.5",
     "zlib-sync": "^0.1.9"
   },
   "devDependencies": {

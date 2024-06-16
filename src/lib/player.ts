@@ -7,14 +7,13 @@ import {
     joinVoiceChannel,
     NoSubscriberBehavior,
     PlayerSubscription,
-    StreamType,
     VoiceConnection,
     VoiceConnectionStatus,
 } from '@discordjs/voice';
 import got from 'got';
 import moment from 'moment';
-import playdl from 'play-dl';
 import prism from 'prism-media';
+import ytdl from 'ytdl-core';
 
 import { errorCode } from './errors.js';
 import { logger } from './log.js';
@@ -465,10 +464,10 @@ class Player {
             seektime = 0;
         }
         let stream = null;
-        let type = null;
+        // let type = null;
         const fileNameRegex = /\/([\w\-. ]+)\.[\w\- ]+$/;
         if (fileNameRegex.test(url)) {
-            type = StreamType.OggOpus;
+            // type = StreamType.OggOpus;
 
             const ffmpeg = new prism.FFmpeg({
                 args: [
@@ -486,9 +485,8 @@ class Player {
 
             stream = stream.pipe(ffmpeg);
         } else {
-            let playStream;
             try {
-                playStream = await playdl.stream(url, { seek: seektime });
+                stream = ytdl(url);
             } catch (error) {
                 let errCode = errorCode.ERROR;
                 if (error.message.includes('Sign in to confirm your age')) {
@@ -508,8 +506,6 @@ class Player {
                     error: error,
                 };
             }
-            type = playStream.type;
-            stream = playStream.stream;
         }
 
         stream.on('error', error => {
@@ -523,7 +519,7 @@ class Player {
         });
 
         if (stream.readable) {
-            const resource = createAudioResource(stream, { inlineVolume: true, inputType: type });
+            const resource = createAudioResource(stream, { inlineVolume: true });
             resource.volume?.setVolume(this.volume);
             return resource;
         } else {
