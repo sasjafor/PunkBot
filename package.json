@@ -1,6 +1,6 @@
 {
   "name": "punk-bot",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A discord music bot without limitations.",
   "author": "Sascha Forster <sascha.forster@hotmail.ch>",
   "type": "module",
@@ -41,7 +41,7 @@
     "type-fest": "^4.19.0",
     "utf-8-validate": "^6.0.4",
     "winston": "^3.13.0",
-    "ytdl-core": "^4.11.5",
+    "ytdl-core-discord": "github:Pilgrimeru/ytdl-core-discord",
     "zlib-sync": "^0.1.9"
   },
   "devDependencies": {
