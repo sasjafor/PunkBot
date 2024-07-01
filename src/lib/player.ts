@@ -487,7 +487,7 @@ class Player {
             stream = stream.pipe(ffmpeg);
         } else {
             try {
-                stream = ytdl(url, {
+                stream = await ytdl(url, {
                     highWaterMark: 1 << 62,
                     liveBuffer: 1 << 62,
                     dlChunkSize: 0,
