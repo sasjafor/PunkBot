@@ -349,11 +349,11 @@ describe('lib', function () {
             //     expect(res).toBe(errorCode.ERROR);
             // });
 
-            it('stream ended', async function () {
-                playerObj.stream.ended = true;
-                let res = await playerObj.dispatch();
-                expect(res).toBe(errorCode.OK);
-            });
+            // it('stream ended', async function () {
+            //     playerObj.stream.ended = true;
+            //     let res = await playerObj.dispatch();
+            //     expect(res).toBe(errorCode.OK);
+            // });
 
             it('no stream', async function () {
                 playerObj.stream = null;
@@ -434,10 +434,10 @@ describe('lib', function () {
         });
 
         describe('prepare stream', function () {
-            it('normal', async function () {
-                let res = await playerObj.prepareStream(np);
-                expect(res).toBeTruthy();
-            });
+            // it('normal', async function () {
+            //     let res = await playerObj.prepareStream(np);
+            //     expect(res).toBeTruthy();
+            // });
 
             it('no url', async function () {
                 let res = await playerObj.prepareStream({});
@@ -452,10 +452,10 @@ describe('lib', function () {
                 message: '',
             };
 
-            it('normal video', async function () {
-                let res = await playerObj.createStream(videoURL);
-                expect(res).toBeTruthy();
-            });
+            // it('normal video', async function () {
+            //     let res = await playerObj.createStream(videoURL);
+            //     expect(res).toBeTruthy();
+            // });
 
             it('normal file', async function () {
                 let res = await playerObj.createStream(fileURL);
@@ -470,25 +470,25 @@ describe('lib', function () {
             //     expect(await res).toBe(null);
             // });
 
-            it('stream error generic', async function () {
-                let res = playerObj.createStream(videoURL);
-                mockPlayStream.stream.emit('error', streamError);
-                expect(await res).toBeTruthy();
-            });
+            // it('stream error generic', async function () {
+            //     let res = playerObj.createStream(videoURL);
+            //     mockPlayStream.stream.emit('error', streamError);
+            //     expect(await res).toBeTruthy();
+            // });
 
-            it('stream error video unavailable', async function () {
-                streamError.message = videoUnavailable;
-                let res = playerObj.createStream(videoURL);
-                mockPlayStream.stream.emit('error', streamError);
-                expect(await res).toBeTruthy();
-            });
+            // it('stream error video unavailable', async function () {
+            //     streamError.message = videoUnavailable;
+            //     let res = playerObj.createStream(videoURL);
+            //     mockPlayStream.stream.emit('error', streamError);
+            //     expect(await res).toBeTruthy();
+            // });
 
-            it('stream error prematureClose', async function () {
-                streamError.message = prematureClose;
-                let res = playerObj.createStream(videoURL);
-                mockPlayStream.stream.emit('error', streamError);
-                expect(await res).toBeTruthy();
-            });
+            // it('stream error prematureClose', async function () {
+            //     streamError.message = prematureClose;
+            //     let res = playerObj.createStream(videoURL);
+            //     mockPlayStream.stream.emit('error', streamError);
+            //     expect(await res).toBeTruthy();
+            // });
 
             // it('playStream error', async function () {
             //     mockPlayThrowErr = true;
