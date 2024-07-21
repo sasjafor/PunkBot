@@ -26,9 +26,10 @@
     "@discordjs/opus": "^0.9.0",
     "@discordjs/rest": "^2.3.0",
     "@discordjs/voice": "^0.17.0",
+    "@distube/ytdl-core": "^4.13.5",
     "axios": "^1.7.2",
     "bufferutil": "^4.0.8",
-    "discord-api-types": "^0.37.87",
+    "discord-api-types": "^0.37.92",
     "discord.js": "^14.15.3",
     "erlpack": "^0.1.4",
     "execa": "^9.2.0",
@@ -40,8 +41,7 @@
     "sodium": "^3.0.2",
     "type-fest": "^4.19.0",
     "utf-8-validate": "^6.0.4",
-    "winston": "^3.13.0",
-    "ytdl-core-discord": "github:Pilgrimeru/ytdl-core-discord",
+    "winston": "^3.13.1",
     "zlib-sync": "^0.1.9"
   },
   "devDependencies": {

@@ -14,7 +14,7 @@ import {
 import got from 'got';
 import moment from 'moment';
 import prism from 'prism-media';
-import ytdl from 'ytdl-core-discord';
+import ytdl from '@distube/ytdl-core';
 
 import { errorCode } from './errors.js';
 import { logger } from './log.js';
@@ -469,7 +469,7 @@ class Player {
         const fileNameRegex = /\/([\w\-. ]+)\.[\w\- ]+$/;
         if (fileNameRegex.test(url)) {
             type = StreamType.OggOpus;
-            
+
             const ffmpeg = new prism.FFmpeg({
                 args: [
                     '-i', '-',
@@ -487,10 +487,11 @@ class Player {
             stream = stream.pipe(ffmpeg);
         } else {
             try {
+                // stream = await ytdl(url);
+
                 stream = await ytdl(url, {
+                    filter: 'audioonly',
                     highWaterMark: 1 << 62,
-                    liveBuffer: 1 << 62,
-                    dlChunkSize: 0,
                     quality: 'lowestaudio',
                 });
 
@@ -527,7 +528,7 @@ class Player {
         });
 
         if (stream.readable) {
-            const resource = createAudioResource(stream, { inlineVolume: true, inputType: type });
+            const resource = createAudioResource(stream, { inlineVolume: true });
             resource.volume?.setVolume(this.volume);
             return resource;
         } else {
