@@ -118,6 +118,7 @@ class Player {
             this.conn = joinVoiceChannel({
                 channelId: channel.id,
                 guildId: channel.guild.id,
+                // @ts-expect-error
                 adapterCreator: channel.guild.voiceAdapterCreator,
             });
             this.conn.on('error', error => {
