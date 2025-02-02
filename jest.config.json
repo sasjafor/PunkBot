@@ -12,8 +12,9 @@
         "/node_modules/(?!(execa|strip-final-newline|npm-run-path|path-key|figures|is-unicode-supported|onetime|mimic-fn|human-signals|is-stream|is-plain-obj|got|p-cancelable|@szmarczak|lowercase-keys|get-stream|yoctocolors|@sec-ant|pretty-ms|parse-ms|@sindresorhus)/)"
     ],
     "moduleNameMapper": {
-        "^(\\.\\.?\\/.+)\\.js$": "$1"
+        "^(\\.{1,2}/.*)\\.js$": "$1"
     },
-    "moduleFileExtensions": ["ts", "js", "jsx"],
-    "moduleDirectories": ["node_modules", "src", "test"]
+    "moduleFileExtensions": ["ts", "tsx", "js", "jsx"],
+    "modulePaths": ["<rootDir>/node_modules", "<rootDir>/src", "<rootDir>/test"],
+    "rootDir": "./"
 }
