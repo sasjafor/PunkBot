@@ -230,7 +230,9 @@ class Player {
     }
 
     public skip(): string | null {
-        if (this.dispatcher?.state.status === AudioPlayerStatus.Playing) {
+        if (this.dispatcher?.state.status === AudioPlayerStatus.Playing ||
+            this.dispatcher?.state?.status === AudioPlayerStatus.Paused
+        ) {
             const title = this.nowPlaying?.title ?? null;
             if (this.loop) {
                 this.nowPlaying = this.queue.dequeue();
