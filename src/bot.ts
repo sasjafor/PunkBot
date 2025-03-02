@@ -13,6 +13,7 @@ import { Routes } from 'discord-api-types/v9';
 import { URL } from 'url';
 
 import { PlayerDict, SlashCommand } from './types.js';
+import axios from 'axios';
 import { errorReply } from './lib/util.js';
 import { LimitedDict } from './lib/limitedDict.js';
 import { logger } from './lib/log.js';
@@ -41,6 +42,14 @@ const commandFilesPath = new URL('./commands', import.meta.url).pathname;
 const commandFiles = fs.readdirSync(commandFilesPath).filter(file => file.endsWith('.js'));
 
 const commandJSONs: string[] = [];
+
+// Healthcheck
+const interval = 5 * 60 * 1000;
+function sendOk(): void {
+    axios.get('https://hc-ping.com/236131b4-0bd8-48cf-a501-399ef23dcf46');
+}
+sendOk();
+setInterval(sendOk, interval);
 
 async function importCommands(): Promise<void> {
     for (const file of commandFiles) {
