@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, GuildMember } from 'discord.js';
+import { ChatInputCommandInteraction, GuildMember, InteractionContextType } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
 import { LimitedDict } from '../lib/limitedDict.js';
@@ -10,7 +10,7 @@ import { strings } from '../lib/messageStrings.js';
 const data = new SlashCommandBuilder()
     .setName('summon')
     .setDescription('Summons the bot to your voice channel.')
-    .setDMPermission(false);
+    .setContexts(InteractionContextType.Guild);
 
 async function execute(interaction: ChatInputCommandInteraction, players: PlayerDict, _youtubeAPIKey: string, _youtubeCache: LimitedDict<PlaybackItem>, _hasYoutubeCookies = false): Promise<void> {
     if (!(interaction.member instanceof GuildMember)) {

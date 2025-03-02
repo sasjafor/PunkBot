@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, GuildMember } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, GuildMember, InteractionContextType } from 'discord.js';
 import { ChatInputCommandInteraction } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
@@ -16,7 +16,7 @@ const BUTTON_TIMEOUT = 300000;
 const data = new SlashCommandBuilder()
     .setName('queue')
     .setDescription('Show the queued songs.')
-    .setDMPermission(false)
+    .setContexts(InteractionContextType.Guild)
     .addIntegerOption(option =>
         option.setName('index')
             .setDescription('Index of page in the queue.')

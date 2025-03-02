@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ChatInputCommandInteraction, ComponentType, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from 'discord.js';
+import { ActionRowBuilder, ChatInputCommandInteraction, ComponentType, InteractionContextType, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import unescape from 'lodash.unescape';
 
@@ -19,7 +19,7 @@ const MAX_ENTRY_LENGTH = 100; // discord limit
 const data = new SlashCommandBuilder()
     .setName('search')
     .setDescription('Search YouTube and show top 5 results.')
-    .setDMPermission(false)
+    .setContexts(InteractionContextType.Guild)
     .addStringOption(option =>
         option.setName('query')
             .setDescription('YouTube link or search term.')

@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder, InteractionContextType } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
 import { BasicVideoInfo, PlayerDict } from '../types.js';
@@ -24,7 +24,7 @@ import { strings } from '../lib/messageStrings.js';
 const data = new SlashCommandBuilder()
     .setName('play')
     .setDescription('Plays a YouTube video.')
-    .setDMPermission(false)
+    .setContexts(InteractionContextType.Guild)
     .addStringOption(option =>
         option.setName('query')
             .setDescription('YouTube link or search term.')

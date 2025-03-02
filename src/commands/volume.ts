@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction} from 'discord.js';
+import { ChatInputCommandInteraction, InteractionContextType} from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
 import { LimitedDict } from '../lib/limitedDict.js';
@@ -10,7 +10,7 @@ import { strings } from '../lib/messageStrings.js';
 const data = new SlashCommandBuilder()
     .setName('volume')
     .setDescription('Set the playback volume.')
-    .setDMPermission(false)
+    .setContexts(InteractionContextType.Guild)
     .addNumberOption(option =>
         option.setName('value')
             .setDescription('Volume to set.')

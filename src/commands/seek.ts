@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, InteractionContextType } from 'discord.js';
 import moment from 'moment';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
@@ -13,7 +13,7 @@ import { strings } from '../lib/messageStrings.js';
 const data = new SlashCommandBuilder()
     .setName('seek')
     .setDescription('Seek to the provided position in the track.')
-    .setDMPermission(false)
+    .setContexts(InteractionContextType.Guild)
     .addStringOption(option =>
         option.setName('time')
             .setDescription('Time to seek to.')

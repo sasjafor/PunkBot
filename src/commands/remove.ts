@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, InteractionContextType } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
 import { LimitedDict } from '../lib/limitedDict.js';
@@ -10,7 +10,7 @@ import { strings } from '../lib/messageStrings.js';
 const data = new SlashCommandBuilder()
     .setName('remove')
     .setDescription('Remove the indicated track.')
-    .setDMPermission(false)
+    .setContexts(InteractionContextType.Guild)
     .addIntegerOption(option =>
         option.setName('index')
             .setDescription('Index to remove from queue.')

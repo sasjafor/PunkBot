@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, InteractionContextType } from 'discord.js';
 import { EmbedBuilder } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
@@ -12,7 +12,7 @@ import { strings } from '../lib/messageStrings.js';
 const data = new SlashCommandBuilder()
     .setName('now-playing')
     .setDescription('Shows the song that is currently playing.')
-    .setDMPermission(false);
+    .setContexts(InteractionContextType.Guild);
 
 async function execute(interaction: ChatInputCommandInteraction, players: PlayerDict, _youtubeAPIKey: string, _youtubeCache: LimitedDict<PlaybackItem>, _hasYoutubeCookies = false): Promise<void> {
     const guildId = interaction.guild?.id;
