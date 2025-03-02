@@ -15,7 +15,7 @@ import { logger } from './log.js';
 import { PlaybackItem } from './playbackItem.js';
 import { Player } from './player.js';
 import { strings } from './messageStrings.js';
-import { YoutubeAPIOptions } from '../types.js';
+import { YoutubeAPIPlaylistItemsOptions } from '../types.js';
 
 async function errorReply(interaction: CommandInteraction | MessageComponentInteraction | null, msgContent: string, errorMessage: string = strings.commandFailed, url: string | null = null, channel: GuildTextBasedChannel | null = null, avatarURL = 'https://media.wired.com/photos/5a15e608801bd64d76805764/4:3/w_408,h_306,c_limit/rickastley.jpg'): Promise<void> {
     if (!msgContent) {
@@ -164,8 +164,8 @@ async function handleYTPlaylist(player: Player, id: Snowflake, requester: GuildM
     do {
         let res;
         try {
-            const playlistOpts: YoutubeAPIOptions = {
-                id: id,
+            const playlistOpts: YoutubeAPIPlaylistItemsOptions = {
+                playlistId: id,
                 key: youtubeAPIKey,
                 part: 'contentDetails,snippet',
                 maxResults: 50,

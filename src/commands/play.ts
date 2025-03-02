@@ -183,6 +183,11 @@ async function processPlaylist(playlistId: string, youtubeAPIKey: string, intera
         }
         const pi = playlistInfoRes.results[0];
 
+        if (!pi) {
+            errorReply(interaction, strings.playlistNotAvailable, strings.commandFailed, url);
+            return;
+        }
+
         const playlistEmbed = new EmbedBuilder()
             .setTitle(pi.title)
             .setAuthor({ name: 'Enqueued playlist', iconURL: interaction.member?.displayAvatarURL(), url: 'https://github.com/sasjafor/PunkBot' })
@@ -199,7 +204,7 @@ async function processPlaylist(playlistId: string, youtubeAPIKey: string, intera
 
     if (!player.isPlaying()) {
         const playlistOpts = {
-            id: playlistId,
+            playlistId: playlistId,
             key: youtubeAPIKey,
             part: 'contentDetails,snippet',
             maxResults: 1,
@@ -213,7 +218,7 @@ async function processPlaylist(playlistId: string, youtubeAPIKey: string, intera
             return null;
         }
         let res = null;
-        if (playlistRes) {
+        if (playlistRes && playlistRes.results.length > 0) {
             const id = playlistRes.results[0].videoId;
 
             res = {

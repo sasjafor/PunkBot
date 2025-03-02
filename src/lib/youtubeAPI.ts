@@ -10,6 +10,7 @@ import {
     YoutubeAPIPlaylistItemsInfo,
     YoutubeAPISearchInfo,
     YoutubeAPISearchOptions,
+    YoutubeAPIPlaylistItemsOptions,
     YoutubeAPIVideoInfo,
     YoutubePlaylistInfoData,
     YoutubePlaylistItemsData,
@@ -168,8 +169,8 @@ async function playlistInfo(params: YoutubeAPIOptions): Promise<YoutubePlaylistI
             publishedAt: item.snippet?.publishedAt,
             channelId: item.snippet?.channelId,
             channelTitle: item.snippet?.channelTitle,
-            title: item.snippet?.title,
-            description: item.snippet?.description,
+            title: item.snippet?.localized?.title,
+            description: item.snippet?.localized?.description,
             thumbnails: item.snippet?.thumbnails,
             itemCount: item.contentDetails?.itemCount,
         };
@@ -181,7 +182,7 @@ async function playlistInfo(params: YoutubeAPIOptions): Promise<YoutubePlaylistI
     };
 }
 
-async function playlistItems(params: YoutubeAPIOptions): Promise<YoutubePlaylistItemsData> {
+async function playlistItems(params: YoutubeAPIPlaylistItemsOptions): Promise<YoutubePlaylistItemsData> {
     const response = await axios.get('https://youtube.googleapis.com/youtube/v3/playlistItems?' + querystring.stringify(params));
 
     const result: YoutubeAPIPlaylistItemsInfo = response.data;

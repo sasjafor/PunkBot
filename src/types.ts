@@ -16,6 +16,10 @@ type YoutubeAPIGenericOptions = {
 type YoutubeAPIOptions = YoutubeAPIGenericOptions & {
     id: string,
 };
+type YoutubeAPIPlaylistItemsOptions = YoutubeAPIGenericOptions & {
+    id?: string,
+    playlistId: string,
+}
 type YoutubeAPISearchOptions = YoutubeAPIGenericOptions & {
     q: string,
     type?: string,
@@ -254,6 +258,7 @@ export {
     YoutubeAPIPlaylistItemsInfo,
     YoutubeAPISearchInfo,
     YoutubeAPISearchOptions,
+    YoutubeAPIPlaylistItemsOptions,
     YoutubeAPIVideoInfo,
     YoutubePlaylistInfoData,
     YoutubePlaylistItemsData,

@@ -32,6 +32,7 @@ const strings = {
     stopped: ':stop_button: **Stopped** ',
     unknownGuild: ':x: **Unknown Guild**',
     notGuildMember: ':x: **Not Guild Member**',
+    playlistNotAvailable: ':x: **The playlist you tried to play is not available**',
 };
 
 export {
