@@ -38,7 +38,7 @@ async function execute(interaction: ChatInputCommandInteraction, players: Player
         return;
     }
 
-    if (!player.isPlaying()) {
+    if (!player.isPlaying() && ! player.isPaused()) {
         interaction.editReply({ content: strings.nothingPlaying });
         return;
     }

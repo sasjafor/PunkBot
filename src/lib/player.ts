@@ -407,6 +407,10 @@ class Player {
         return this.dispatcher?.state?.status === AudioPlayerStatus.Playing;
     }
 
+    public isPaused(): boolean {
+        return this.dispatcher?.state?.status === AudioPlayerStatus.Paused;
+    }
+
     public isIdle(): boolean {
         return this.dispatcher?.state?.status === AudioPlayerStatus.Idle;
     }
