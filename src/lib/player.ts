@@ -498,7 +498,7 @@ class Player {
                 stream = await ytdl(url, {
                     filter: 'audioonly',
                     highWaterMark: 1 << 62,
-                    quality: 'lowestaudio',
+                    quality: 'highestaudio',
                 });
 
             } catch (error) {
