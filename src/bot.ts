@@ -160,9 +160,9 @@ async function registerCommands(): Promise<void> {
     // Push command to Discord application
     const rest = new REST({ version: '9' }).setToken(token);
 
-    // register guild specific commands
-    // const guild_id = '374283832901500928';
-    // await rest.put(Routes.applicationGuildCommands(client.user.id, guild_id), { body: commandJSONs })
+    // // register guild specific commands
+    // const guildId = '246328943299264513';
+    // await rest.put(Routes.applicationGuildCommands(client.user.id, guildId), { body: commandJSONs })
     //     .then(() => logger.info(strings.successfullyRegisteredCommands))
     //     .catch(logger.error);
 

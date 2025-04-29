@@ -37,6 +37,7 @@ class Player {
     private subscription: PlayerSubscription | null;
     private volume: number;
     private channel: VoiceBasedChannel | null;
+    private filters: string;
 
     constructor() {
         this.queue = new Queue();
@@ -51,6 +52,7 @@ class Player {
         this.subscription = null;
         this.volume = 1;
         this.channel = null;
+        this.filters = '';
     }
 
     //#region Main Commands
@@ -218,7 +220,7 @@ class Player {
                 }
             }
 
-            this.lastSeekTime = time * 1000;
+            this.nowPlaying.seekTime = time;
             return await this.dispatch();
         } else {
             return errorCode.NOT_PLAYING;
@@ -264,6 +266,22 @@ class Player {
         if (this.stream) {
             this.stream.volume?.setVolume(value);
             logger.debug('Set stream volume to ' + value);
+        }
+    }
+
+    public async setFilters(filters: string): Promise<void> {
+        this.filters = filters;
+
+        if (this.nowPlaying?.url) {
+            this.oldStream = this.stream;
+            const currentTime = this.currentPlaybackProgress() / 1000;
+            this.stream = await this.createStream(this.nowPlaying.url, currentTime);
+
+            this.nowPlaying.seekTime = currentTime;
+            await this.dispatch();
+            return;
+        } else {
+            return;
         }
     }
 
@@ -472,20 +490,27 @@ class Player {
         }
         let stream = null;
         let type = null;
+
+        const ffmpegArgs = [
+            '-i', '-',
+            '-ss', String(seektime),
+            '-loglevel', '0',
+            '-acodec', 'libopus',
+            '-f', 'opus',
+            '-ar', '48000',
+            '-ac', '2',
+        ];
+        if (this.filters.length > 0) {
+            ffmpegArgs.push('-af');
+            ffmpegArgs.push(this.filters);
+        }
+
         const fileNameRegex = /\/([\w\-. ]+)\.[\w\- ]+$/;
         if (fileNameRegex.test(url)) {
             type = StreamType.OggOpus;
 
             const ffmpeg = new prism.FFmpeg({
-                args: [
-                    '-i', '-',
-                    '-ss', String(seektime),
-                    '-loglevel', '0',
-                    '-acodec', 'libopus',
-                    '-f', 'opus',
-                    '-ar', '48000',
-                    '-ac', '2',
-                ],
+                args: ffmpegArgs,
             });
 
             stream = await got.stream(url);
@@ -501,6 +526,11 @@ class Player {
                     quality: 'highestaudio',
                 });
 
+                const ffmpeg = new prism.FFmpeg({
+                    args: ffmpegArgs,
+                });
+
+                stream = stream.pipe(ffmpeg);
             } catch (error) {
                 let errCode = errorCode.ERROR;
                 if (error.message.includes('Sign in to confirm your age')) {
