@@ -29,7 +29,7 @@
     "@distube/ytdl-core": "^4.16.9",
     "axios": "^1.9.0",
     "bufferutil": "^4.0.9",
-    "discord-api-types": "^0.38.1",
+    "discord-api-types": "^0.38.2",
     "discord.js": "^14.19.1",
     "erlpack": "^0.1.4",
     "execa": "^9.5.2",
