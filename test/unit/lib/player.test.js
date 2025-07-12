@@ -638,7 +638,7 @@ describe('lib', function () {
                 let res = playerObj.connect(channel);
                 mockConn.emit('error');
                 await res;
-                expect(mockConn.subscribe).toBeCalled();
+                expect(mockConn.subscribe).toHaveBeenCalled();
             });
 
             it('conn error autopaused', async function () {
@@ -647,7 +647,7 @@ describe('lib', function () {
                 let res = playerObj.connect(channel);
                 mockConn.emit('error');
                 await res;
-                expect(mockConn.subscribe).toBeCalled();
+                expect(mockConn.subscribe).toHaveBeenCalled();
             });
 
             it('conn stateChange', async function () {
@@ -656,7 +656,7 @@ describe('lib', function () {
                 let res = playerObj.connect(channel);
                 mockConn.emit('stateChange', {status:VoiceConnectionStatus.Ready}, {status:VoiceConnectionStatus.Connecting});
                 await res;
-                expect(mockConn.subscribe).toBeCalled();
+                expect(mockConn.subscribe).toHaveBeenCalled();
             });
         });
 
