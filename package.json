@@ -27,7 +27,7 @@
     "@discordjs/rest": "^2.5.1",
     "@discordjs/voice": "^0.18.0",
     "@distube/ytdl-core": "^4.16.12",
-    "axios": "^1.10.0",
+    "axios": "^1.13.5",
     "bufferutil": "^4.0.9",
     "discord-api-types": "^0.38.15",
     "discord.js": "^14.21.0",
