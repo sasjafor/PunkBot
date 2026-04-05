@@ -22,4 +22,6 @@ jobs:
           git config --global user.name 'sasjafor'
           git config --global user.email 'sascha.forster@hotmail.ch'
           git commit -am "New release version"
+          tag=$(npm version patch)
+          git tag ${tag}
           git push
