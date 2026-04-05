@@ -1,11 +1,13 @@
 {
   "compilerOptions": {
+    "rootDir": "./src",
     "outDir": "./build",
     "allowJs": true,
     "target": "esnext",
     "module": "nodenext",
     "jsx": "preserve",
     "moduleResolution": "nodenext",
+    "lib": ["ES2022"],
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
     "alwaysStrict": true,

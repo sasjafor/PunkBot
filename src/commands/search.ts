@@ -77,7 +77,7 @@ async function execute(interaction: ChatInputCommandInteraction, players: Player
         }
     } catch (error) {
         logger.error(error);
-        errorReply(interaction, searchQuery, error.response?.message);
+        errorReply(interaction, searchQuery);
         return;
     }
     const results = res?.results;
@@ -121,7 +121,7 @@ async function execute(interaction: ChatInputCommandInteraction, players: Player
                 pb = await handleYTVideo(i.values[0], interaction.member, youtubeAPIKey);
             } catch(error) {
                 logger.error(error);
-                errorReply(interaction, searchQuery, error.response?.data?.error?.message, null);
+                errorReply(interaction, searchQuery);
                 return;
             }
             const queued = await playItem(i, player, pb, youtubeCache, hasYoutubeCookies, searchQuery, false);

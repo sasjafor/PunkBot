@@ -1,4 +1,4 @@
-FROM node:22-alpine AS BUILD_IMAGE
+FROM node:25.9.0-alpine3.23 AS BUILD_IMAGE
 
 WORKDIR /app
 
@@ -32,7 +32,7 @@ RUN npm pkg set scripts.prepare=" " && \
 
 RUN npm run build
 
-FROM node:22-alpine
+FROM node:25.9.0-alpine3.23
 
 WORKDIR /app
 
@@ -58,6 +58,10 @@ COPY --from=BUILD_IMAGE /app/build ./build
 
 # Copy run script
 COPY src/run.sh .
+
+# Install yt-dlp
+ADD https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp /usr/local/bin/
+RUN chmod a+rx /usr/local/bin/yt-dlp
 
 EXPOSE 8080
 VOLUME /config

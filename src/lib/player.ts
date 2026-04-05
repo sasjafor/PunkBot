@@ -14,13 +14,18 @@ import {
 import got from 'got';
 import moment from 'moment';
 import prism from 'prism-media';
-import ytdl from '@distube/ytdl-core';
+// import ytdl from '@distube/ytdl-core';
 
-import { errorCode } from './errors.js';
+// import { Readable } from 'stream';
+
+import { ErrorCode, CreateStreamError } from './errors.js';
+import { exec } from 'child_process';
 import { logger } from './log.js';
 import { PlaybackItem } from './playbackItem.js';
 import { Queue } from './queue.js';
 import { VoiceBasedChannel } from 'discord.js';
+import { strings } from './messageStrings.js';
+import { getYTStreamUrl } from './util.js';
 
 const DISCONNECT_TIMEOUT = 300000; // 5 minutes timeout
 
@@ -38,6 +43,7 @@ class Player {
     private volume: number;
     private channel: VoiceBasedChannel | null;
     private filters: string;
+    // private yt: Innertube | null;
 
     constructor() {
         this.queue = new Queue();
@@ -53,9 +59,16 @@ class Player {
         this.volume = 1;
         this.channel = null;
         this.filters = '';
+        // this.yt = null;
     }
 
     //#region Main Commands
+
+    // public async init(): Promise<void> {
+    //     if (this.yt === null) {
+    //         this.yt = await Innertube.create({ cache: new UniversalCache(false), generate_session_locally: true });
+    //     }
+    // }
 
     public clear(): void {
         this.queue = new Queue();
@@ -75,9 +88,9 @@ class Player {
             this.stream = null;
             this.lastSeekTime = 0;
 
-            return errorCode.OK;
+            return ErrorCode.OK;
         } else {
-            return errorCode.ERROR;
+            return ErrorCode.ERROR;
         }
     }
 
@@ -104,13 +117,13 @@ class Player {
 
     public pause(): number {
         if (this.dispatcher?.state.status === AudioPlayerStatus.Paused) {
-            return errorCode.ALREADY_PAUSED;
+            return ErrorCode.ALREADY_PAUSED;
         }
         const pause = this.dispatcher?.pause(true);
         if (pause) {
-            return errorCode.OK;
+            return ErrorCode.OK;
         } else {
-            return errorCode.NOT_PLAYING;
+            return ErrorCode.NOT_PLAYING;
         }
     }
 
@@ -177,45 +190,49 @@ class Player {
 
     public resume(): number {
         if (this.dispatcher?.state.status === AudioPlayerStatus.Playing) {
-            return errorCode.ALREADY_PLAYING;
+            return ErrorCode.ALREADY_PLAYING;
         }
         const unpause = this.dispatcher?.unpause();
         if (unpause) {
-            return errorCode.OK;
+            return ErrorCode.OK;
         } else {
-            return errorCode.NOT_PLAYING;
+            return ErrorCode.NOT_PLAYING;
         }
     }
 
     public async seek(time: number): Promise<number> {
         if (this.nowPlaying?.url) {
             if (time > this.nowPlaying.duration.asSeconds()) {
-                return errorCode.SEEK_ERROR;
+                return ErrorCode.SEEK_ERROR;
             }
             logger.debug('Seek_time=' + time);
             this.oldStream = this.stream;
             try {
                 this.stream = await this.createStream(this.nowPlaying.url, time);
             } catch (exception) {
-                if (exception.errorCode) {
-                    let retErr = true;
-                    if (exception.errorCode === 3) {
-                        const maxTimeRegex = /Seeking beyond limit. \[ [0-9]+ - ([0-9]+)]/;
-                        const errorMsg = exception.error.message;
-                        const match = errorMsg.match(maxTimeRegex);
-                        if (match && match.length > 1) {
-                            time = match[1];
-                            try {
-                                this.stream = await this.createStream(this.nowPlaying.url, time);
-                            } catch (exception) {
-                                if (!exception.errorCode) {
-                                    retErr = false;
+                if (exception instanceof CreateStreamError) {
+                    if (exception.errorCode) {
+                        let retErr = true;
+                        if (exception.errorCode === ErrorCode.SEEK_ERROR) {
+                            const maxTimeRegex = /Seeking beyond limit. \[ [0-9]+ - ([0-9]+)]/;
+                            const errorMsg = exception.message;
+                            const match = errorMsg.match(maxTimeRegex);
+                            if (match && match.length > 1) {
+                                let time = Number(match[1]);
+                                try {
+                                    this.stream = await this.createStream(this.nowPlaying.url, time);
+                                } catch (exception) {
+                                    if (exception instanceof CreateStreamError) {
+                                        if (!exception.errorCode) {
+                                            retErr = false;
+                                        }
+                                    }
                                 }
                             }
                         }
-                    }
-                    if (retErr) {
-                        return exception.errorCode;
+                        if (retErr) {
+                            return exception.errorCode;
+                        }
                     }
                 }
             }
@@ -223,7 +240,7 @@ class Player {
             this.nowPlaying.seekTime = time;
             return await this.dispatch();
         } else {
-            return errorCode.NOT_PLAYING;
+            return ErrorCode.NOT_PLAYING;
         }
     }
 
@@ -255,9 +272,9 @@ class Player {
                 this.disconnect();
             }, DISCONNECT_TIMEOUT);
 
-            return errorCode.OK;
+            return ErrorCode.OK;
         } else {
-            return errorCode.NOT_PLAYING;
+            return ErrorCode.NOT_PLAYING;
         }
     }
 
@@ -336,7 +353,7 @@ class Player {
 
         if (this.conn) {
             const dispatchRes = await this.dispatch();
-            if (dispatchRes === errorCode.OK) {
+            if (dispatchRes === ErrorCode.OK) {
                 logger.debug('Playing: ' + url);
             }
         }
@@ -518,37 +535,57 @@ class Player {
             stream = stream.pipe(ffmpeg);
         } else {
             try {
+                let streamUrl = await getYTStreamUrl(url);
+
+                // if (this.yt === null) {
+                //     throw Error('youtubei is not initialised');
+                // }
                 // stream = await ytdl(url);
 
-                stream = await ytdl(url, {
-                    filter: 'audioonly',
-                    highWaterMark: 1 << 62,
-                    quality: 'highestaudio',
-                });
+                // stream = await ytdl(url, {
+                //     filter: 'audioonly',
+                //     highWaterMark: 1 << 62,
+                //     quality: 'highestaudio',
+                // });
 
+                // const navigationEndpoint = await this.yt.resolveURL(url);
+
+                // const videoInfo = await this.yt.getInfo(navigationEndpoint);
+
+                // stream = await this.yt.download(videoInfo.basic_info.id as string, {
+                //     type: 'audio', // audio, video or video+audio
+                //     quality: 'best', // best, bestefficiency, 144p, 240p, 480p, 720p and so on.
+                //     format: 'opus', // media container format,
+                //     client: 'YTMUSIC',
+                // });
+
+
+                stream = await got.stream(streamUrl);
                 const ffmpeg = new prism.FFmpeg({
                     args: ffmpegArgs,
                 });
 
+                // stream = Readable.fromWeb(stream as ReadableStream);
                 stream = stream.pipe(ffmpeg);
             } catch (error) {
-                let errCode = errorCode.ERROR;
-                if (error.message.includes('Sign in to confirm your age')) {
-                    errCode = errorCode.CONFIRM_AGE;
-                    error.stack = null;
-                    logger.warn(error);
-                } else if (error.message.includes('Seeking beyond limit')) {
-                    errCode = errorCode.SEEK_ERROR;
-                    error.stack = null;
-                    logger.warn(error);
-                } else {
-                    logger.error(error);
-                    this.skip();
+                let errCode = ErrorCode.ERROR;
+                let errMessage = strings.errorMsgNotAvailable;
+                if (error instanceof Error) {
+                    errMessage = error.message;
+                    if (error.message.includes('Sign in to confirm your age')) {
+                        errCode = ErrorCode.CONFIRM_AGE;
+                        error.stack = undefined;
+                        logger.warn(error);
+                    } else if (error.message.includes('Seeking beyond limit')) {
+                        errCode = ErrorCode.SEEK_ERROR;
+                        error.stack = undefined;
+                        logger.warn(error);
+                    } else {
+                        logger.error(error);
+                        this.skip();
+                    }
                 }
-                throw {
-                    errorCode: errCode,
-                    error: error,
-                };
+                throw new CreateStreamError(errMessage, errCode);
             }
             type = StreamType.Opus;
         }
@@ -580,13 +617,13 @@ class Player {
 
     private async dispatch(): Promise<number> {
         if (!this.stream) {
-            return errorCode.NOT_PLAYING;
+            return ErrorCode.NOT_PLAYING;
         }
 
         this.stream = await this.stream;
 
         if (!this.nowPlaying) {
-            return errorCode.NOT_PLAYING;
+            return ErrorCode.NOT_PLAYING;
         }
 
         if (this.stream?.ended) {
@@ -594,7 +631,7 @@ class Player {
         }
 
         if (!this.stream) {
-            return errorCode.NOT_PLAYING;
+            return ErrorCode.NOT_PLAYING;
         }
 
         // set volume before playing
@@ -603,7 +640,7 @@ class Player {
         this.lastSeekTime = 1000 * this.nowPlaying.seekTime;
         this.dispatcher?.play(this.stream);
 
-        return errorCode.OK;
+        return ErrorCode.OK;
     }
 
     private next(): void {

@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, InteractionContextType } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
-import { errorCode } from '../lib/errors.js';
+import { ErrorCode } from '../lib/errors.js';
 import { LimitedDict } from '../lib/limitedDict.js';
 import { logger } from '../lib/log.js';
 import { PlaybackItem } from '../lib/playbackItem.js';
@@ -29,12 +29,12 @@ async function execute(interaction: ChatInputCommandInteraction, players: Player
 
     const stop = player.stop();
     switch (stop) {
-        case errorCode.OK:
+        case ErrorCode.OK:
         {
             await interaction.editReply({ content: strings.stopped });
             break;
         }
-        case errorCode.NOT_PLAYING:
+        case ErrorCode.NOT_PLAYING:
         {
             await interaction.editReply({ content: strings.nothingPlaying });
             break;

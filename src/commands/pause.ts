@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, InteractionContextType } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
-import { errorCode } from '../lib/errors.js';
+import { ErrorCode } from '../lib/errors.js';
 import { LimitedDict } from '../lib/limitedDict.js';
 import { logger } from '../lib/log.js';
 import { PlaybackItem } from '../lib/playbackItem.js';
@@ -29,17 +29,17 @@ async function execute(interaction: ChatInputCommandInteraction, players: Player
 
     const pause = player.pause();
     switch (pause) {
-        case errorCode.OK:
+        case ErrorCode.OK:
         {
             interaction.editReply({ content: strings.paused });
             break;
         }
-        case errorCode.NOT_PLAYING:
+        case ErrorCode.NOT_PLAYING:
         {
             interaction.editReply({ content: strings.nothingPlaying });
             break;
         }
-        case errorCode.ALREADY_PAUSED:
+        case ErrorCode.ALREADY_PAUSED:
         {
             interaction.editReply({ content: strings.alreadyPaused });
             break;

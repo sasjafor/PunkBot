@@ -2,7 +2,7 @@ import { ChatInputCommandInteraction, InteractionContextType } from 'discord.js'
 import moment from 'moment';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
-import { errorCode } from '../lib/errors.js';
+import { ErrorCode } from '../lib/errors.js';
 import { LimitedDict } from '../lib/limitedDict.js';
 import { logger } from '../lib/log.js';
 import { PlaybackItem } from '../lib/playbackItem.js';
@@ -67,18 +67,18 @@ async function execute(interaction: ChatInputCommandInteraction, players: Player
     const duration = moment.duration(seekTime * 1000);
     const resCode = await player.seek(seekTime);
     switch (resCode) {
-        case errorCode.OK:
+        case ErrorCode.OK:
         {
             const prettyTime = prettifyTime(duration);
             interaction.editReply({ content: strings.seeked + '`' + prettyTime + '`' });
             break;
         }
-        case errorCode.NOT_PLAYING:
+        case ErrorCode.NOT_PLAYING:
         {
             interaction.editReply({ content: strings.nothingPlaying });
             break;
         }
-        case errorCode.SEEK_ERROR:
+        case ErrorCode.SEEK_ERROR:
         {
             interaction.editReply({ content: strings.seekTooLong });
             break;

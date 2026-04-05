@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, InteractionContextType } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
-import { errorCode } from '../lib/errors.js';
+import { ErrorCode } from '../lib/errors.js';
 import { LimitedDict } from '../lib/limitedDict.js';
 import { logger } from '../lib/log.js';
 import { PlaybackItem } from '../lib/playbackItem.js';
@@ -29,12 +29,12 @@ async function execute(interaction: ChatInputCommandInteraction, players: Player
 
     const disconnectRes = player.disconnect();
     switch (disconnectRes) {
-        case errorCode.OK:
+        case ErrorCode.OK:
         {
             interaction.editReply({ content: strings.disconnected });
             break;
         }
-        case errorCode.ERROR:
+        case ErrorCode.ERROR:
         {
             interaction.editReply({ content: strings.notConnected });
             break;

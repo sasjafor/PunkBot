@@ -16,6 +16,7 @@ import { PlaybackItem } from './playbackItem.js';
 import { Player } from './player.js';
 import { strings } from './messageStrings.js';
 import { YoutubeAPIPlaylistItemsOptions } from '../types.js';
+import { exec } from 'child_process';
 
 async function errorReply(interaction: CommandInteraction | MessageComponentInteraction | null, msgContent: string, errorMessage: string = strings.commandFailed, url: string | null = null, channel: GuildTextBasedChannel | null = null, avatarURL = 'https://media.wired.com/photos/5a15e608801bd64d76805764/4:3/w_408,h_306,c_limit/rickastley.jpg'): Promise<void> {
     if (!msgContent) {
@@ -179,7 +180,7 @@ async function handleYTPlaylist(player: Player, id: Snowflake, requester: GuildM
         } catch (error) {
             logger.error(error);
             const url = 'https://www.youtube.com/playlist?list=' + id;
-            errorReply(null, url, error.response?.data?.error?.message, url, channel, avatarURL);
+            errorReply(null, url, undefined, url, channel, avatarURL);
             return;
         }
         pageInfo = res.pageInfo;
@@ -228,10 +229,27 @@ async function getAudioDurationInSeconds(url: string): Promise<number> {
     }
 }
 
+function getYTStreamUrl(inputUrl: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const cmd = `yt-dlp --js-runtimes node --extract-audio --get-url "${inputUrl}"`;
+
+    exec(cmd, (error, stdout, _stderr) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      const url = stdout.trim();
+      resolve(url);
+    });
+  });
+}
+
 export {
     buildProgressBar,
     errorReply,
     getAudioDurationInSeconds,
+    getYTStreamUrl,
     getSeekTime,
     getYTid,
     handleAudioResource,

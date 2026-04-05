@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-import { ChatInputCommandInteraction, EmbedBuilder, InteractionContextType } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder, HTTPError, InteractionContextType } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
 import { BasicVideoInfo, PlayerDict } from '../types.js';
@@ -129,7 +129,7 @@ async function execute(interaction: ChatInputCommandInteraction, players: Player
                 }
             } catch (error) {
                 logger.error(error);
-                errorReply(interaction, searchQuery, error.response?.message);
+                errorReply(interaction, searchQuery);
                 return;
             }
         }
@@ -141,7 +141,7 @@ async function execute(interaction: ChatInputCommandInteraction, players: Player
                 pb = await handleYTVideo(id, interaction.member, youtubeAPIKey, seekTime);
             } catch(error) {
                 logger.error(error);
-                errorReply(interaction, searchQuery, error.response?.data?.error?.message, url);
+                errorReply(interaction, searchQuery, undefined, url);
                 return;
             }
         }
@@ -178,7 +178,7 @@ async function processPlaylist(playlistId: string, youtubeAPIKey: string, intera
             playlistInfoRes = await playlistInfo(playlistInfoOpts);
         } catch (error) {
             logger.error(error);
-            errorReply(interaction, url, error.response?.data?.error?.message, url);
+            errorReply(interaction, url, undefined, url);
             return;
         }
         const pi = playlistInfoRes.results[0];
@@ -214,7 +214,7 @@ async function processPlaylist(playlistId: string, youtubeAPIKey: string, intera
             playlistRes = await playlistItems(playlistOpts);
         } catch (error) {
             logger.error(error);
-            errorReply(interaction, url, error.response?.data?.error?.message, url);
+            errorReply(interaction, url, undefined, url);
             return null;
         }
         let res = null;

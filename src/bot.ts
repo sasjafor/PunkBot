@@ -107,6 +107,7 @@ client.on('interactionCreate', async interaction => {
     let player = players[guildId];
     if (!player) {
         player = players[guildId] = new Player();
+        // await player.init();
     }
 
     const options = interaction.options;
@@ -118,7 +119,12 @@ client.on('interactionCreate', async interaction => {
         await command.execute(interaction, players, youtubeAPIKey, youtubeCache, hasYoutubeCookies);
     } catch (error) {
         logger.error(error);
-        errorReply(interaction, error.message);
+        let errorMessage = strings.errorMsgNotAvailable;
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
+        errorReply(interaction, errorMessage);
+        
     }
 });
 
