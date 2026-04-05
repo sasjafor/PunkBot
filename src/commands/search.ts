@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ChatInputCommandInteraction, ComponentType, InteractionContextType, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import unescape from 'lodash.unescape';
+import unescape from 'lodash';
 
 import { createPlayEmbed, playItem } from '../lib/playbackHelpers.js';
 import { errorReply, handleYTVideo } from '../lib/util.js';
@@ -85,8 +85,8 @@ async function execute(interaction: ChatInputCommandInteraction, players: Player
     if (results) {
         const videos = [];
         for (const element of results) {
-            const title = unescape(element.title).substring(0, MAX_ENTRY_LENGTH);
-            const channelTitle = unescape(element.channelTitle).substring(0, MAX_ENTRY_LENGTH);
+            const title = String(unescape(element.title)).substring(0, MAX_ENTRY_LENGTH);
+            const channelTitle = String(unescape(element.channelTitle)).substring(0, MAX_ENTRY_LENGTH);
             const option = new StringSelectMenuOptionBuilder()
                 .setValue(element.id)
                 .setLabel(title)

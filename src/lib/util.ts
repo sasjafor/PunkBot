@@ -1,4 +1,3 @@
-import { execa } from 'execa';
 import moment from 'moment';
 
 import {
@@ -208,19 +207,25 @@ async function handleYTPlaylist(player: Player, id: Snowflake, requester: GuildM
     }
 }
 
+function executeCommand(cmd: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        exec(cmd, (error, stdout, _stderr) => {
+            if (error) {
+                reject(error);
+                return;
+            }
+
+            const result = stdout.trim();
+            resolve(result);
+        });
+    });
+}
+
 async function getAudioDurationInSeconds(url: string): Promise<number> {
-    const params = [
-        '-v',
-        'error',
-        '-select_streams',
-        'a:0',
-        '-show_format',
-        '-show_streams',
-    ];
+    const cmd = `ffprobe -v error -select_streams a:0 -show_format -show_streams ${url}`
+    const result = await executeCommand(cmd);
 
-    const { stdout } = await execa('ffprobe', [...params, url]);
-
-    const matches = stdout.match(/duration="?(\d*\.\d*)"?/);
+    const matches = result.match(/duration="?(\d*\.\d*)"?/);
 
     if (matches && matches[1]) {
         return parseFloat(matches[1]);
@@ -229,20 +234,9 @@ async function getAudioDurationInSeconds(url: string): Promise<number> {
     }
 }
 
-function getYTStreamUrl(inputUrl: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const cmd = `yt-dlp --js-runtimes node --extract-audio --get-url "${inputUrl}"`;
-
-    exec(cmd, (error, stdout, _stderr) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-
-      const url = stdout.trim();
-      resolve(url);
-    });
-  });
+function getYTStreamUrl(url: string): Promise<string> {
+    const cmd = `yt-dlp --js-runtimes node --extract-audio --get-url "${url}"`;
+    return executeCommand(cmd)
 }
 
 export {
