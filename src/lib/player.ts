@@ -523,50 +523,10 @@ class Player {
         }
 
         const fileNameRegex = /\/([\w\-. ]+)\.[\w\- ]+$/;
-        if (fileNameRegex.test(url)) {
-            type = StreamType.OggOpus;
-
-            const ffmpeg = new prism.FFmpeg({
-                args: ffmpegArgs,
-            });
-
-            stream = await got.stream(url);
-
-            stream = stream.pipe(ffmpeg);
-        } else {
+        let streamURL = url;
+        if (!fileNameRegex.test(url)) {
             try {
-                let streamUrl = await getYTStreamUrl(url);
-
-                // if (this.yt === null) {
-                //     throw Error('youtubei is not initialised');
-                // }
-                // stream = await ytdl(url);
-
-                // stream = await ytdl(url, {
-                //     filter: 'audioonly',
-                //     highWaterMark: 1 << 62,
-                //     quality: 'highestaudio',
-                // });
-
-                // const navigationEndpoint = await this.yt.resolveURL(url);
-
-                // const videoInfo = await this.yt.getInfo(navigationEndpoint);
-
-                // stream = await this.yt.download(videoInfo.basic_info.id as string, {
-                //     type: 'audio', // audio, video or video+audio
-                //     quality: 'best', // best, bestefficiency, 144p, 240p, 480p, 720p and so on.
-                //     format: 'opus', // media container format,
-                //     client: 'YTMUSIC',
-                // });
-
-
-                stream = await got.stream(streamUrl);
-                const ffmpeg = new prism.FFmpeg({
-                    args: ffmpegArgs,
-                });
-
-                // stream = Readable.fromWeb(stream as ReadableStream);
-                stream = stream.pipe(ffmpeg);
+                streamURL = await getYTStreamUrl(url);
             } catch (error) {
                 let errCode = ErrorCode.ERROR;
                 let errMessage = strings.errorMsgNotAvailable;
@@ -587,8 +547,15 @@ class Player {
                 }
                 throw new CreateStreamError(errMessage, errCode);
             }
-            type = StreamType.Opus;
         }
+
+        type = StreamType.OggOpus;
+        const ffmpeg = new prism.FFmpeg({
+            args: ffmpegArgs,
+        });
+
+        stream = got.stream(streamURL);
+        stream = stream.pipe(ffmpeg);
 
         stream.on('error', error => {
             if (error.message.includes('This video is not available.')) {
