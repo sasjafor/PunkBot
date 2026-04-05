@@ -72,7 +72,7 @@ async function login(): Promise<void> {
 }
 login();
 
-client.on('ready', async () => {
+client.on('clientReady', async () => {
     logger.info('Connected as ' + client.user?.username);
 
     await registerCommands();
