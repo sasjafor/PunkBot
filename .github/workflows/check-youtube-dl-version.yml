@@ -25,3 +25,4 @@ jobs:
           tag=$(npm version patch)
           git tag ${tag}
           git push
+          git push --tags
